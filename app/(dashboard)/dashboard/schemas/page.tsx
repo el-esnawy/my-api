@@ -4,11 +4,12 @@ import { useState } from "react";
 import {
   useSchemas,
   useCreateSchema,
+  useUpdateSchema,
   useDeleteSchema,
 } from "@/lib/client/hooks";
 import { ApiError } from "@/lib/client/api";
 import { slugify, formatDate } from "@/lib/client/util";
-import type { FieldType } from "@/lib/client/types";
+import type { DataSchema, FieldType } from "@/lib/client/types";
 import { Modal } from "@/components/Modal";
 import {
   Badge,
@@ -30,6 +31,9 @@ interface DraftField {
   type: FieldType;
   required: boolean;
   unique: boolean;
+  // Carried through edits even though the builder has no enum editor yet, so a
+  // schema created with enum constraints (e.g. via the API) isn't silently wiped.
+  enumValues: string[] | null;
 }
 
 const emptyField = (): DraftField => ({
@@ -37,11 +41,15 @@ const emptyField = (): DraftField => ({
   type: "string",
   required: false,
   unique: false,
+  enumValues: null,
 });
+
+// `null` = closed; `{ schema }` = edit; `{}` = create.
+type ModalState = { schema?: DataSchema } | null;
 
 export default function SchemasPage() {
   const { data: schemas, isLoading } = useSchemas();
-  const [open, setOpen] = useState(false);
+  const [modal, setModal] = useState<ModalState>(null);
 
   return (
     <div>
@@ -52,7 +60,7 @@ export default function SchemasPage() {
             Define the shape of your data. Endpoints are built on top of schemas.
           </p>
         </div>
-        <Button onClick={() => setOpen(true)}>+ New schema</Button>
+        <Button onClick={() => setModal({})}>+ New schema</Button>
       </div>
 
       <div className="mt-6">
@@ -64,26 +72,34 @@ export default function SchemasPage() {
           <EmptyState
             title="No schemas yet"
             description="Create your first schema to describe the data your endpoints will store."
-            action={<Button onClick={() => setOpen(true)}>+ New schema</Button>}
+            action={<Button onClick={() => setModal({})}>+ New schema</Button>}
           />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {schemas.map((schema) => (
-              <SchemaCard key={schema.id} schema={schema} />
+              <SchemaCard
+                key={schema.id}
+                schema={schema}
+                onEdit={() => setModal({ schema })}
+              />
             ))}
           </div>
         )}
       </div>
 
-      <CreateSchemaModal open={open} onClose={() => setOpen(false)} />
+      {modal && (
+        <SchemaFormModal editing={modal.schema} onClose={() => setModal(null)} />
+      )}
     </div>
   );
 }
 
 function SchemaCard({
   schema,
+  onEdit,
 }: {
-  schema: import("@/lib/client/types").DataSchema;
+  schema: DataSchema;
+  onEdit: () => void;
 }) {
   const del = useDeleteSchema();
   const [error, setError] = useState<string | null>(null);
@@ -107,16 +123,23 @@ function SchemaCard({
             {schema.slug}
           </Badge>
         </div>
-        <button
-          onClick={onDelete}
-          disabled={del.isPending}
-          className="rounded-md p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-          aria-label="Delete schema"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onEdit}
+            className="rounded-md p-1.5 text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-600"
+            aria-label="Edit schema"
+          >
+            <PencilIcon />
+          </button>
+          <button
+            onClick={onDelete}
+            disabled={del.isPending}
+            className="rounded-md p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+            aria-label="Delete schema"
+          >
+            <TrashIcon />
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 space-y-1.5">
@@ -141,34 +164,48 @@ function SchemaCard({
   );
 }
 
-function CreateSchemaModal({
-  open,
+function draftFromSchema(s?: DataSchema): {
+  name: string;
+  slug: string;
+  fields: DraftField[];
+} {
+  if (!s) return { name: "", slug: "", fields: [emptyField()] };
+  return {
+    name: s.name,
+    slug: s.slug,
+    fields: s.fields.length
+      ? s.fields.map((f) => ({
+          name: f.name,
+          type: f.type,
+          required: f.required,
+          unique: f.unique,
+          enumValues: f.enumValues ?? null,
+        }))
+      : [emptyField()],
+  };
+}
+
+function SchemaFormModal({
+  editing,
   onClose,
 }: {
-  open: boolean;
+  editing?: DataSchema;
   onClose: () => void;
 }) {
   const create = useCreateSchema();
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [slugEdited, setSlugEdited] = useState(false);
-  const [fields, setFields] = useState<DraftField[]>([emptyField()]);
+  const update = useUpdateSchema();
+  const isEdit = !!editing;
+  const init = draftFromSchema(editing);
+
+  const [name, setName] = useState(init.name);
+  const [slug, setSlug] = useState(init.slug);
+  // When editing, the slug is already set — don't let typing the name overwrite it.
+  const [slugEdited, setSlugEdited] = useState(isEdit);
+  const [fields, setFields] = useState<DraftField[]>(init.fields);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  function reset() {
-    setName("");
-    setSlug("");
-    setSlugEdited(false);
-    setFields([emptyField()]);
-    setError(null);
-    setFieldErrors({});
-  }
-
-  function close() {
-    reset();
-    onClose();
-  }
+  const pending = create.isPending || update.isPending;
 
   function updateField(i: number, patch: Partial<DraftField>) {
     setFields((prev) => prev.map((f, idx) => (idx === i ? { ...f, ...patch } : f)));
@@ -178,18 +215,20 @@ function CreateSchemaModal({
     e.preventDefault();
     setError(null);
     setFieldErrors({});
+    const payload = {
+      name,
+      slug: slug || slugify(name),
+      fields: fields.map((f) => ({
+        name: f.name,
+        type: f.type,
+        required: f.required,
+        unique: f.unique,
+      })),
+    };
     try {
-      await create.mutateAsync({
-        name,
-        slug: slug || slugify(name),
-        fields: fields.map((f) => ({
-          name: f.name,
-          type: f.type,
-          required: f.required,
-          unique: f.unique,
-        })),
-      });
-      close();
+      if (isEdit) await update.mutateAsync({ id: editing!.id, ...payload });
+      else await create.mutateAsync(payload);
+      onClose();
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -201,7 +240,12 @@ function CreateSchemaModal({
   }
 
   return (
-    <Modal open={open} onClose={close} title="New schema" description="Describe a data type with typed fields.">
+    <Modal
+      open
+      onClose={onClose}
+      title={isEdit ? "Edit schema" : "New schema"}
+      description="Describe a data type with typed fields."
+    >
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -298,20 +342,44 @@ function CreateSchemaModal({
           {fieldErrors.fields && <ErrorText>{fieldErrors.fields}</ErrorText>}
         </div>
 
+        {isEdit && (
+          <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
+            Editing fields won&apos;t change records already stored. Removing a field just
+            hides it from future reads and writes.
+          </p>
+        )}
+
         {error && (
           <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>
         )}
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="secondary" onClick={close}>
+          <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" disabled={create.isPending}>
-            {create.isPending && <Spinner />}
-            Create schema
+          <Button type="submit" disabled={pending}>
+            {pending && <Spinner />}
+            {isEdit ? "Save changes" : "Create schema"}
           </Button>
         </div>
       </form>
     </Modal>
+  );
+}
+
+function PencilIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    </svg>
   );
 }

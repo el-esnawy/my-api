@@ -70,6 +70,19 @@ export function useCreateSchema() {
   });
 }
 
+export function useUpdateSchema() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: { id: string } & Record<string, unknown>) =>
+      api<{ schema: DataSchema }>(`/api/schemas/${id}`, { method: "PUT", json: input }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.schemas });
+      // Endpoints reference schema fields, so refresh them too.
+      qc.invalidateQueries({ queryKey: keys.endpoints });
+    },
+  });
+}
+
 export function useDeleteSchema() {
   const qc = useQueryClient();
   return useMutation({
@@ -93,6 +106,18 @@ export function useCreateEndpoint() {
     mutationFn: (input: unknown) =>
       api<{ endpoint: Endpoint }>("/api/endpoints", { method: "POST", json: input }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.endpoints }),
+  });
+}
+
+export function useUpdateEndpoint() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: { id: string } & Record<string, unknown>) =>
+      api<{ endpoint: Endpoint }>(`/api/endpoints/${id}`, { method: "PUT", json: input }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.endpoints });
+      qc.invalidateQueries({ queryKey: keys.tokens });
+    },
   });
 }
 

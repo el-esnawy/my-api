@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getSession } from "@/lib/auth/session";
 
 const features = [
   {
@@ -25,7 +26,58 @@ const steps = [
   { n: "4", t: "Call it anywhere", d: "Authorization: Bearer <token>." },
 ];
 
-export default function LandingPage() {
+const tiers = [
+  {
+    name: "Hobby",
+    price: "$0",
+    cadence: "/mo",
+    tagline: "For side projects and trying things out.",
+    features: [
+      "3 schemas",
+      "3 endpoints",
+      "1 access token",
+      "10k requests / month",
+      "Community support",
+    ],
+    cta: { label: "Get started", href: "/sign-up" },
+    featured: false,
+  },
+  {
+    name: "Pro",
+    price: "$19",
+    cadence: "/mo",
+    tagline: "For production apps that need room to grow.",
+    features: [
+      "Unlimited schemas & endpoints",
+      "10 access tokens",
+      "1M requests / month",
+      "Higher rate limits",
+      "Email support",
+    ],
+    cta: { label: "Start free trial", href: "/sign-up" },
+    featured: true,
+  },
+  {
+    name: "Enterprise",
+    price: "Custom",
+    cadence: "",
+    tagline: "For teams with scale, security, and SLA needs.",
+    features: [
+      "Unlimited everything",
+      "SSO & audit logs",
+      "Custom rate limits",
+      "Dedicated support & SLA",
+      "On-prem / VPC options",
+    ],
+    cta: { label: "Contact sales", href: "mailto:sales@example.com" },
+    featured: false,
+  },
+];
+
+export default async function LandingPage() {
+  const session = await getSession();
+  const signedIn = !!session;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Nav */}
@@ -34,19 +86,36 @@ export default function LandingPage() {
           <Logo />
           <span>my-api</span>
         </div>
-        <nav className="flex items-center gap-2">
-          <Link
-            href="/sign-in"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+        <nav className="flex items-center gap-1 sm:gap-2">
+          <a
+            href="#pricing"
+            className="hidden rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 sm:inline-block"
           >
-            Sign in
-          </Link>
-          <Link
-            href="/sign-up"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-500"
-          >
-            Get started
-          </Link>
+            Pricing
+          </a>
+          {signedIn ? (
+            <Link
+              href="/dashboard/schemas"
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-500"
+            >
+              Go to my account
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/sign-in"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/sign-up"
+                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-500"
+              >
+                Get started
+              </Link>
+            </>
+          )}
         </nav>
       </header>
 
@@ -63,18 +132,29 @@ export default function LandingPage() {
           them from anywhere with access tokens that are unique to your account.
         </p>
         <div className="mt-8 flex items-center justify-center gap-3">
-          <Link
-            href="/sign-up"
-            className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
-          >
-            Create your first endpoint
-          </Link>
-          <Link
-            href="/sign-in"
-            className="rounded-lg border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-          >
-            Sign in
-          </Link>
+          {signedIn ? (
+            <Link
+              href="/dashboard/schemas"
+              className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+            >
+              Go to my account
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/sign-up"
+                className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+              >
+                Create your first endpoint
+              </Link>
+              <Link
+                href="/sign-in"
+                className="rounded-lg border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Sign in
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Code preview */}
@@ -115,7 +195,7 @@ export default function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section className="mx-auto max-w-6xl px-6 pb-20">
+      <section className="mx-auto max-w-6xl px-6 pb-16">
         <h2 className="text-center text-2xl font-bold text-slate-900">How it works</h2>
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((s) => (
@@ -130,11 +210,94 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Pricing */}
+      <section id="pricing" className="mx-auto max-w-6xl scroll-mt-8 px-6 py-16">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-slate-900">Simple, transparent pricing</h2>
+          <p className="mx-auto mt-2 max-w-xl text-slate-600">
+            Start free and upgrade when you need more endpoints, tokens, and throughput.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          {tiers.map((tier) => (
+            <PricingCard key={tier.name} tier={tier} signedIn={signedIn} />
+          ))}
+        </div>
+      </section>
+
       <footer className="border-t border-slate-200 py-8">
         <div className="mx-auto max-w-6xl px-6 text-sm text-slate-500">
           my-api — custom REST endpoints backed by MongoDB, Redis, and per-account access tokens.
         </div>
       </footer>
+    </div>
+  );
+}
+
+function PricingCard({
+  tier,
+  signedIn,
+}: {
+  tier: (typeof tiers)[number];
+  signedIn: boolean;
+}) {
+  // When signed in, every CTA becomes "Go to my account" → the dashboard.
+  const ctaHref = signedIn ? "/dashboard/schemas" : tier.cta.href;
+  const ctaLabel = signedIn ? "Go to my account" : tier.cta.label;
+
+  return (
+    <div
+      className={
+        "relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm " +
+        (tier.featured ? "border-indigo-300 ring-2 ring-indigo-200" : "border-slate-200")
+      }
+    >
+      {tier.featured && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+          Most popular
+        </span>
+      )}
+
+      <h3 className="text-lg font-semibold text-slate-900">{tier.name}</h3>
+      <p className="mt-1 text-sm text-slate-500">{tier.tagline}</p>
+
+      <div className="mt-5 flex items-baseline gap-1">
+        <span className="text-4xl font-bold tracking-tight text-slate-900">{tier.price}</span>
+        {tier.cadence && <span className="text-sm text-slate-500">{tier.cadence}</span>}
+      </div>
+
+      <ul className="mt-6 flex-1 space-y-3">
+        {tier.features.map((feat) => (
+          <li key={feat} className="flex items-start gap-2.5 text-sm text-slate-600">
+            <svg
+              className="mt-0.5 shrink-0 text-indigo-600"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+            {feat}
+          </li>
+        ))}
+      </ul>
+
+      <Link
+        href={ctaHref}
+        className={
+          "mt-8 inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold transition " +
+          (tier.featured
+            ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-500"
+            : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50")
+        }
+      >
+        {ctaLabel}
+      </Link>
     </div>
   );
 }

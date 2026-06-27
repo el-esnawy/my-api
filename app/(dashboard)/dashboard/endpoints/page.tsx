@@ -5,6 +5,7 @@ import {
   useEndpoints,
   useSchemas,
   useCreateEndpoint,
+  useUpdateEndpoint,
   useDeleteEndpoint,
 } from "@/lib/client/hooks";
 import { ApiError } from "@/lib/client/api";
@@ -34,10 +35,13 @@ const methodTone: Record<HttpMethod, "green" | "indigo" | "amber" | "slate" | "r
   DELETE: "red",
 };
 
+// `null` = closed; `{ endpoint }` = edit; `{}` = create.
+type ModalState = { endpoint?: Endpoint } | null;
+
 export default function EndpointsPage() {
   const { data: endpoints, isLoading } = useEndpoints();
   const { data: schemas } = useSchemas();
-  const [open, setOpen] = useState(false);
+  const [modal, setModal] = useState<ModalState>(null);
 
   const schemaById = useMemo(() => {
     const map = new Map<string, DataSchema>();
@@ -54,7 +58,7 @@ export default function EndpointsPage() {
             Expose schemas as REST endpoints. Choose verbs and what can be read or written.
           </p>
         </div>
-        <Button onClick={() => setOpen(true)} disabled={!schemas || schemas.length === 0}>
+        <Button onClick={() => setModal({})} disabled={!schemas || schemas.length === 0}>
           + New endpoint
         </Button>
       </div>
@@ -73,7 +77,7 @@ export default function EndpointsPage() {
           <EmptyState
             title="No endpoints yet"
             description="Turn one of your schemas into a callable REST endpoint."
-            action={<Button onClick={() => setOpen(true)}>+ New endpoint</Button>}
+            action={<Button onClick={() => setModal({})}>+ New endpoint</Button>}
           />
         ) : (
           <div className="space-y-4">
@@ -82,17 +86,20 @@ export default function EndpointsPage() {
                 key={ep.id}
                 endpoint={ep}
                 schema={schemaById.get(ep.schemaId)}
+                onEdit={() => setModal({ endpoint: ep })}
               />
             ))}
           </div>
         )}
       </div>
 
-      <CreateEndpointModal
-        open={open}
-        onClose={() => setOpen(false)}
-        schemas={schemas ?? []}
-      />
+      {modal && (
+        <EndpointFormModal
+          editing={modal.endpoint}
+          onClose={() => setModal(null)}
+          schemas={schemas ?? []}
+        />
+      )}
     </div>
   );
 }
@@ -100,9 +107,11 @@ export default function EndpointsPage() {
 function EndpointCard({
   endpoint,
   schema,
+  onEdit,
 }: {
   endpoint: Endpoint;
   schema?: DataSchema;
+  onEdit: () => void;
 }) {
   const del = useDeleteEndpoint();
   const [error, setError] = useState<string | null>(null);
@@ -150,13 +159,19 @@ function EndpointCard({
 
       <div className="mt-4 flex items-center justify-between">
         {error ? <ErrorText>{error}</ErrorText> : <span />}
-        <button
-          onClick={onDelete}
-          disabled={del.isPending}
-          className="text-sm font-medium text-red-600 transition hover:text-red-500 disabled:opacity-50"
-        >
-          Delete endpoint
-        </button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="secondary" onClick={onEdit}>
+            Edit
+          </Button>
+          <Button
+            size="sm"
+            variant="dangerGhost"
+            onClick={onDelete}
+            disabled={del.isPending}
+          >
+            Delete
+          </Button>
+        </div>
       </div>
     </Card>
   );
@@ -191,43 +206,56 @@ function FieldList({
   );
 }
 
-function CreateEndpointModal({
-  open,
+function deriveEndpoint(editing: Endpoint | undefined, schemas: DataSchema[]) {
+  if (!editing) {
+    return {
+      name: "",
+      slug: "",
+      schemaId: "",
+      methods: [...METHODS] as HttpMethod[],
+      readable: [] as string[],
+      writable: [] as string[],
+    };
+  }
+  const schema = schemas.find((s) => s.id === editing.schemaId);
+  const all = schema?.fields.map((f) => f.name) ?? [];
+  return {
+    name: editing.name,
+    slug: editing.slug,
+    schemaId: editing.schemaId,
+    methods: editing.methods,
+    // Stored [] means "all fields" — expand it so every checkbox shows as selected.
+    readable: editing.readableFields.length === 0 ? all : editing.readableFields,
+    writable: editing.writableFields.length === 0 ? all : editing.writableFields,
+  };
+}
+
+function EndpointFormModal({
+  editing,
   onClose,
   schemas,
 }: {
-  open: boolean;
+  editing?: Endpoint;
   onClose: () => void;
   schemas: DataSchema[];
 }) {
   const create = useCreateEndpoint();
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [slugEdited, setSlugEdited] = useState(false);
-  const [schemaId, setSchemaId] = useState("");
-  const [methods, setMethods] = useState<HttpMethod[]>([...METHODS]);
-  const [readable, setReadable] = useState<string[]>([]);
-  const [writable, setWritable] = useState<string[]>([]);
+  const update = useUpdateEndpoint();
+  const isEdit = !!editing;
+  const init = deriveEndpoint(editing, schemas);
+
+  const [name, setName] = useState(init.name);
+  const [slug, setSlug] = useState(init.slug);
+  const [slugEdited, setSlugEdited] = useState(isEdit);
+  const [schemaId, setSchemaId] = useState(init.schemaId);
+  const [methods, setMethods] = useState<HttpMethod[]>(init.methods);
+  const [readable, setReadable] = useState<string[]>(init.readable);
+  const [writable, setWritable] = useState<string[]>(init.writable);
   const [error, setError] = useState<string | null>(null);
 
+  const pending = create.isPending || update.isPending;
   const selectedSchema = schemas.find((s) => s.id === schemaId);
   const schemaFields = selectedSchema?.fields.map((f) => f.name) ?? [];
-
-  function reset() {
-    setName("");
-    setSlug("");
-    setSlugEdited(false);
-    setSchemaId("");
-    setMethods([...METHODS]);
-    setReadable([]);
-    setWritable([]);
-    setError(null);
-  }
-
-  function close() {
-    reset();
-    onClose();
-  }
 
   function pickSchema(id: string) {
     setSchemaId(id);
@@ -249,18 +277,20 @@ function CreateEndpointModal({
       setError("Select a schema");
       return;
     }
+    const payload = {
+      name,
+      slug: slug || slugify(name),
+      schemaId,
+      methods,
+      // Send [] when all fields are selected, so the endpoint stays in sync
+      // if the schema gains fields later (empty = all).
+      readableFields: readable.length === schemaFields.length ? [] : readable,
+      writableFields: writable.length === schemaFields.length ? [] : writable,
+    };
     try {
-      await create.mutateAsync({
-        name,
-        slug: slug || slugify(name),
-        schemaId,
-        methods,
-        // Send [] when all fields are selected, so the endpoint stays in sync
-        // if the schema gains fields later (empty = all).
-        readableFields: readable.length === schemaFields.length ? [] : readable,
-        writableFields: writable.length === schemaFields.length ? [] : writable,
-      });
-      close();
+      if (isEdit) await update.mutateAsync({ id: editing!.id, ...payload });
+      else await create.mutateAsync(payload);
+      onClose();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong");
     }
@@ -268,9 +298,9 @@ function CreateEndpointModal({
 
   return (
     <Modal
-      open={open}
-      onClose={close}
-      title="New endpoint"
+      open
+      onClose={onClose}
+      title={isEdit ? "Edit endpoint" : "New endpoint"}
       description="Expose a schema as a REST resource."
       widthClass="max-w-xl"
     >
@@ -365,12 +395,12 @@ function CreateEndpointModal({
         )}
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="secondary" onClick={close}>
+          <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" disabled={create.isPending || methods.length === 0}>
-            {create.isPending && <Spinner />}
-            Create endpoint
+          <Button type="submit" disabled={pending || methods.length === 0}>
+            {pending && <Spinner />}
+            {isEdit ? "Save changes" : "Create endpoint"}
           </Button>
         </div>
       </form>

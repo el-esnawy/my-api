@@ -25,10 +25,13 @@ import {
   Spinner,
 } from "@/components/ui";
 
+// `null` = closed; `{ token }` = edit; `{}` = create.
+type ModalState = { token?: AccessToken } | null;
+
 export default function TokensPage() {
   const { data: tokens, isLoading } = useTokens();
   const { data: endpoints } = useEndpoints();
-  const [open, setOpen] = useState(false);
+  const [modal, setModal] = useState<ModalState>(null);
 
   const endpointById = useMemo(() => {
     const map = new Map<string, Endpoint>();
@@ -46,7 +49,7 @@ export default function TokensPage() {
             endpoints and permissions you choose.
           </p>
         </div>
-        <Button onClick={() => setOpen(true)} disabled={!endpoints || endpoints.length === 0}>
+        <Button onClick={() => setModal({})} disabled={!endpoints || endpoints.length === 0}>
           + New token
         </Button>
       </div>
@@ -65,22 +68,29 @@ export default function TokensPage() {
           <EmptyState
             title="No tokens yet"
             description="Mint an access token to start calling your endpoints from anywhere."
-            action={<Button onClick={() => setOpen(true)}>+ New token</Button>}
+            action={<Button onClick={() => setModal({})}>+ New token</Button>}
           />
         ) : (
           <div className="space-y-3">
             {tokens.map((t) => (
-              <TokenCard key={t.id} token={t} endpointById={endpointById} />
+              <TokenCard
+                key={t.id}
+                token={t}
+                endpointById={endpointById}
+                onEdit={() => setModal({ token: t })}
+              />
             ))}
           </div>
         )}
       </div>
 
-      <CreateTokenModal
-        open={open}
-        onClose={() => setOpen(false)}
-        endpoints={endpoints ?? []}
-      />
+      {modal && (
+        <TokenFormModal
+          editing={modal.token}
+          onClose={() => setModal(null)}
+          endpoints={endpoints ?? []}
+        />
+      )}
     </div>
   );
 }
@@ -88,9 +98,11 @@ export default function TokensPage() {
 function TokenCard({
   token,
   endpointById,
+  onEdit,
 }: {
   token: AccessToken;
   endpointById: Map<string, Endpoint>;
+  onEdit: () => void;
 }) {
   const update = useUpdateToken();
   const del = useDeleteToken();
@@ -128,6 +140,9 @@ function TokenCard({
           </code>
         </div>
         <div className="flex items-center gap-2">
+          <Button size="sm" variant="secondary" onClick={onEdit}>
+            Edit
+          </Button>
           <Button size="sm" variant="secondary" onClick={onRevoke} disabled={update.isPending}>
             {token.revoked ? "Re-enable" : "Revoke"}
           </Button>
@@ -170,32 +185,37 @@ function TokenCard({
   );
 }
 
-function CreateTokenModal({
-  open,
+function grantsMapFromToken(
+  t?: AccessToken
+): Record<string, { read: boolean; write: boolean }> {
+  const map: Record<string, { read: boolean; write: boolean }> = {};
+  (t?.grants ?? []).forEach((g) => {
+    map[g.endpointId] = { read: g.read, write: g.write };
+  });
+  return map;
+}
+
+function TokenFormModal({
+  editing,
   onClose,
   endpoints,
 }: {
-  open: boolean;
+  editing?: AccessToken;
   onClose: () => void;
   endpoints: Endpoint[];
 }) {
   const create = useCreateToken();
-  const [name, setName] = useState("");
-  const [grants, setGrants] = useState<Record<string, { read: boolean; write: boolean }>>({});
+  const update = useUpdateToken();
+  const isEdit = !!editing;
+
+  const [name, setName] = useState(editing?.name ?? "");
+  const [grants, setGrants] = useState<Record<string, { read: boolean; write: boolean }>>(
+    () => grantsMapFromToken(editing)
+  );
   const [error, setError] = useState<string | null>(null);
   const [secret, setSecret] = useState<string | null>(null);
 
-  function reset() {
-    setName("");
-    setGrants({});
-    setError(null);
-    setSecret(null);
-  }
-
-  function close() {
-    reset();
-    onClose();
-  }
+  const pending = create.isPending || update.isPending;
 
   function setGrant(id: string, patch: Partial<{ read: boolean; write: boolean }>) {
     setGrants((prev) => {
@@ -218,17 +238,22 @@ function CreateTokenModal({
     }
 
     try {
-      const res = await create.mutateAsync({ name, grants: selected });
-      setSecret(res.plaintext);
+      if (isEdit) {
+        await update.mutateAsync({ id: editing!.id, name, grants: selected });
+        onClose();
+      } else {
+        const res = await create.mutateAsync({ name, grants: selected });
+        setSecret(res.plaintext);
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong");
     }
   }
 
-  // --- Secret reveal screen ---
+  // --- Secret reveal screen (create only) ---
   if (secret) {
     return (
-      <Modal open={open} onClose={close} title="Token created" widthClass="max-w-xl">
+      <Modal open onClose={onClose} title="Token created" widthClass="max-w-xl">
         <div className="space-y-4">
           <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
             Copy this token now — it&apos;s shown only once and cannot be retrieved later.
@@ -246,20 +271,24 @@ function CreateTokenModal({
             </pre>
           </div>
           <div className="flex justify-end">
-            <Button onClick={close}>Done</Button>
+            <Button onClick={onClose}>Done</Button>
           </div>
         </div>
       </Modal>
     );
   }
 
-  // --- Create form ---
+  // --- Create / edit form ---
   return (
     <Modal
-      open={open}
-      onClose={close}
-      title="New access token"
-      description="Choose which endpoints this token can reach and what it can do."
+      open
+      onClose={onClose}
+      title={isEdit ? "Edit token" : "New access token"}
+      description={
+        isEdit
+          ? "Update the name and which endpoints this token can reach. The token value stays the same."
+          : "Choose which endpoints this token can reach and what it can do."
+      }
       widthClass="max-w-xl"
     >
       <form onSubmit={onSubmit} className="space-y-4">
@@ -314,12 +343,12 @@ function CreateTokenModal({
         )}
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="secondary" onClick={close}>
+          <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" disabled={create.isPending}>
-            {create.isPending && <Spinner />}
-            Create token
+          <Button type="submit" disabled={pending}>
+            {pending && <Spinner />}
+            {isEdit ? "Save changes" : "Create token"}
           </Button>
         </div>
       </form>
