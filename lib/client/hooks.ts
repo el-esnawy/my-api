@@ -1,0 +1,150 @@
+"use client";
+
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { api } from "./api";
+import type {
+  AccessToken,
+  DataSchema,
+  Endpoint,
+  TokenGrant,
+  User,
+} from "./types";
+
+export const keys = {
+  me: ["me"] as const,
+  schemas: ["schemas"] as const,
+  endpoints: ["endpoints"] as const,
+  tokens: ["tokens"] as const,
+};
+
+// --- Auth ---
+export function useMe() {
+  return useQuery({
+    queryKey: keys.me,
+    queryFn: () => api<{ user: User }>("/api/auth/me").then((r) => r.user),
+    retry: false,
+  });
+}
+
+export function useSignIn() {
+  return useMutation({
+    mutationFn: (input: { email: string; password: string }) =>
+      api<{ user: User }>("/api/auth/sign-in", { method: "POST", json: input }),
+  });
+}
+
+export function useSignUp() {
+  return useMutation({
+    mutationFn: (input: { email: string; password: string; name?: string }) =>
+      api<{ user: User }>("/api/auth/sign-up", { method: "POST", json: input }),
+  });
+}
+
+export function useSignOut() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api("/api/auth/sign-out", { method: "POST" }),
+    onSuccess: () => qc.clear(),
+  });
+}
+
+// --- Schemas ---
+export function useSchemas() {
+  return useQuery({
+    queryKey: keys.schemas,
+    queryFn: () =>
+      api<{ schemas: DataSchema[] }>("/api/schemas").then((r) => r.schemas),
+  });
+}
+
+export function useCreateSchema() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: unknown) =>
+      api<{ schema: DataSchema }>("/api/schemas", { method: "POST", json: input }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.schemas }),
+  });
+}
+
+export function useDeleteSchema() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api(`/api/schemas/${id}`, { method: "DELETE" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.schemas }),
+  });
+}
+
+// --- Endpoints ---
+export function useEndpoints() {
+  return useQuery({
+    queryKey: keys.endpoints,
+    queryFn: () =>
+      api<{ endpoints: Endpoint[] }>("/api/endpoints").then((r) => r.endpoints),
+  });
+}
+
+export function useCreateEndpoint() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: unknown) =>
+      api<{ endpoint: Endpoint }>("/api/endpoints", { method: "POST", json: input }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.endpoints }),
+  });
+}
+
+export function useDeleteEndpoint() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api(`/api/endpoints/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.endpoints });
+      // grants may have changed
+      qc.invalidateQueries({ queryKey: keys.tokens });
+    },
+  });
+}
+
+// --- Tokens ---
+export function useTokens() {
+  return useQuery({
+    queryKey: keys.tokens,
+    queryFn: () =>
+      api<{ tokens: AccessToken[] }>("/api/tokens").then((r) => r.tokens),
+  });
+}
+
+export function useCreateToken() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name: string; grants: TokenGrant[] }) =>
+      api<{ token: AccessToken; plaintext: string }>("/api/tokens", {
+        method: "POST",
+        json: input,
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.tokens }),
+  });
+}
+
+export function useUpdateToken() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...patch }: { id: string } & Record<string, unknown>) =>
+      api<{ token: AccessToken }>(`/api/tokens/${id}`, {
+        method: "PATCH",
+        json: patch,
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.tokens }),
+  });
+}
+
+export function useDeleteToken() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api(`/api/tokens/${id}`, { method: "DELETE" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.tokens }),
+  });
+}
