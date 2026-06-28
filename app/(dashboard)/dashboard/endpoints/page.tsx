@@ -277,15 +277,33 @@ function EndpointFormModal({
       setError("Select a schema");
       return;
     }
+    // Guard the ambiguous "zero fields selected" state. An empty list is stored
+    // as [] which the API treats as the "all fields" sentinel — the opposite of
+    // intent. Require at least one field for whichever verbs are enabled, and
+    // steer users to the Methods toggles to disable a verb entirely.
+    const hasGet = methods.includes("GET");
+    const hasWrite = methods.some((m) => m !== "GET");
+    if (hasGet && readable.length === 0) {
+      setError("Select at least one readable field, or turn off GET in Methods.");
+      return;
+    }
+    if (hasWrite && writable.length === 0) {
+      setError(
+        "Select at least one writable field, or turn off the write methods (POST/PUT/PATCH)."
+      );
+      return;
+    }
+    // Collapse to [] only when ALL fields are selected, so the endpoint
+    // auto-tracks fields added to the schema later; otherwise send the subset.
+    const allSelected = (sel: string[]) =>
+      schemaFields.length > 0 && sel.length === schemaFields.length;
     const payload = {
       name,
       slug: slug || slugify(name),
       schemaId,
       methods,
-      // Send [] when all fields are selected, so the endpoint stays in sync
-      // if the schema gains fields later (empty = all).
-      readableFields: readable.length === schemaFields.length ? [] : readable,
-      writableFields: writable.length === schemaFields.length ? [] : writable,
+      readableFields: allSelected(readable) ? [] : readable,
+      writableFields: allSelected(writable) ? [] : writable,
     };
     try {
       if (isEdit) await update.mutateAsync({ id: editing!.id, ...payload });

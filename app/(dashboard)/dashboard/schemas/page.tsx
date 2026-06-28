@@ -223,6 +223,8 @@ function SchemaFormModal({
         type: f.type,
         required: f.required,
         unique: f.unique,
+        // Only include enumValues when present (zod treats it as optional, not nullable).
+        ...(f.enumValues && f.enumValues.length ? { enumValues: f.enumValues } : {}),
       })),
     };
     try {

@@ -1,10 +1,16 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth/session";
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Already signed in? The auth pages aren't for you — go to the dashboard.
+  const session = await getSession();
+  if (session) redirect("/dashboard/schemas");
+
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-white to-slate-50">
       <header className="mx-auto w-full max-w-6xl px-6 py-5">
