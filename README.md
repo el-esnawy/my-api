@@ -34,9 +34,22 @@ lib/
   db/{mongoose,redis} · models/* · auth/* · validation/* · records/* · api/*
 ```
 
+## Developer docs
+
+Detailed onboarding docs live in [`dev-docs`](dev-docs/README.md):
+
+- [Architecture overview](dev-docs/architecture-overview.md)
+- [Technology guide](dev-docs/technology-guide.md)
+- [Auth and security flow](dev-docs/auth-and-security.md)
+- [Data model and validation](dev-docs/data-model-and-validation.md)
+- [Dashboard management flows](dev-docs/dashboard-management-flows.md)
+- [Public API engine](dev-docs/public-api-engine.md)
+- [Frontend dashboard](dev-docs/frontend-dashboard.md)
+- [Local development and operations](dev-docs/local-development-and-operations.md)
+
 ## Getting started
 
-Requirements: Node 18.18+ and Docker (for local Mongo + Redis).
+Requirements: Node 20+ and Docker (for local Mongo + Redis).
 
 ```bash
 # 1. Start MongoDB + Redis
