@@ -1,6 +1,7 @@
 import { Schema, model, models, type Model, type InferSchemaType } from "mongoose";
 
 export const HTTP_METHODS = [
+  "GET_MANY",
   "GET",
   "POST",
   "PUT",
@@ -13,8 +14,9 @@ export type HttpMethod = (typeof HTTP_METHODS)[number];
 
 /**
  * An Endpoint exposes a DataSchema as a REST resource. `methods` controls which
- * verbs are allowed; `readableFields` controls what GET returns; `writableFields`
- * controls what write methods accept ("choose what to get and what to mutate").
+ * operations are allowed; `readableFields` controls what read methods return;
+ * `writableFields` controls what write methods accept ("choose what to get and
+ * what to mutate").
  */
 const endpointSchema = new Schema(
   {
@@ -24,8 +26,9 @@ const endpointSchema = new Schema(
     slug: { type: String, required: true, trim: true, lowercase: true },
     methods: {
       type: [{ type: String, enum: HTTP_METHODS }],
-      default: ["GET", "POST", "PUT", "PATCH", "DELETE", "PUT_MANY", "PATCH_MANY"],
+      default: ["GET_MANY", "GET", "POST", "PUT", "PATCH", "DELETE", "PUT_MANY", "PATCH_MANY"],
     },
+    methodsVersion: { type: Number },
     readableFields: { type: [String], default: [] },
     writableFields: { type: [String], default: [] },
   },

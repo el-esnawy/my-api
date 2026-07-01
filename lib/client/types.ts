@@ -1,5 +1,6 @@
 export type FieldType = "string" | "number" | "boolean" | "date" | "enum";
 export type HttpMethod =
+  | "GET_MANY"
   | "GET"
   | "POST"
   | "PUT"

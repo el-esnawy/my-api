@@ -68,7 +68,15 @@ export async function authorizePublicRequest(
     };
   }
 
-  if (!endpoint.methods.includes(method)) {
+  const usesSplitReadMethods =
+    (endpoint as any).methodsVersion === 2 || endpoint.methods.includes("GET_MANY");
+  const methodEnabled =
+    endpoint.methods.includes(method) ||
+    (method === "GET_MANY" &&
+      !usesSplitReadMethods &&
+      endpoint.methods.includes("GET"));
+
+  if (!methodEnabled) {
     return {
       ok: false,
       status: 405,
@@ -78,7 +86,7 @@ export async function authorizePublicRequest(
     };
   }
 
-  const isWrite = method !== "GET";
+  const isWrite = method !== "GET" && method !== "GET_MANY";
   if (isWrite && !grant.write) {
     return { ok: false, status: 403, message: t("api.errors.writePermissionMissing") };
   }

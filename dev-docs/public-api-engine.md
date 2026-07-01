@@ -33,7 +33,7 @@ Authorization: Bearer mapi_<secret>
 Every public route starts by calling `gate()`.
 
 ```ts
-const g = await gate(req, slug, "GET");
+const g = await gate(req, slug, "GET_MANY");
 if (!g.ok) return g.response;
 const { auth, headers } = g;
 ```
@@ -55,9 +55,9 @@ If both succeed, the route receives:
 
 ## Method Behavior
 
-| Method | HTTP route | Permission needed | Behavior |
+| Endpoint method | HTTP route | Permission needed | Behavior |
 | --- | --- | --- | --- |
-| `GET` | `GET /api/v1/:endpoint` | read | List records with optional filters and pagination. |
+| `GET_MANY` | `GET /api/v1/:endpoint` | read | List records with optional filters and pagination. |
 | `POST` | `POST /api/v1/:endpoint` | write | Create one record. |
 | `PUT_MANY` | `PUT /api/v1/:endpoint` | write | Full update for many records. |
 | `PATCH_MANY` | `PATCH /api/v1/:endpoint` | write | Partial update for many records. |
@@ -85,7 +85,7 @@ Authorization: Bearer mapi_...
 
 Flow:
 
-1. Authorize and rate-limit with `gate()`.
+1. Authorize and rate-limit with `gate(req, slug, "GET_MANY")`.
 2. Load schema fields with `loadFields(auth)`.
 3. Start a MongoDB filter with `userId` and `endpointId`.
 4. For each schema field:

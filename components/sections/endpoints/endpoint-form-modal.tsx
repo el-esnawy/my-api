@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/atoms/checkbox";
 import { Spinner } from "@/components/atoms/spinner";
 
 const METHODS: HttpMethod[] = [
+  "GET_MANY",
   "GET",
   "POST",
   "PUT",
@@ -25,7 +26,8 @@ const METHODS: HttpMethod[] = [
 ];
 
 const methodLabels: Record<HttpMethod, string> = {
-  GET: "GET many",
+  GET_MANY: "GET many",
+  GET: "GET",
   POST: "POST",
   PUT: "PUT",
   PATCH: "PATCH",
@@ -35,6 +37,7 @@ const methodLabels: Record<HttpMethod, string> = {
 };
 
 const activeMethodClasses: Record<HttpMethod, string> = {
+  GET_MANY: "border-green-300 bg-green-50 text-green-700",
   GET: "border-green-300 bg-green-50 text-green-700",
   POST: "border-yellow-300 bg-yellow-50 text-yellow-700",
   PUT: "border-blue-300 bg-blue-50 text-blue-700",
@@ -120,9 +123,9 @@ export function EndpointFormModal({
     // as [] which the API treats as the "all fields" sentinel — the opposite of
     // intent. Require at least one field for whichever verbs are enabled, and
     // steer users to the Methods toggles to disable a verb entirely.
-    const hasGet = methods.includes("GET");
-    const hasWrite = methods.some((m) => m !== "GET");
-    if (hasGet && readable.length === 0) {
+    const hasRead = methods.some((m) => m === "GET_MANY" || m === "GET");
+    const hasWrite = methods.some((m) => m !== "GET_MANY" && m !== "GET");
+    if (hasRead && readable.length === 0) {
       setError(t("endpoints.modal.readableRequired"));
       return;
     }

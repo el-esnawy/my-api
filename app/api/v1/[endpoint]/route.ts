@@ -41,7 +41,7 @@ function clampInt(value: string | null, fallback: number, min: number, max: numb
 export async function GET(req: NextRequest, { params }: Params) {
   return withErrorHandling(async () => {
     const { endpoint: slug } = await params;
-    const g = await gate(req, slug, "GET");
+    const g = await gate(req, slug, "GET_MANY");
     if (!g.ok) return g.response;
     const { auth, headers } = g;
 

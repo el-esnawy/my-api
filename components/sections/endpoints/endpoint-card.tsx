@@ -14,6 +14,7 @@ import { CopyButton } from '@/components/molecules/copy-button';
 import { EndpointFieldList } from './endpoint-field-list';
 
 const methodTone: Record<HttpMethod, 'green' | 'yellow' | 'blue' | 'purple' | 'red'> = {
+  GET_MANY: 'green',
   GET: 'green',
   POST: 'yellow',
   PUT: 'blue',
@@ -24,7 +25,8 @@ const methodTone: Record<HttpMethod, 'green' | 'yellow' | 'blue' | 'purple' | 'r
 };
 
 const methodLabels: Record<HttpMethod, string> = {
-  GET: 'GET many',
+  GET_MANY: 'GET many',
+  GET: 'GET',
   POST: 'POST',
   PUT: 'PUT',
   PATCH: 'PATCH',
@@ -33,14 +35,7 @@ const methodLabels: Record<HttpMethod, string> = {
   DELETE: 'DELETE'
 };
 
-const singleRecordMethods = new Set<HttpMethod>(['PUT', 'PATCH', 'DELETE']);
-
-interface MethodRow {
-  key: string;
-  method: HttpMethod;
-  label: string;
-  url: string;
-}
+const singleRecordMethods = new Set<HttpMethod>(['GET', 'PUT', 'PATCH', 'DELETE']);
 
 export function EndpointCard({
   endpoint,
@@ -56,22 +51,6 @@ export function EndpointCard({
   const [error, setError] = useState<string | null>(null);
   const url = `${appBaseUrl()}/api/v1/${endpoint.slug}`;
   const methodUrl = (method: HttpMethod) => (singleRecordMethods.has(method) ? `${url}/:id` : url);
-  const methodRows = endpoint.methods.flatMap<MethodRow>((method) => {
-    if (method === 'GET') {
-      return [
-        { key: 'GET_BY_ID', method, label: 'GET', url: `${url}/:id` },
-        { key: 'GET_LIST', method, label: 'GET many', url }
-      ];
-    }
-    return [
-      {
-        key: method,
-        method,
-        label: methodLabels[method],
-        url: methodUrl(method)
-      }
-    ];
-  });
 
   async function onDelete() {
     if (!confirm(t('endpoints.deleteConfirm', { name: endpoint.name }))) return;
@@ -106,22 +85,23 @@ export function EndpointCard({
       </div>
 
       <div className='mt-4 space-y-2'>
-        {methodRows.map((row) => {
+        {endpoint.methods.map((method) => {
+          const currentUrl = methodUrl(method);
           return (
             <div
-              key={row.key}
+              key={method}
               className='flex flex-wrap items-center gap-2 rounded-lg bg-slate-900 px-3 py-2'
             >
               <Badge
-                tone={methodTone[row.method]}
+                tone={methodTone[method]}
                 className='font-mono'
               >
-                {row.label}
+                {methodLabels[method]}
               </Badge>
               <code className='scroll-thin flex-1 overflow-x-auto whitespace-nowrap text-sm text-slate-100'>
-                {row.url}
+                {currentUrl}
               </code>
-              <CopyButton value={row.url} />
+              <CopyButton value={currentUrl} />
             </div>
           );
         })}

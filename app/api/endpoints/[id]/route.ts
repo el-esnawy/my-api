@@ -70,7 +70,10 @@ export async function PUT(req: NextRequest, { params }: Params) {
     if (parsed.data.name !== undefined) endpoint.name = parsed.data.name;
     if (parsed.data.slug !== undefined) endpoint.slug = parsed.data.slug;
     if (parsed.data.schemaId !== undefined) endpoint.schemaId = schema._id;
-    if (parsed.data.methods !== undefined) endpoint.methods = parsed.data.methods;
+    if (parsed.data.methods !== undefined) {
+      endpoint.methods = parsed.data.methods;
+      (endpoint as any).methodsVersion = 2;
+    }
     if (parsed.data.readableFields !== undefined) {
       endpoint.readableFields = parsed.data.readableFields;
     }

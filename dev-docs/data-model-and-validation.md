@@ -82,15 +82,15 @@ Fields:
 - `schemaId`: referenced `DataSchema`.
 - `name`: display name.
 - `slug`: URL segment used by `/api/v1/:slug`.
-- `methods`: enabled HTTP verbs.
-- `readableFields`: fields returned by `GET`.
+- `methods`: enabled endpoint operations.
+- `readableFields`: fields returned by `GET_MANY` and `GET`.
 - `writableFields`: fields accepted by `POST`, `PUT`, and `PATCH`.
 - timestamps.
 
 Supported methods:
 
 ```ts
-["GET", "POST", "PUT", "PATCH", "DELETE", "PUT_MANY", "PATCH_MANY"]
+["GET_MANY", "GET", "POST", "PUT", "PATCH", "DELETE", "PUT_MANY", "PATCH_MANY"]
 ```
 
 Index:

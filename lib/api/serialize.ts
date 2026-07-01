@@ -28,12 +28,19 @@ export function serializeSchema(doc: any) {
 }
 
 export function serializeEndpoint(doc: any) {
+  const methods = doc.methods ?? [];
+  const usesSplitReadMethods = doc.methodsVersion === 2 || methods.includes("GET_MANY");
+  const serializedMethods =
+    !usesSplitReadMethods && methods.includes("GET")
+      ? ["GET_MANY", ...methods]
+      : methods;
+
   return {
     id: String(doc._id),
     name: doc.name,
     slug: doc.slug,
     schemaId: String(doc.schemaId),
-    methods: doc.methods ?? [],
+    methods: serializedMethods,
     readableFields: doc.readableFields ?? [],
     writableFields: doc.writableFields ?? [],
     createdAt: doc.createdAt ?? null,

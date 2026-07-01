@@ -71,7 +71,7 @@ Open http://localhost:3000, sign up, and you'll land on the dashboard.
 ## Try a custom endpoint
 
 1. **Schemas** → create `Note` with fields `title` (string, required), `body` (string), `done` (boolean).
-2. **Endpoints** → create endpoint slug `notes` from the `Note` schema; enable `GET many/POST/PUT/DELETE`;
+2. **Endpoints** → create endpoint slug `notes` from the `Note` schema; enable `GET many/GET/POST/PUT/DELETE`;
    mark fields readable/writable. The page shows your base URL: `http://localhost:3000/api/v1/notes`.
 3. **Request Tokens** → create a request token scoped to `notes` with read + write. Copy it now,
    or view it again anytime from the token list.

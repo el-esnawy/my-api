@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
         name: parsed.data.name,
         slug: parsed.data.slug,
         methods: parsed.data.methods,
+        methodsVersion: 2,
         readableFields: parsed.data.readableFields,
         writableFields: parsed.data.writableFields,
       });

@@ -151,16 +151,16 @@ another user's schema.
 
 ### Readable and Writable Fields
 
-Readable fields control `GET` output. Writable fields control `POST`, `PUT`, and
-`PATCH` input.
+Readable fields control `GET_MANY` and `GET` output. Writable fields control
+`POST`, `PUT`, and `PATCH` input.
 
 An empty list is special:
 
 - `[]` means all schema fields.
 
-The frontend guards against the confusing "I unchecked every box" case. If `GET`
-is enabled, the user must select at least one readable field. If write methods
-are enabled, the user must select at least one writable field.
+The frontend guards against the confusing "I unchecked every box" case. If a
+read method is enabled, the user must select at least one readable field. If
+write methods are enabled, the user must select at least one writable field.
 
 ### Update Endpoint
 
