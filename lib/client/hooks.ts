@@ -118,7 +118,12 @@ export function useUpdateEndpoint() {
   return useMutation({
     mutationFn: ({ id, ...input }: { id: string } & Record<string, unknown>) =>
       api<{ endpoint: Endpoint }>(`/api/endpoints/${id}`, { method: "PUT", json: input }),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      qc.setQueryData<Endpoint[]>(keys.endpoints, (endpoints) =>
+        endpoints?.map((endpoint) =>
+          endpoint.id === data.endpoint.id ? data.endpoint : endpoint
+        )
+      );
       qc.invalidateQueries({ queryKey: keys.endpoints });
       qc.invalidateQueries({ queryKey: keys.tokens });
     },

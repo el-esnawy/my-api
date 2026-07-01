@@ -22,6 +22,15 @@ interface ManyUpdateItem {
   data: Record<string, unknown>;
 }
 
+function toPublicRecord(doc: any, readableFields: string[]) {
+  return {
+    id: String(doc._id),
+    data: projectReadable(doc.data as Record<string, unknown>, readableFields),
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
+
 function clampInt(value: string | null, fallback: number, min: number, max: number) {
   const n = Number(value);
   if (!Number.isFinite(n)) return fallback;
@@ -63,12 +72,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       RecordModel.countDocuments(filter),
     ]);
 
-    const records = items.map((r) => ({
-      id: String(r._id),
-      data: projectReadable(r.data as Record<string, unknown>, readable),
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
-    }));
+    const records = items.map((r) => toPublicRecord(r, readable));
 
     return jsonWithHeaders({ records, pagination: { total, limit, skip } }, 200, headers);
   });
@@ -119,12 +123,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return jsonWithHeaders(
       {
-        record: {
-          id: String(rec._id),
-          data: projectReadable(rec.data as Record<string, unknown>, auth.endpoint.readableFields ?? []),
-          createdAt: rec.createdAt,
-          updatedAt: rec.updatedAt,
-        },
+        record: toPublicRecord(rec, auth.endpoint.readableFields ?? []),
       },
       201,
       headers
@@ -210,12 +209,12 @@ async function applyManyUpdate(
     }
 
     const validIds = items.map((item) => item.id).filter((id) => isValidObjectId(id));
-    const records = await RecordModel.find({
+    const existingRecords = await RecordModel.find({
       _id: { $in: validIds },
       userId,
       schemaId,
     });
-    const recordById = new Map(records.map((record) => [String(record._id), record]));
+    const recordById = new Map(existingRecords.map((record) => [String(record._id), record]));
     for (const id of validIds) {
       if (!recordById.has(id)) {
         errors.push({ id, fields: { _root: t("api.errors.unknownEntry") } });
@@ -283,7 +282,19 @@ async function applyManyUpdate(
       }))
     );
 
-    return jsonWithHeaders({ updated: validatedUpdates.length }, 200, headers);
+    const updatedIds = validatedUpdates.map((update) => update.id);
+    const updatedDocs = await RecordModel.find({
+      _id: { $in: updatedIds },
+      userId,
+      schemaId,
+    });
+    const updatedById = new Map(updatedDocs.map((record) => [String(record._id), record]));
+    const updatedRecords = updatedIds
+      .map((id) => updatedById.get(id))
+      .filter((record): record is NonNullable<typeof record> => !!record)
+      .map((record) => toPublicRecord(record, auth.endpoint.readableFields ?? []));
+
+    return jsonWithHeaders({ updated: updatedRecords.length, records: updatedRecords }, 200, headers);
   });
 }
 

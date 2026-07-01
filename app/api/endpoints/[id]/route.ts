@@ -67,7 +67,16 @@ export async function PUT(req: NextRequest, { params }: Params) {
       return badRequest(t("api.errors.endpointFieldsInvalid"), { unknown });
     }
 
-    Object.assign(endpoint, parsed.data);
+    if (parsed.data.name !== undefined) endpoint.name = parsed.data.name;
+    if (parsed.data.slug !== undefined) endpoint.slug = parsed.data.slug;
+    if (parsed.data.schemaId !== undefined) endpoint.schemaId = schema._id;
+    if (parsed.data.methods !== undefined) endpoint.methods = parsed.data.methods;
+    if (parsed.data.readableFields !== undefined) {
+      endpoint.readableFields = parsed.data.readableFields;
+    }
+    if (parsed.data.writableFields !== undefined) {
+      endpoint.writableFields = parsed.data.writableFields;
+    }
     try {
       await endpoint.save();
       return ok({ endpoint: serializeEndpoint(endpoint) });

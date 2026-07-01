@@ -71,6 +71,7 @@ export default function EndpointsPage() {
 
       {modal && (
         <EndpointFormModal
+          key={modal.endpoint?.id ?? "new"}
           editing={modal.endpoint}
           onClose={() => setModal(null)}
           schemas={schemas ?? []}
