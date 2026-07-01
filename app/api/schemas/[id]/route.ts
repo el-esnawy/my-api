@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db/mongoose";
 import { DataSchema } from "@/lib/models/DataSchema";
 import { Endpoint } from "@/lib/models/Endpoint";
+import { RecordModel } from "@/lib/models/Record";
 import { requireSession } from "@/lib/api/dashboardAuth";
 import { updateSchemaInput } from "@/lib/validation/schemas";
 import { serializeSchema } from "@/lib/api/serialize";
@@ -91,6 +92,10 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
       userId: auth.session.userId,
     });
     if (!deleted) return notFound("Schema not found");
+
+    // The schema owns its entries — remove them with it.
+    await RecordModel.deleteMany({ userId: auth.session.userId, schemaId: deleted._id });
+
     return ok({ success: true });
   });
 }

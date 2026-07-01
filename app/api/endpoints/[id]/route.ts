@@ -2,7 +2,6 @@ import type { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db/mongoose";
 import { Endpoint } from "@/lib/models/Endpoint";
 import { DataSchema } from "@/lib/models/DataSchema";
-import { RecordModel } from "@/lib/models/Record";
 import { AccessToken } from "@/lib/models/AccessToken";
 import { requireSession } from "@/lib/api/dashboardAuth";
 import { updateEndpointInput } from "@/lib/validation/schemas";
@@ -89,14 +88,12 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     });
     if (!endpoint) return notFound("Endpoint not found");
 
-    // Clean up dependent data: the endpoint's records and any token grants for it.
-    await Promise.all([
-      RecordModel.deleteMany({ userId: auth.session.userId, endpointId: endpoint._id }),
-      AccessToken.updateMany(
-        { userId: auth.session.userId },
-        { $pull: { grants: { endpointId: endpoint._id } } }
-      ),
-    ]);
+    // Records are owned by the schema, so they survive endpoint deletion —
+    // only the token grants pointing at this endpoint need cleaning up.
+    await AccessToken.updateMany(
+      { userId: auth.session.userId },
+      { $pull: { grants: { endpointId: endpoint._id } } }
+    );
 
     return ok({ success: true });
   });

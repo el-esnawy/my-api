@@ -7,6 +7,7 @@ import {
   projectReadable,
   coerceScalar,
 } from "@/lib/records/validate";
+import { findUniqueConflicts } from "@/lib/records/unique";
 import { withErrorHandling } from "@/lib/api/respond";
 
 export const runtime = "nodejs";
@@ -35,10 +36,10 @@ export async function GET(req: NextRequest, { params }: Params) {
     const limit = clampInt(url.searchParams.get("limit"), 50, 1, 200);
     const skip = clampInt(url.searchParams.get("skip"), 0, 0, 1_000_000);
 
-    // Build an equality filter from query params matching readable fields.
+    // Records are owned by the schema; the endpoint is a projection over them.
     const filter: Record<string, unknown> = {
       userId: auth.userId,
-      endpointId: auth.endpoint._id,
+      schemaId: auth.endpoint.schemaId,
     };
     for (const field of fields) {
       const isReadable = readable.length === 0 || readable.includes(field.name);
@@ -88,8 +89,21 @@ export async function POST(req: NextRequest, { params }: Params) {
       );
     }
 
+    const conflicts = await findUniqueConflicts({
+      schemaId: String(auth.endpoint.schemaId),
+      userId: auth.userId,
+      fields,
+      candidates: [{ data: result.value! }],
+    });
+    if (conflicts.length > 0) {
+      const errors: Record<string, string> = {};
+      for (const c of conflicts) errors[c.field] = "must be unique";
+      return jsonWithHeaders({ error: "Validation failed", fields: errors }, 400, headers);
+    }
+
     const rec = await RecordModel.create({
       userId: auth.userId,
+      schemaId: auth.endpoint.schemaId,
       endpointId: auth.endpoint._id,
       data: result.value,
     });

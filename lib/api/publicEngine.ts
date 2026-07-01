@@ -50,6 +50,7 @@ export async function loadFields(auth: AuthSuccess): Promise<SchemaFieldLike[]> 
     name: f.name,
     type: f.type,
     required: !!f.required,
+    unique: !!f.unique,
     enumValues: f.enumValues ?? null,
   }));
 }

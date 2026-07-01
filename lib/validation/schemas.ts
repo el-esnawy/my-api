@@ -60,6 +60,33 @@ export const createTokenInput = z.object({
   grants: z.array(tokenGrantInput).min(1, "Grant access to at least one endpoint"),
 });
 
+// --- Entries (schema-owned records managed from the dashboard) ---
+export const batchEntriesInput = z
+  .object({
+    creates: z
+      .array(z.object({ tempId: z.string().min(1), data: z.record(z.unknown()) }))
+      .default([]),
+    updates: z
+      .array(z.object({ id: z.string().min(1), data: z.record(z.unknown()) }))
+      .default([]),
+    deletes: z.array(z.string().min(1)).default([]),
+  })
+  .refine(
+    (v) => v.creates.length + v.updates.length + v.deletes.length > 0,
+    { message: "Nothing to save" }
+  )
+  .refine(
+    (v) => v.creates.length + v.updates.length + v.deletes.length <= 2000,
+    { message: "Too many changes in one save (max 2000)" }
+  );
+
+export const importEntriesInput = z.object({
+  entries: z
+    .array(z.record(z.unknown()))
+    .min(1, "The file contains no entries")
+    .max(5000, "Too many entries in one import (max 5000)"),
+});
+
 export const updateTokenInput = z
   .object({
     name: z.string().trim().min(1).max(80).optional(),

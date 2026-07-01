@@ -15,5 +15,8 @@ export { CopyIcon } from "./icons/copy-icon";
 export { PencilIcon } from "./icons/pencil-icon";
 export { TrashIcon } from "./icons/trash-icon";
 export { SchemaIcon } from "./icons/schema-icon";
+export { BackIcon } from "./icons/back-icon";
+export { UploadIcon } from "./icons/upload-icon";
+export { DownloadIcon } from "./icons/download-icon";
 export { EndpointIcon } from "./icons/endpoint-icon";
 export { TokenIcon } from "./icons/token-icon";

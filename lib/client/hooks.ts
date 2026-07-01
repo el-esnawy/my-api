@@ -10,6 +10,8 @@ import type {
   AccessToken,
   DataSchema,
   Endpoint,
+  Entry,
+  ImportResult,
   TokenGrant,
   User,
 } from "./types";
@@ -19,6 +21,8 @@ export const keys = {
   schemas: ["schemas"] as const,
   endpoints: ["endpoints"] as const,
   tokens: ["tokens"] as const,
+  entryCounts: ["entries", "counts"] as const,
+  entries: (schemaId: string) => ["entries", schemaId] as const,
 };
 
 // --- Auth ---
@@ -171,6 +175,60 @@ export function useDeleteToken() {
   return useMutation({
     mutationFn: (id: string) => api(`/api/tokens/${id}`, { method: "DELETE" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.tokens }),
+  });
+}
+
+// --- Entries ---
+export function useEntryCounts() {
+  return useQuery({
+    queryKey: keys.entryCounts,
+    queryFn: () =>
+      api<{ counts: Record<string, number> }>("/api/entries/counts").then((r) => r.counts),
+  });
+}
+
+export function useEntries(schemaId: string | null) {
+  return useQuery({
+    queryKey: keys.entries(schemaId ?? "none"),
+    queryFn: () =>
+      api<{ entries: Entry[]; truncated: boolean }>(
+        `/api/schemas/${schemaId}/entries`
+      ).then((r) => r.entries),
+    enabled: !!schemaId,
+  });
+}
+
+export function useBatchSaveEntries(schemaId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: {
+      creates: { tempId: string; data: Record<string, unknown> }[];
+      updates: { id: string; data: Record<string, unknown> }[];
+      deletes: string[];
+    }) =>
+      api<{ created: number; updated: number; deleted: number }>(
+        `/api/schemas/${schemaId}/entries/batch`,
+        { method: "POST", json: input }
+      ),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.entries(schemaId) });
+      qc.invalidateQueries({ queryKey: keys.entryCounts });
+    },
+  });
+}
+
+export function useImportEntries(schemaId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (entries: Record<string, unknown>[]) =>
+      api<ImportResult>(`/api/schemas/${schemaId}/entries/import`, {
+        method: "POST",
+        json: { entries },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.entries(schemaId) });
+      qc.invalidateQueries({ queryKey: keys.entryCounts });
+    },
   });
 }
 

@@ -4,6 +4,7 @@ export interface SchemaFieldLike {
   name: string;
   type: FieldType;
   required?: boolean;
+  unique?: boolean;
   enumValues?: string[] | null;
 }
 

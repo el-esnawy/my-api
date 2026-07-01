@@ -6,6 +6,7 @@ import { cn } from "@/lib/client/util";
 
 const tabs = [
   { href: "/dashboard/schemas", label: "Schemas" },
+  { href: "/dashboard/entries", label: "Entries" },
   { href: "/dashboard/endpoints", label: "Endpoints" },
   { href: "/dashboard/tokens", label: "Request Tokens" },
 ];

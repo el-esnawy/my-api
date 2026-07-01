@@ -5,6 +5,7 @@ import { RecordModel } from "@/lib/models/Record";
 import type { HttpMethod } from "@/lib/models/Endpoint";
 import { gate, loadFields, jsonWithHeaders } from "@/lib/api/publicEngine";
 import { validateRecordData, projectReadable } from "@/lib/records/validate";
+import { findUniqueConflicts } from "@/lib/records/unique";
 import { withErrorHandling } from "@/lib/api/respond";
 
 export const runtime = "nodejs";
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     const rec = await RecordModel.findOne({
       _id: recordId,
       userId: auth.userId,
-      endpointId: auth.endpoint._id,
+      schemaId: auth.endpoint.schemaId,
     });
     if (!rec) return jsonWithHeaders({ error: "Record not found" }, 404, headers);
 
@@ -61,7 +62,7 @@ async function applyUpdate(req: NextRequest, params: Params["params"], method: H
     const rec = await RecordModel.findOne({
       _id: recordId,
       userId: auth.userId,
-      endpointId: auth.endpoint._id,
+      schemaId: auth.endpoint.schemaId,
     });
     if (!rec) return jsonWithHeaders({ error: "Record not found" }, 404, headers);
 
@@ -77,7 +78,21 @@ async function applyUpdate(req: NextRequest, params: Params["params"], method: H
       return jsonWithHeaders({ error: "Validation failed", fields: result.errors }, 400, headers);
     }
 
-    rec.data = { ...(rec.data as Record<string, unknown>), ...result.value };
+    const nextData = { ...(rec.data as Record<string, unknown>), ...result.value };
+
+    const conflicts = await findUniqueConflicts({
+      schemaId: String(auth.endpoint.schemaId),
+      userId: auth.userId,
+      fields,
+      candidates: [{ data: nextData, excludeId: String(rec._id) }],
+    });
+    if (conflicts.length > 0) {
+      const errors: Record<string, string> = {};
+      for (const c of conflicts) errors[c.field] = "must be unique";
+      return jsonWithHeaders({ error: "Validation failed", fields: errors }, 400, headers);
+    }
+
+    rec.data = nextData;
     rec.markModified("data");
     await rec.save();
 
@@ -122,7 +137,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     const deleted = await RecordModel.findOneAndDelete({
       _id: recordId,
       userId: auth.userId,
-      endpointId: auth.endpoint._id,
+      schemaId: auth.endpoint.schemaId,
     });
     if (!deleted) return jsonWithHeaders({ error: "Record not found" }, 404, headers);
 

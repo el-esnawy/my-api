@@ -46,6 +46,31 @@ export interface AccessToken {
   createdAt: string | null;
 }
 
+export interface Entry {
+  id: string;
+  data: Record<string, unknown>;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface ImportRejection {
+  index: number;
+  entry: Record<string, unknown>;
+  reasons: string[];
+}
+
+export interface ImportResult {
+  total: number;
+  imported: number;
+  rejected: ImportRejection[];
+}
+
+export interface BatchItemError {
+  tempId?: string;
+  id?: string;
+  fields: Record<string, string>;
+}
+
 export interface User {
   id: string;
   email: string;
