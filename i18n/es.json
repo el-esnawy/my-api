@@ -48,7 +48,8 @@
       "string": "texto",
       "number": "número",
       "boolean": "booleano",
-      "date": "fecha"
+      "date": "fecha",
+      "enum": "enum"
     }
   },
   "dashboard": {
@@ -198,6 +199,10 @@
       "fields": "Campos",
       "addField": "+ Agregar campo",
       "fieldNamePlaceholder": "nombre_campo",
+      "enumValues": "Valores enum",
+      "addEnumValue": "+ Agregar valor",
+      "enumValuePlaceholder": "valor",
+      "removeEnumValue": "Eliminar valor enum",
       "removeField": "Eliminar campo",
       "editWarning": "Editar campos no cambiará los registros ya almacenados. Quitar un campo solo lo oculta en lecturas y escrituras futuras.",
       "create": "Crear esquema"
@@ -214,7 +219,7 @@
     "emptyDescription": "Convierte uno de tus esquemas en un endpoint REST invocable.",
     "schemaLabel": "Esquema:",
     "readableGet": "Legibles (GET)",
-    "writableMethods": "Escribibles (POST/PUT/PATCH)",
+    "writableMethods": "Escribibles (POST/PUT/PATCH/PUT many/PATCH many)",
     "deleteConfirm": "¿Eliminar el endpoint \"{{name}}\"? Sus registros almacenados serán eliminados.",
     "deleteFailed": "No se pudo eliminar",
     "modal": {
@@ -233,7 +238,7 @@
       "create": "Crear endpoint",
       "selectSchemaError": "Selecciona un esquema",
       "readableRequired": "Selecciona al menos un campo legible o desactiva GET en Métodos.",
-      "writableRequired": "Selecciona al menos un campo escribible o desactiva los métodos de escritura (POST/PUT/PATCH)."
+      "writableRequired": "Selecciona al menos un campo escribible o desactiva los métodos de escritura."
     }
   },
   "tokens": {
@@ -370,6 +375,7 @@
       "readPermissionMissing": "Este token no tiene permiso de lectura",
       "recordNotFound": "Registro no encontrado",
       "unknownEntry": "Entrada desconocida",
+      "duplicateUpdateId": "id de registro duplicado en la actualización por lote",
       "entriesInvalid": "Algunas entradas son inválidas — no se guardó nada",
       "duplicateBatch": "valor duplicado para el campo único \"{{field}}\" — una entrada anterior del archivo ya lo usa",
       "duplicateStored": "el valor del campo único \"{{field}}\" ya existe en tus entradas almacenadas"
@@ -380,6 +386,8 @@
     "fieldName": "Usa letras, números y guiones bajos; no debe comenzar con un número",
     "invalidSlug": "Slug inválido",
     "schemaFieldsMin": "Agrega al menos un campo",
+    "enumValuesMin": "Agrega al menos un valor enum",
+    "enumValuesUnique": "Los valores enum deben ser únicos",
     "endpointMethodsMin": "Habilita al menos un método",
     "tokenGrantsMin": "Concede acceso al menos a un endpoint",
     "nothingToSave": "Nada que guardar",
@@ -389,6 +397,7 @@
     "noTokenFields": "No hay campos para actualizar",
     "record": {
       "bodyObject": "El cuerpo debe ser un objeto JSON",
+      "manyBody": "El cuerpo debe ser un arreglo de registros o un objeto con un arreglo updates/records",
       "required": "es obligatorio",
       "string": "debe ser texto",
       "number": "debe ser un número",

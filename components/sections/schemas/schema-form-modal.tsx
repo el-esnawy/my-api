@@ -16,15 +16,13 @@ import { ErrorText } from '@/components/atoms/error-text';
 import { Spinner } from '@/components/atoms/spinner';
 import { CloseIcon } from '@/components/atoms/icons/close-icon';
 
-const FIELD_TYPES: FieldType[] = ['string', 'number', 'boolean', 'date'];
+const FIELD_TYPES: FieldType[] = ['string', 'number', 'boolean', 'date', 'enum'];
 
 interface DraftField {
   name: string;
   type: FieldType;
   required: boolean;
   unique: boolean;
-  // Carried through edits even though the builder has no enum editor yet, so a
-  // schema created with enum constraints (e.g. via the API) isn't silently wiped.
   enumValues: string[] | null;
 }
 
@@ -33,8 +31,12 @@ const emptyField = (): DraftField => ({
   type: 'string',
   required: false,
   unique: false,
-  enumValues: null
+  enumValues: []
 });
+
+function normalizeEnumValues(values: string[] | null | undefined): string[] {
+  return (values ?? []).map((value) => value.trim()).filter(Boolean);
+}
 
 function draftFromSchema(s?: DataSchema): {
   name: string;
@@ -51,7 +53,12 @@ function draftFromSchema(s?: DataSchema): {
           type: f.type,
           required: f.required,
           unique: f.unique,
-          enumValues: f.enumValues ?? null
+          enumValues:
+            f.type === 'enum'
+              ? f.enumValues && f.enumValues.length > 0
+                ? f.enumValues
+                : ['']
+              : []
         }))
       : [emptyField()]
   };
@@ -78,6 +85,63 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
     setFields((prev) => prev.map((f, idx) => (idx === i ? { ...f, ...patch } : f)));
   }
 
+  function updateFieldType(i: number, type: FieldType) {
+    setFields((prev) =>
+      prev.map((field, idx) =>
+        idx === i
+          ? {
+              ...field,
+              type,
+              enumValues:
+                type === 'enum'
+                  ? field.enumValues && field.enumValues.length > 0
+                    ? field.enumValues
+                    : ['']
+                  : []
+            }
+          : field
+      )
+    );
+  }
+
+  function updateEnumValue(fieldIndex: number, valueIndex: number, value: string) {
+    setFields((prev) =>
+      prev.map((field, idx) =>
+        idx === fieldIndex
+          ? {
+              ...field,
+              enumValues: (field.enumValues?.length ? field.enumValues : ['']).map((item, optionIdx) =>
+                optionIdx === valueIndex ? value : item
+              )
+            }
+          : field
+      )
+    );
+  }
+
+  function addEnumValue(fieldIndex: number) {
+    setFields((prev) =>
+      prev.map((field, idx) =>
+        idx === fieldIndex
+          ? { ...field, enumValues: [...(field.enumValues ?? []), ''] }
+          : field
+      )
+    );
+  }
+
+  function removeEnumValue(fieldIndex: number, valueIndex: number) {
+    setFields((prev) =>
+      prev.map((field, idx) =>
+        idx === fieldIndex
+          ? {
+              ...field,
+              enumValues: (field.enumValues ?? []).filter((_, optionIdx) => optionIdx !== valueIndex)
+            }
+          : field
+      )
+    );
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -85,14 +149,16 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
     const payload = {
       name,
       slug: slug || slugify(name),
-      fields: fields.map((f) => ({
-        name: f.name,
-        type: f.type,
-        required: f.required,
-        unique: f.unique,
-        // Only include enumValues when present (zod treats it as optional, not nullable).
-        ...(f.enumValues && f.enumValues.length ? { enumValues: f.enumValues } : {})
-      }))
+      fields: fields.map((f) => {
+        const enumValues = normalizeEnumValues(f.enumValues);
+        return {
+          name: f.name,
+          type: f.type,
+          required: f.required,
+          unique: f.unique,
+          ...(f.type === 'enum' ? { enumValues } : {})
+        };
+      })
     };
     try {
       if (isEdit) await update.mutateAsync({ id: editing!.id, ...payload });
@@ -174,8 +240,8 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
                 />
                 <Select
                   value={field.type}
-                  onChange={(e) => updateField(i, { type: e.target.value as FieldType })}
-                  className='h-9 w-28'
+                  onChange={(e) => updateFieldType(i, e.target.value as FieldType)}
+                  className='h-9 w-32'
                 >
                   {FIELD_TYPES.map((fieldType) => (
                     <option
@@ -209,6 +275,52 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
                 >
                   <CloseIcon size={16} />
                 </button>
+                {field.type === 'enum' && (
+                  <div className='w-full border-t border-slate-200 pt-2'>
+                    <div className='flex items-center justify-between gap-3'>
+                      <span className='text-xs font-medium text-slate-500'>
+                        {t('schemas.modal.enumValues')}
+                      </span>
+                      <button
+                        type='button'
+                        onClick={() => addEnumValue(i)}
+                        className='text-xs font-medium text-indigo-600 transition hover:text-indigo-500'
+                      >
+                        {t('schemas.modal.addEnumValue')}
+                      </button>
+                    </div>
+                    <div className='mt-2 grid gap-2 sm:grid-cols-2'>
+                      {(field.enumValues?.length ? field.enumValues : ['']).map((enumValue, valueIndex) => (
+                        <div
+                          key={valueIndex}
+                          className='flex items-center gap-1.5'
+                        >
+                          <Input
+                            value={enumValue}
+                            onChange={(e) => updateEnumValue(i, valueIndex, e.target.value)}
+                            placeholder={t('schemas.modal.enumValuePlaceholder')}
+                            className='h-9 font-mono'
+                            required
+                          />
+                          <button
+                            type='button'
+                            onClick={() => removeEnumValue(i, valueIndex)}
+                            disabled={(field.enumValues?.length ?? 0) <= 1}
+                            className='rounded-md p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-30'
+                            aria-label={t('schemas.modal.removeEnumValue')}
+                          >
+                            <CloseIcon size={15} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    {(fieldErrors[`fields.${i}.enumValues`] || fieldErrors[`fields.${i}.enumValues.0`]) && (
+                      <ErrorText>
+                        {fieldErrors[`fields.${i}.enumValues`] ?? fieldErrors[`fields.${i}.enumValues.0`]}
+                      </ErrorText>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>

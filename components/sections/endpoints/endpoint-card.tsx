@@ -13,13 +13,30 @@ import { ErrorText } from "@/components/atoms/error-text";
 import { CopyButton } from "@/components/molecules/copy-button";
 import { EndpointFieldList } from "./endpoint-field-list";
 
-const methodTone: Record<HttpMethod, "green" | "indigo" | "amber" | "slate" | "red"> = {
+const methodTone: Record<
+  HttpMethod,
+  "green" | "yellow" | "blue" | "purple" | "red"
+> = {
   GET: "green",
-  POST: "indigo",
-  PUT: "amber",
-  PATCH: "amber",
+  POST: "yellow",
+  PUT: "blue",
+  PATCH: "purple",
+  PUT_MANY: "blue",
+  PATCH_MANY: "purple",
   DELETE: "red",
 };
+
+const methodLabels: Record<HttpMethod, string> = {
+  GET: "GET",
+  POST: "POST",
+  PUT: "PUT",
+  PATCH: "PATCH",
+  PUT_MANY: "PUT many",
+  PATCH_MANY: "PATCH many",
+  DELETE: "DELETE",
+};
+
+const singleRecordMethods = new Set<HttpMethod>(["PUT", "PATCH", "DELETE"]);
 
 export function EndpointCard({
   endpoint,
@@ -34,6 +51,8 @@ export function EndpointCard({
   const del = useDeleteEndpoint();
   const [error, setError] = useState<string | null>(null);
   const url = `${appBaseUrl()}/api/v1/${endpoint.slug}`;
+  const methodUrl = (method: HttpMethod) =>
+    singleRecordMethods.has(method) ? `${url}/:id` : url;
 
   async function onDelete() {
     if (!confirm(t("endpoints.deleteConfirm", { name: endpoint.name }))) return;
@@ -57,17 +76,30 @@ export function EndpointCard({
         <div className="flex items-center gap-1.5">
           {endpoint.methods.map((m) => (
             <Badge key={m} tone={methodTone[m]} className="font-mono">
-              {m}
+              {methodLabels[m]}
             </Badge>
           ))}
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg bg-slate-900 px-3 py-2">
-        <code className="scroll-thin flex-1 overflow-x-auto whitespace-nowrap text-sm text-slate-100">
-          {url}
-        </code>
-        <CopyButton value={url} />
+      <div className="mt-4 space-y-2">
+        {endpoint.methods.map((method) => {
+          const currentUrl = methodUrl(method);
+          return (
+            <div
+              key={method}
+              className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-900 px-3 py-2"
+            >
+              <Badge tone={methodTone[method]} className="font-mono">
+                {methodLabels[method]}
+              </Badge>
+              <code className="scroll-thin flex-1 overflow-x-auto whitespace-nowrap text-sm text-slate-100">
+                {currentUrl}
+              </code>
+              <CopyButton value={currentUrl} />
+            </div>
+          );
+        })}
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">

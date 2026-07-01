@@ -69,7 +69,13 @@ export async function authorizePublicRequest(
   }
 
   if (!endpoint.methods.includes(method)) {
-    return { ok: false, status: 405, message: t("api.errors.methodDisabled", { method }) };
+    return {
+      ok: false,
+      status: 405,
+      message: t("api.errors.methodDisabled", {
+        method: method.replace("_MANY", " many"),
+      }),
+    };
   }
 
   const isWrite = method !== "GET";

@@ -14,7 +14,35 @@ import { Select } from "@/components/atoms/select";
 import { Checkbox } from "@/components/atoms/checkbox";
 import { Spinner } from "@/components/atoms/spinner";
 
-const METHODS: HttpMethod[] = ["GET", "POST", "PUT", "PATCH", "DELETE"];
+const METHODS: HttpMethod[] = [
+  "GET",
+  "POST",
+  "PUT",
+  "PATCH",
+  "PUT_MANY",
+  "PATCH_MANY",
+  "DELETE",
+];
+
+const methodLabels: Record<HttpMethod, string> = {
+  GET: "GET",
+  POST: "POST",
+  PUT: "PUT",
+  PATCH: "PATCH",
+  PUT_MANY: "PUT many",
+  PATCH_MANY: "PATCH many",
+  DELETE: "DELETE",
+};
+
+const activeMethodClasses: Record<HttpMethod, string> = {
+  GET: "border-green-300 bg-green-50 text-green-700",
+  POST: "border-yellow-300 bg-yellow-50 text-yellow-700",
+  PUT: "border-blue-300 bg-blue-50 text-blue-700",
+  PATCH: "border-purple-300 bg-purple-50 text-purple-700",
+  PUT_MANY: "border-blue-300 bg-blue-50 text-blue-700",
+  PATCH_MANY: "border-purple-300 bg-purple-50 text-purple-700",
+  DELETE: "border-red-300 bg-red-50 text-red-700",
+};
 
 function deriveEndpoint(editing: Endpoint | undefined, schemas: DataSchema[]) {
   if (!editing) {
@@ -187,11 +215,11 @@ export function EndpointFormModal({
                   className={
                     "rounded-lg border px-3 py-1.5 text-sm font-medium font-mono transition " +
                     (on
-                      ? "border-indigo-300 bg-indigo-50 text-indigo-700"
+                      ? activeMethodClasses[m]
                       : "border-slate-200 bg-white text-slate-400 hover:bg-slate-50")
                   }
                 >
-                  {m}
+                  {methodLabels[m]}
                 </button>
               );
             })}

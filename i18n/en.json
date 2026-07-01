@@ -48,7 +48,8 @@
       "string": "string",
       "number": "number",
       "boolean": "boolean",
-      "date": "date"
+      "date": "date",
+      "enum": "enum"
     }
   },
   "dashboard": {
@@ -198,6 +199,10 @@
       "fields": "Fields",
       "addField": "+ Add field",
       "fieldNamePlaceholder": "field_name",
+      "enumValues": "Enum values",
+      "addEnumValue": "+ Add value",
+      "enumValuePlaceholder": "value",
+      "removeEnumValue": "Remove enum value",
       "removeField": "Remove field",
       "editWarning": "Editing fields won't change records already stored. Removing a field just hides it from future reads and writes.",
       "create": "Create schema"
@@ -214,7 +219,7 @@
     "emptyDescription": "Turn one of your schemas into a callable REST endpoint.",
     "schemaLabel": "Schema:",
     "readableGet": "Readable (GET)",
-    "writableMethods": "Writable (POST/PUT/PATCH)",
+    "writableMethods": "Writable (POST/PUT/PATCH/PUT many/PATCH many)",
     "deleteConfirm": "Delete endpoint \"{{name}}\"? Its stored records will be removed.",
     "deleteFailed": "Failed to delete",
     "modal": {
@@ -233,7 +238,7 @@
       "create": "Create endpoint",
       "selectSchemaError": "Select a schema",
       "readableRequired": "Select at least one readable field, or turn off GET in Methods.",
-      "writableRequired": "Select at least one writable field, or turn off the write methods (POST/PUT/PATCH)."
+      "writableRequired": "Select at least one writable field, or turn off the write methods."
     }
   },
   "tokens": {
@@ -370,6 +375,7 @@
       "readPermissionMissing": "This token lacks read permission",
       "recordNotFound": "Record not found",
       "unknownEntry": "Unknown entry",
+      "duplicateUpdateId": "duplicate record id in update batch",
       "entriesInvalid": "Some entries are invalid — nothing was saved",
       "duplicateBatch": "duplicate value for unique field \"{{field}}\" — an earlier entry in the file already uses it",
       "duplicateStored": "value for unique field \"{{field}}\" already exists in your stored entries"
@@ -380,6 +386,8 @@
     "fieldName": "Use letters, numbers, underscores; must not start with a number",
     "invalidSlug": "Invalid slug",
     "schemaFieldsMin": "Add at least one field",
+    "enumValuesMin": "Add at least one enum value",
+    "enumValuesUnique": "Enum values must be unique",
     "endpointMethodsMin": "Enable at least one method",
     "tokenGrantsMin": "Grant access to at least one endpoint",
     "nothingToSave": "Nothing to save",
@@ -389,6 +397,7 @@
     "noTokenFields": "No fields to update",
     "record": {
       "bodyObject": "Body must be a JSON object",
+      "manyBody": "Body must be an array of records, or an object with an updates/records array",
       "required": "is required",
       "string": "must be a string",
       "number": "must be a number",

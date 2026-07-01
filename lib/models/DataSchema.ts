@@ -1,6 +1,6 @@
 import { Schema, model, models, type Model, type InferSchemaType } from "mongoose";
 
-export const FIELD_TYPES = ["string", "number", "boolean", "date"] as const;
+export const FIELD_TYPES = ["string", "number", "boolean", "date", "enum"] as const;
 export type FieldType = (typeof FIELD_TYPES)[number];
 
 const fieldSchema = new Schema(

@@ -20,13 +20,41 @@ export const signInInput = z.object({
 });
 
 // --- Schemas (data types) ---
-export const schemaFieldInput = z.object({
-  name: z.string().trim().regex(fieldNameRegex, "validation.fieldName"),
-  type: z.enum(FIELD_TYPES),
-  required: z.boolean().optional().default(false),
-  unique: z.boolean().optional().default(false),
-  enumValues: z.array(z.string()).optional(),
-});
+const enumValuesInput = z.preprocess(
+  (value) =>
+    Array.isArray(value)
+      ? value
+          .map((item) => (typeof item === "string" ? item.trim() : item))
+          .filter((item) => item !== "")
+      : value,
+  z.array(z.string()).optional()
+);
+
+export const schemaFieldInput = z
+  .object({
+    name: z.string().trim().regex(fieldNameRegex, "validation.fieldName"),
+    type: z.enum(FIELD_TYPES),
+    required: z.boolean().optional().default(false),
+    unique: z.boolean().optional().default(false),
+    enumValues: enumValuesInput,
+  })
+  .superRefine((field, ctx) => {
+    const enumValues = field.enumValues ?? [];
+    if (field.type === "enum" && enumValues.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["enumValues"],
+        message: "validation.enumValuesMin",
+      });
+    }
+    if (enumValues.length > 0 && new Set(enumValues).size !== enumValues.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["enumValues"],
+        message: "validation.enumValuesUnique",
+      });
+    }
+  });
 
 export const createSchemaInput = z.object({
   name: z.string().trim().min(1).max(80),

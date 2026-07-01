@@ -1,5 +1,12 @@
-export type FieldType = "string" | "number" | "boolean" | "date";
-export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+export type FieldType = "string" | "number" | "boolean" | "date" | "enum";
+export type HttpMethod =
+  | "GET"
+  | "POST"
+  | "PUT"
+  | "PATCH"
+  | "DELETE"
+  | "PUT_MANY"
+  | "PATCH_MANY";
 
 export interface SchemaField {
   name: string;

@@ -110,6 +110,7 @@ function coerce(
 ): { value?: unknown; error?: string } {
   switch (type) {
     case "string":
+    case "enum":
       if (typeof raw === "string") return { value: raw };
       if (typeof raw === "number" || typeof raw === "boolean")
         return { value: String(raw) };
