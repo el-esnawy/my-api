@@ -4,6 +4,7 @@ import { DataSchema } from "@/lib/models/DataSchema";
 import { requireSession } from "@/lib/api/dashboardAuth";
 import { createSchemaInput } from "@/lib/validation/schemas";
 import { serializeSchema } from "@/lib/api/serialize";
+import { getRequestTranslator } from "@/i18n/server";
 import {
   badRequest,
   conflict,
@@ -15,9 +16,10 @@ import {
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
 
     await connectDB();
@@ -30,19 +32,20 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
 
     const body = await req.json().catch(() => null);
     const parsed = createSchemaInput.safeParse(body);
     if (!parsed.success) {
-      return badRequest("Validation failed", { fields: zodErrors(parsed.error) });
+      return badRequest(t("api.errors.validationFailed"), { fields: zodErrors(parsed.error, t) });
     }
 
     // Field names must be unique within a schema.
     const names = parsed.data.fields.map((f) => f.name);
     if (new Set(names).size !== names.length) {
-      return badRequest("Field names must be unique");
+      return badRequest(t("api.errors.fieldNamesUnique"));
     }
 
     await connectDB();
@@ -55,7 +58,7 @@ export async function POST(req: NextRequest) {
       });
       return created({ schema: serializeSchema(schema) });
     } catch (err: any) {
-      if (err?.code === 11000) return conflict("You already have a schema with that slug");
+      if (err?.code === 11000) return conflict(t("api.errors.schemaSlugExists"));
       throw err;
     }
   });

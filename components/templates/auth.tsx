@@ -3,19 +3,23 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { Logo } from "@/components/atoms/logo";
+import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
+import { getServerTranslator } from "@/i18n/server";
 
 export default async function AuthTemplate({ children }: { children: React.ReactNode }) {
+  const t = await getServerTranslator();
   // Already signed in? The auth pages aren't for you — go to the dashboard.
   const session = await getSession();
   if (session) redirect("/dashboard/schemas");
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-white to-slate-50">
-      <header className="mx-auto w-full max-w-6xl px-6 py-5">
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
         <Link href="/" className="inline-flex items-center gap-2 font-semibold text-slate-900">
           <Logo />
-          <span>my-api</span>
+          <span>{t("common.brand")}</span>
         </Link>
+        <LanguageSwitcher />
       </header>
       <main className="flex flex-1 items-center justify-center px-6 py-10">
         <div className="w-full max-w-md">{children}</div>

@@ -7,6 +7,7 @@ import { loadOwnedSchema } from "@/lib/api/entries";
 import { batchEntriesInput } from "@/lib/validation/schemas";
 import { validateRecordData } from "@/lib/records/validate";
 import { findUniqueConflicts, type UniqueCandidate } from "@/lib/records/unique";
+import { getRequestTranslator } from "@/i18n/server";
 import {
   badRequest,
   notFound,
@@ -34,20 +35,21 @@ interface ItemError {
  */
 export async function POST(req: NextRequest, { params }: Params) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
     const { id } = await params;
 
     const body = await req.json().catch(() => null);
     const parsed = batchEntriesInput.safeParse(body);
     if (!parsed.success) {
-      return badRequest("Validation failed", { fields: zodErrors(parsed.error) });
+      return badRequest(t("api.errors.validationFailed"), { fields: zodErrors(parsed.error, t) });
     }
     const { creates, updates, deletes } = parsed.data;
 
     await connectDB();
     const owned = await loadOwnedSchema(id, auth.session.userId);
-    if (!owned) return notFound("Schema not found");
+    if (!owned) return notFound(t("api.errors.schemaNotFound"));
     const schemaId = String(owned.schema._id);
     const userId = auth.session.userId;
 
@@ -57,7 +59,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const referencedIds = [...updates.map((u) => u.id), ...deletes];
     const invalidIds = referencedIds.filter((rid) => !isValidObjectId(rid));
     for (const rid of invalidIds) {
-      errors.push({ id: rid, fields: { _root: "Unknown entry" } });
+      errors.push({ id: rid, fields: { _root: t("api.errors.unknownEntry") } });
     }
     const validIds = referencedIds.filter((rid) => isValidObjectId(rid));
     const found = await RecordModel.find({
@@ -67,19 +69,19 @@ export async function POST(req: NextRequest, { params }: Params) {
     }).select("_id");
     const foundSet = new Set(found.map((r) => String(r._id)));
     for (const rid of validIds) {
-      if (!foundSet.has(rid)) errors.push({ id: rid, fields: { _root: "Unknown entry" } });
+      if (!foundSet.has(rid)) errors.push({ id: rid, fields: { _root: t("api.errors.unknownEntry") } });
     }
 
     // --- Field-level validation (required, types, enums) ---
     const validatedCreates: { tempId: string; data: Record<string, unknown> }[] = [];
     for (const c of creates) {
-      const result = validateRecordData(owned.fields, c.data);
+      const result = validateRecordData(owned.fields, c.data, { t });
       if (!result.ok) errors.push({ tempId: c.tempId, fields: result.errors! });
       else validatedCreates.push({ tempId: c.tempId, data: result.value! });
     }
     const validatedUpdates: { id: string; data: Record<string, unknown> }[] = [];
     for (const u of updates) {
-      const result = validateRecordData(owned.fields, u.data);
+      const result = validateRecordData(owned.fields, u.data, { t });
       if (!result.ok) errors.push({ id: u.id, fields: result.errors! });
       else validatedUpdates.push({ id: u.id, data: result.value! });
     }
@@ -101,11 +103,11 @@ export async function POST(req: NextRequest, { params }: Params) {
         conflict.index < validatedCreates.length
           ? { tempId: validatedCreates[conflict.index].tempId }
           : { id: validatedUpdates[conflict.index - validatedCreates.length].id };
-      errors.push({ ...ref, fields: { [conflict.field]: "must be unique" } });
+      errors.push({ ...ref, fields: { [conflict.field]: t("validation.record.unique") } });
     }
 
     if (errors.length > 0) {
-      return badRequest("Some entries are invalid — nothing was saved", { items: errors });
+      return badRequest(t("api.errors.entriesInvalid"), { items: errors });
     }
 
     // --- Apply (validation passed for every item) ---

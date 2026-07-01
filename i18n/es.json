@@ -1,0 +1,402 @@
+{
+  "metadata": {
+    "title": "my-api — Endpoints REST personalizados",
+    "description": "Define tus propios esquemas de datos, genera endpoints REST y consúltalos desde cualquier lugar con tokens de acceso por cuenta."
+  },
+  "common": {
+    "brand": "my-api",
+    "language": "Idioma",
+    "english": "Inglés",
+    "spanish": "Español",
+    "pricing": "Precios",
+    "goToAccount": "Ir a mi cuenta",
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "getStarted": "Comenzar",
+    "cancel": "Cancelar",
+    "saveChanges": "Guardar cambios",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "close": "Cerrar",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "done": "Listo",
+    "name": "Nombre",
+    "slug": "Slug",
+    "schema": "Esquema",
+    "loading": "Cargando...",
+    "created": "Creado {{date}}",
+    "lastUsed": "Último uso {{date}}",
+    "none": "ninguno",
+    "deleted": "eliminado",
+    "required": "obligatorio",
+    "unique": "único",
+    "boolean": "booleano",
+    "true": "verdadero",
+    "false": "falso",
+    "apply": "Aplicar",
+    "status": "Estado",
+    "restore": "Restaurar",
+    "dismiss": "Descartar",
+    "somethingWentWrong": "Algo salió mal",
+    "somethingWentWrongRetry": "Algo salió mal. Inténtalo de nuevo.",
+    "field_one": "{{count}} campo",
+    "field_other": "{{count}} campos",
+    "entry_one": "{{count}} entrada",
+    "entry_other": "{{count}} entradas",
+    "fieldTypes": {
+      "string": "texto",
+      "number": "número",
+      "boolean": "booleano",
+      "date": "fecha"
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "schemas": "Esquemas",
+      "entries": "Entradas",
+      "endpoints": "Endpoints",
+      "tokens": "Tokens de solicitud"
+    },
+    "signOut": "Cerrar sesión"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Tus datos → tu API REST, en minutos",
+      "title": "Crea endpoints REST personalizados sin escribir un backend",
+      "description": "Define tus propias estructuras de datos, genera endpoints REST seguros a partir de ellas y llámalos desde cualquier lugar con tokens de acceso únicos para tu cuenta.",
+      "primaryCta": "Crea tu primer endpoint",
+      "code": "curl -X POST https://tu-app/api/v1/notas \\\n  -H \"Authorization: Bearer mapi_•••••••••\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"title\": \"Hola\", \"done\": false }'"
+    },
+    "features": {
+      "define": {
+        "title": "Define esquemas",
+        "body": "Describe tus datos una vez: campos, tipos y reglas obligatorias. Sin migraciones ni código repetitivo."
+      },
+      "generate": {
+        "title": "Genera endpoints REST",
+        "body": "Convierte cualquier esquema en un recurso REST real. Elige los verbos y qué se puede leer o escribir."
+      },
+      "query": {
+        "title": "Consulta con tokens de acceso",
+        "body": "Crea tokens por cuenta limitados a endpoints específicos. Revócalos cuando quieras. Aislamiento estricto por usuario."
+      }
+    },
+    "howItWorks": {
+      "title": "Cómo funciona",
+      "steps": {
+        "one": {
+          "title": "Crea un esquema",
+          "description": "por ejemplo, una Nota con título, cuerpo y completado."
+        },
+        "two": {
+          "title": "Expón un endpoint",
+          "description": "/api/v1/notas con GET, POST, PUT y DELETE."
+        },
+        "three": {
+          "title": "Emite un token",
+          "description": "Limitado a ese endpoint, lectura + escritura."
+        },
+        "four": {
+          "title": "Llámalo desde cualquier lugar",
+          "description": "Authorization: Bearer <token>."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Precios simples y transparentes",
+      "description": "Empieza gratis y mejora cuando necesites más endpoints, tokens y capacidad.",
+      "mostPopular": "Más popular",
+      "signedInCta": "Ir a mi cuenta",
+      "tiers": {
+        "hobby": {
+          "name": "Hobby",
+          "price": "$0",
+          "cadence": "/mes",
+          "tagline": "Para proyectos personales y pruebas.",
+          "features": [
+            "3 esquemas",
+            "3 endpoints",
+            "1 token de acceso",
+            "10k solicitudes / mes",
+            "Soporte comunitario"
+          ],
+          "cta": "Comenzar"
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "$19",
+          "cadence": "/mes",
+          "tagline": "Para apps en producción que necesitan crecer.",
+          "features": [
+            "Esquemas y endpoints ilimitados",
+            "10 tokens de acceso",
+            "1M solicitudes / mes",
+            "Límites de tasa más altos",
+            "Soporte por email"
+          ],
+          "cta": "Iniciar prueba gratis"
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "price": "Personalizado",
+          "cadence": "",
+          "tagline": "Para equipos con necesidades de escala, seguridad y SLA.",
+          "features": [
+            "Todo ilimitado",
+            "SSO y registros de auditoría",
+            "Límites de tasa personalizados",
+            "Soporte dedicado y SLA",
+            "Opciones on-prem / VPC"
+          ],
+          "cta": "Contactar ventas"
+        }
+      }
+    },
+    "footer": "my-api — endpoints REST personalizados respaldados por MongoDB, Redis y tokens de acceso por cuenta."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Bienvenido de nuevo",
+      "description": "Inicia sesión para administrar tus endpoints.",
+      "footerPrompt": "¿No tienes una cuenta?",
+      "passwordPlaceholder": "Tu contraseña"
+    },
+    "signUp": {
+      "title": "Crea tu cuenta",
+      "description": "Empieza a crear endpoints REST personalizados en minutos.",
+      "footerPrompt": "¿Ya tienes una cuenta?",
+      "passwordPlaceholder": "Al menos 8 caracteres"
+    },
+    "fields": {
+      "nameOptional": "Nombre (opcional)",
+      "email": "Email",
+      "password": "Contraseña"
+    },
+    "placeholders": {
+      "name": "Ada Lovelace",
+      "email": "tu@ejemplo.com"
+    }
+  },
+  "schemas": {
+    "title": "Esquemas",
+    "description": "Define la forma de tus datos. Los endpoints se construyen sobre esquemas.",
+    "new": "+ Nuevo esquema",
+    "loading": "Cargando esquemas...",
+    "emptyTitle": "Aún no hay esquemas",
+    "emptyDescription": "Crea tu primer esquema para describir los datos que almacenarán tus endpoints.",
+    "editAria": "Editar esquema",
+    "deleteAria": "Eliminar esquema",
+    "deleteConfirm": "¿Eliminar el esquema \"{{name}}\"? Esta acción no se puede deshacer.",
+    "deleteFailed": "No se pudo eliminar",
+    "modal": {
+      "newTitle": "Nuevo esquema",
+      "editTitle": "Editar esquema",
+      "description": "Describe un tipo de dato con campos tipados.",
+      "namePlaceholder": "Nota",
+      "slugPlaceholder": "nota",
+      "fields": "Campos",
+      "addField": "+ Agregar campo",
+      "fieldNamePlaceholder": "nombre_campo",
+      "removeField": "Eliminar campo",
+      "editWarning": "Editar campos no cambiará los registros ya almacenados. Quitar un campo solo lo oculta en lecturas y escrituras futuras.",
+      "create": "Crear esquema"
+    }
+  },
+  "endpoints": {
+    "title": "Endpoints",
+    "description": "Expón esquemas como endpoints REST. Elige verbos y qué se puede leer o escribir.",
+    "new": "+ Nuevo endpoint",
+    "loading": "Cargando endpoints...",
+    "emptyNeedsSchemaTitle": "Crea un esquema primero",
+    "emptyNeedsSchemaDescription": "Los endpoints se construyen sobre esquemas. Ve a la pestaña Esquemas para definir uno.",
+    "emptyTitle": "Aún no hay endpoints",
+    "emptyDescription": "Convierte uno de tus esquemas en un endpoint REST invocable.",
+    "schemaLabel": "Esquema:",
+    "readableGet": "Legibles (GET)",
+    "writableMethods": "Escribibles (POST/PUT/PATCH)",
+    "deleteConfirm": "¿Eliminar el endpoint \"{{name}}\"? Sus registros almacenados serán eliminados.",
+    "deleteFailed": "No se pudo eliminar",
+    "modal": {
+      "newTitle": "Nuevo endpoint",
+      "editTitle": "Editar endpoint",
+      "description": "Expón un esquema como recurso REST.",
+      "slugUrl": "Slug (URL)",
+      "namePlaceholder": "Notas",
+      "slugPlaceholder": "notas",
+      "selectSchema": "Selecciona un esquema...",
+      "allowedMethods": "Métodos permitidos",
+      "readableFields": "Campos legibles",
+      "readableHint": "Devueltos por GET",
+      "writableFields": "Campos escribibles",
+      "writableHint": "Aceptados en escrituras",
+      "create": "Crear endpoint",
+      "selectSchemaError": "Selecciona un esquema",
+      "readableRequired": "Selecciona al menos un campo legible o desactiva GET en Métodos.",
+      "writableRequired": "Selecciona al menos un campo escribible o desactiva los métodos de escritura (POST/PUT/PATCH)."
+    }
+  },
+  "tokens": {
+    "title": "Tokens de solicitud",
+    "description": "Los tokens de solicitud autentican llamadas externas a tus endpoints. Cada uno está limitado a los endpoints y permisos que elijas.",
+    "new": "+ Nuevo token de solicitud",
+    "loading": "Cargando tokens de solicitud...",
+    "emptyNeedsEndpointTitle": "Crea un endpoint primero",
+    "emptyNeedsEndpointDescription": "Los tokens de solicitud conceden acceso a endpoints específicos. Crea uno en la pestaña Endpoints.",
+    "emptyTitle": "Aún no hay tokens de solicitud",
+    "emptyDescription": "Crea un token de solicitud para empezar a llamar tus endpoints desde cualquier lugar.",
+    "revoked": "revocado",
+    "revealing": "Mostrando...",
+    "hide": "Ocultar",
+    "view": "Ver",
+    "reEnable": "Reactivar",
+    "revoke": "Revocar",
+    "endpointAccess": "Acceso a endpoints",
+    "noEndpoints": "sin endpoints",
+    "deleteConfirm": "¿Eliminar el token \"{{name}}\"? Las llamadas que lo usen dejarán de funcionar.",
+    "updateFailed": "No se pudo actualizar",
+    "deleteFailed": "No se pudo eliminar",
+    "revealFailed": "No se pudo mostrar el token",
+    "modal": {
+      "createdTitle": "Token de solicitud creado",
+      "createdDescription": "Copia este token ahora o vuelve a verlo cuando quieras desde la lista de tokens.",
+      "bearerHint": "Úsalo como token bearer:",
+      "newTitle": "Nuevo token de solicitud",
+      "editTitle": "Editar token de solicitud",
+      "newDescription": "Elige qué endpoints puede alcanzar este token de solicitud y qué puede hacer.",
+      "editDescription": "Actualiza el nombre y qué endpoints puede alcanzar este token de solicitud. El valor del token no cambia.",
+      "name": "Nombre del token de solicitud",
+      "namePlaceholder": "Servidor de producción",
+      "permissions": "Permisos de endpoint",
+      "read": "Lectura",
+      "write": "Escritura",
+      "grantRequired": "Concede acceso al menos a un endpoint",
+      "create": "Crear token"
+    }
+  },
+  "entries": {
+    "title": "Entradas",
+    "description": "Explora y edita los datos almacenados en cada uno de tus esquemas.",
+    "loadingSchemas": "Cargando esquemas...",
+    "emptySchemasTitle": "Aún no hay esquemas",
+    "emptySchemasDescription": "Las entradas viven dentro de esquemas. Crea un esquema primero y luego administra sus datos aquí.",
+    "manage": "Administrar entradas →",
+    "editor": {
+      "headingSuffix": "entradas",
+      "description": "Los cambios se preparan localmente hasta que los guardes.",
+      "backAria": "Volver a todos los esquemas",
+      "importJson": "Importar JSON",
+      "addEntry": "+ Agregar entrada",
+      "importDisabledTitle": "Guarda o descarta tus cambios antes de importar",
+      "unsaved_one": "{{count}} cambio sin guardar",
+      "unsaved_other": "{{count}} cambios sin guardar",
+      "discard": "Descartar",
+      "loading": "Cargando entradas...",
+      "emptyTitle": "Aún no hay entradas",
+      "emptyDescription": "Agrega entradas manualmente o importa un archivo JSON que coincida con este esquema.",
+      "tableIndex": "#",
+      "saved_one": "{{count}} cambio guardado",
+      "saved_other": "{{count}} cambios guardados",
+      "nothingSaved": "No se guardó nada — corrige las entradas resaltadas e inténtalo de nuevo",
+      "saveFailed": "No se pudieron guardar los cambios",
+      "invalidJson": "Ese archivo no es JSON válido",
+      "expectedArray": "Se esperaba un arreglo JSON de entradas",
+      "imported_one": "{{count}} entrada importada",
+      "imported_other": "{{count}} entradas importadas",
+      "importedPartial": "Importadas {{imported}} de {{total}} — {{rejected}} rechazadas",
+      "importFailed": "La importación falló",
+      "discardConfirm": "¿Descartar todos los cambios preparados?",
+      "editAria": "Editar entrada",
+      "deleteAria": "Eliminar entrada",
+      "status": {
+        "new": "nueva",
+        "modified": "modificada",
+        "deleted": "eliminada"
+      }
+    },
+    "form": {
+      "newTitle": "Nueva entrada",
+      "editTitle": "Editar entrada",
+      "schemaDescription": "Esquema: {{name}}",
+      "noneOption": "— ninguno —"
+    },
+    "importResult": {
+      "partialTitle": "Importación completada parcialmente",
+      "failedTitle": "La importación falló",
+      "summary": "Importadas <strong>{{imported}}</strong> de <strong>{{total}}</strong> entradas. <strong>{{rejected}}</strong> {{rejectedLabel}} rechazadas.",
+      "entryWas": "entrada fue",
+      "entriesWere": "entradas fueron",
+      "warning": "Las entradas rechazadas solo están disponibles ahora; cuando cierres este diálogo no podrán recuperarse. Descárgalas para corregirlas e importarlas de nuevo más tarde.",
+      "download": "Descargar entradas rechazadas",
+      "downloaded": "Descargado ✓ (descargar de nuevo)"
+    },
+    "unsaved": {
+      "title": "Cambios sin guardar",
+      "description": "Tienes cambios sin guardar en las entradas de este esquema.",
+      "body": "Si sales ahora, tus ediciones preparadas se descartarán. Guarda los cambios primero para conservarlos.",
+      "stay": "Quedarse",
+      "leave": "Descartar y salir"
+    }
+  },
+  "api": {
+    "errors": {
+      "badRequest": "Solicitud incorrecta",
+      "unauthorized": "No autorizado",
+      "forbidden": "Prohibido",
+      "notFound": "No encontrado",
+      "methodNotAllowed": "Método no permitido",
+      "conflict": "Conflicto",
+      "rateLimitExceeded": "Límite de tasa excedido",
+      "serverError": "Error interno del servidor",
+      "validationFailed": "La validación falló",
+      "emailRegistered": "El email ya está registrado",
+      "invalidCredentials": "Email o contraseña inválidos",
+      "fieldNamesUnique": "Los nombres de campo deben ser únicos",
+      "schemaSlugExists": "Ya tienes un esquema con ese slug",
+      "schemaNotFound": "Esquema no encontrado",
+      "schemaInUse": "El esquema es usado por {{count}} endpoint(s). Elimina esos endpoints primero.",
+      "unknownSchema": "Esquema desconocido",
+      "endpointFieldsInvalid": "Los campos legibles/escribibles deben pertenecer al esquema",
+      "endpointSlugExists": "Ya tienes un endpoint con ese slug",
+      "endpointNotFound": "Endpoint no encontrado",
+      "tokenNotFound": "Token no encontrado",
+      "tokenRevealUnsupported": "Este token fue creado antes de que se admitiera verlo; revócalo y crea uno nuevo",
+      "endpointsUnknown": "Algunos endpoints son desconocidos o no son tuyos",
+      "missingBearer": "Falta el token bearer de acceso",
+      "invalidBearer": "Token de acceso inválido o revocado",
+      "tokenEndpointForbidden": "Este token no está autorizado para este endpoint",
+      "methodDisabled": "{{method}} no está habilitado para este endpoint",
+      "writePermissionMissing": "Este token no tiene permiso de escritura",
+      "readPermissionMissing": "Este token no tiene permiso de lectura",
+      "recordNotFound": "Registro no encontrado",
+      "unknownEntry": "Entrada desconocida",
+      "entriesInvalid": "Algunas entradas son inválidas — no se guardó nada",
+      "duplicateBatch": "valor duplicado para el campo único \"{{field}}\" — una entrada anterior del archivo ya lo usa",
+      "duplicateStored": "el valor del campo único \"{{field}}\" ya existe en tus entradas almacenadas"
+    }
+  },
+  "validation": {
+    "passwordMin": "La contraseña debe tener al menos 8 caracteres",
+    "fieldName": "Usa letras, números y guiones bajos; no debe comenzar con un número",
+    "invalidSlug": "Slug inválido",
+    "schemaFieldsMin": "Agrega al menos un campo",
+    "endpointMethodsMin": "Habilita al menos un método",
+    "tokenGrantsMin": "Concede acceso al menos a un endpoint",
+    "nothingToSave": "Nada que guardar",
+    "tooManyChanges": "Demasiados cambios en un solo guardado (máx. 2000)",
+    "emptyImport": "El archivo no contiene entradas",
+    "tooManyImport": "Demasiadas entradas en una importación (máx. 5000)",
+    "noTokenFields": "No hay campos para actualizar",
+    "record": {
+      "bodyObject": "El cuerpo debe ser un objeto JSON",
+      "required": "es obligatorio",
+      "string": "debe ser texto",
+      "number": "debe ser un número",
+      "boolean": "debe ser booleano",
+      "date": "debe ser una fecha válida",
+      "unsupported": "tipo no compatible",
+      "oneOf": "debe ser uno de: {{values}}",
+      "unique": "debe ser único"
+    }
+  }
+}

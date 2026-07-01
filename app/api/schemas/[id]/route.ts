@@ -6,6 +6,7 @@ import { RecordModel } from "@/lib/models/Record";
 import { requireSession } from "@/lib/api/dashboardAuth";
 import { updateSchemaInput } from "@/lib/validation/schemas";
 import { serializeSchema } from "@/lib/api/serialize";
+import { getRequestTranslator } from "@/i18n/server";
 import {
   badRequest,
   conflict,
@@ -21,34 +22,36 @@ type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_req: NextRequest, { params }: Params) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(_req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
     const { id } = await params;
 
     await connectDB();
     // Scope by userId so one user can never read another's schema.
     const schema = await DataSchema.findOne({ _id: id, userId: auth.session.userId });
-    if (!schema) return notFound("Schema not found");
+    if (!schema) return notFound(t("api.errors.schemaNotFound"));
     return ok({ schema: serializeSchema(schema) });
   });
 }
 
 export async function PUT(req: NextRequest, { params }: Params) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
     const { id } = await params;
 
     const body = await req.json().catch(() => null);
     const parsed = updateSchemaInput.safeParse(body);
     if (!parsed.success) {
-      return badRequest("Validation failed", { fields: zodErrors(parsed.error) });
+      return badRequest(t("api.errors.validationFailed"), { fields: zodErrors(parsed.error, t) });
     }
 
     if (parsed.data.fields) {
       const names = parsed.data.fields.map((f) => f.name);
       if (new Set(names).size !== names.length) {
-        return badRequest("Field names must be unique");
+        return badRequest(t("api.errors.fieldNamesUnique"));
       }
     }
 
@@ -59,10 +62,10 @@ export async function PUT(req: NextRequest, { params }: Params) {
         { $set: parsed.data },
         { new: true }
       );
-      if (!schema) return notFound("Schema not found");
+      if (!schema) return notFound(t("api.errors.schemaNotFound"));
       return ok({ schema: serializeSchema(schema) });
     } catch (err: any) {
-      if (err?.code === 11000) return conflict("You already have a schema with that slug");
+      if (err?.code === 11000) return conflict(t("api.errors.schemaSlugExists"));
       throw err;
     }
   });
@@ -70,7 +73,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(_req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
     const { id } = await params;
 
@@ -82,16 +86,14 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
       schemaId: id,
     });
     if (inUse > 0) {
-      return conflict(
-        `Schema is used by ${inUse} endpoint(s). Delete those endpoints first.`
-      );
+      return conflict(t("api.errors.schemaInUse", { count: inUse }));
     }
 
     const deleted = await DataSchema.findOneAndDelete({
       _id: id,
       userId: auth.session.userId,
     });
-    if (!deleted) return notFound("Schema not found");
+    if (!deleted) return notFound(t("api.errors.schemaNotFound"));
 
     // The schema owns its entries — remove them with it.
     await RecordModel.deleteMany({ userId: auth.session.userId, schemaId: deleted._id });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import type { ImportResult } from "@/lib/client/types";
 import { Modal } from "@/components/molecules/modal";
 import { Button } from "@/components/atoms/button";
@@ -18,6 +19,7 @@ export function ImportResultModal({
   result: ImportResult;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const [downloaded, setDownloaded] = useState(false);
 
   function downloadRejected() {
@@ -44,14 +46,28 @@ export function ImportResultModal({
     <Modal
       open
       onClose={onClose}
-      title={result.imported > 0 ? "Import partially completed" : "Import failed"}
+      title={
+        result.imported > 0
+          ? t("entries.importResult.partialTitle")
+          : t("entries.importResult.failedTitle")
+      }
       widthClass="max-w-xl"
     >
       <div className="space-y-4">
         <p className="text-sm text-slate-700">
-          Imported <strong>{result.imported}</strong> of <strong>{result.total}</strong>{" "}
-          entries. <strong>{result.rejected.length}</strong>{" "}
-          {result.rejected.length === 1 ? "entry was" : "entries were"} rejected.
+          <Trans
+            i18nKey="entries.importResult.summary"
+            values={{
+              imported: result.imported,
+              total: result.total,
+              rejected: result.rejected.length,
+              rejectedLabel:
+                result.rejected.length === 1
+                  ? t("entries.importResult.entryWas")
+                  : t("entries.importResult.entriesWere"),
+            }}
+            components={{ strong: <strong /> }}
+          />
         </p>
 
         <div className="scroll-thin max-h-56 space-y-2 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-3">
@@ -64,16 +80,15 @@ export function ImportResultModal({
         </div>
 
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          The rejected entries are only available right now — once you close this dialog
-          they cannot be retrieved. Download them to fix and re-import later.
+          {t("entries.importResult.warning")}
         </div>
 
         <div className="flex items-center justify-between gap-2">
           <Button variant="secondary" onClick={downloadRejected}>
             <DownloadIcon size={16} />
-            {downloaded ? "Downloaded ✓ (download again)" : "Download rejected entries"}
+            {downloaded ? t("entries.importResult.downloaded") : t("entries.importResult.download")}
           </Button>
-          <Button onClick={onClose}>Close</Button>
+          <Button onClick={onClose}>{t("common.close")}</Button>
         </div>
       </div>
     </Modal>

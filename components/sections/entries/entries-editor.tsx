@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   useEntries,
   useBatchSaveEntries,
@@ -52,16 +53,25 @@ function buildRows(entries: Entry[] | undefined): DraftRow[] {
   }));
 }
 
-function formatCell(value: unknown, type: string): React.ReactNode {
+function formatCell(
+  value: unknown,
+  type: string,
+  t: (key: string) => string,
+  language: string
+): React.ReactNode {
   if (value === undefined || value === null || value === "") {
     return <span className="text-slate-300">—</span>;
   }
   if (type === "boolean") {
-    return <Badge tone={value === true ? "green" : "slate"}>{String(value)}</Badge>;
+    return (
+      <Badge tone={value === true ? "green" : "slate"}>
+        {value === true ? t("common.true") : t("common.false")}
+      </Badge>
+    );
   }
   if (type === "date") {
     const d = new Date(value as string);
-    return isNaN(d.getTime()) ? String(value) : d.toLocaleString();
+    return isNaN(d.getTime()) ? String(value) : d.toLocaleString(language);
   }
   return String(value);
 }
@@ -81,6 +91,7 @@ export function EntriesEditor({
   onBack: () => void;
   onToast: (message: string, tone: "success" | "warning" | "error") => void;
 }) {
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { data: entries, isLoading, refetch } = useEntries(schema.id);
   const save = useBatchSaveEntries(schema.id);
@@ -192,7 +203,7 @@ export function EntriesEditor({
   }
 
   function discardChanges() {
-    if (!confirm("Discard all staged changes?")) return;
+    if (!confirm(t("entries.editor.discardConfirm"))) return;
     setRows(buildRows(entries));
   }
 
@@ -211,12 +222,7 @@ export function EntriesEditor({
       const result = await save.mutateAsync(payload);
       const fresh = await refetch();
       setRows(buildRows(fresh.data));
-      onToast(
-        `Saved ${result.created + result.updated + result.deleted} change${
-          result.created + result.updated + result.deleted === 1 ? "" : "s"
-        }`,
-        "success"
-      );
+      onToast(t("entries.editor.saved", { count: result.created + result.updated + result.deleted }), "success");
     } catch (err) {
       if (err instanceof ApiError && Array.isArray(err.body?.items)) {
         const items = err.body.items as BatchItemError[];
@@ -231,9 +237,9 @@ export function EntriesEditor({
             return { ...r, errors: fields };
           })
         );
-        onToast("Nothing was saved — fix the highlighted entries and try again", "error");
+        onToast(t("entries.editor.nothingSaved"), "error");
       } else {
-        onToast(err instanceof ApiError ? err.message : "Failed to save changes", "error");
+        onToast(err instanceof ApiError ? err.message : t("entries.editor.saveFailed"), "error");
       }
     }
   }
@@ -250,7 +256,7 @@ export function EntriesEditor({
     try {
       parsed = JSON.parse(await file.text());
     } catch {
-      onToast("That file is not valid JSON", "error");
+      onToast(t("entries.editor.invalidJson"), "error");
       return;
     }
     const list = Array.isArray(parsed)
@@ -259,25 +265,29 @@ export function EntriesEditor({
         ? (parsed as any).entries
         : null;
     if (!list) {
-      onToast("Expected a JSON array of entries", "error");
+      onToast(t("entries.editor.expectedArray"), "error");
       return;
     }
 
     try {
       const result = await importEntries.mutateAsync(list);
       if (result.rejected.length === 0) {
-        onToast(`Imported ${result.imported} entr${result.imported === 1 ? "y" : "ies"}`, "success");
+        onToast(t("entries.editor.imported", { count: result.imported }), "success");
       } else {
         setImportResult(result);
         if (result.imported > 0) {
           onToast(
-            `Imported ${result.imported} of ${result.total} — ${result.rejected.length} rejected`,
+            t("entries.editor.importedPartial", {
+              imported: result.imported,
+              total: result.total,
+              rejected: result.rejected.length,
+            }),
             "warning"
           );
         }
       }
     } catch (err) {
-      onToast(err instanceof ApiError ? err.message : "Import failed", "error");
+      onToast(err instanceof ApiError ? err.message : t("entries.editor.importFailed"), "error");
     }
   }
 
@@ -289,16 +299,16 @@ export function EntriesEditor({
           <button
             onClick={() => requestNavigation(onBack)}
             className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-            aria-label="Back to all schemas"
+            aria-label={t("entries.editor.backAria")}
           >
             <BackIcon size={20} />
           </button>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">
-              {schema.name} <span className="text-slate-400">entries</span>
+              {schema.name} <span className="text-slate-400">{t("entries.editor.headingSuffix")}</span>
             </h1>
             <p className="mt-0.5 text-sm text-slate-500">
-              Changes are staged locally until you save them.
+              {t("entries.editor.description")}
             </p>
           </div>
         </div>
@@ -315,13 +325,13 @@ export function EntriesEditor({
             variant="secondary"
             onClick={() => fileInputRef.current?.click()}
             disabled={dirty || importEntries.isPending}
-            title={dirty ? "Save or discard your changes before importing" : undefined}
+            title={dirty ? t("entries.editor.importDisabledTitle") : undefined}
           >
             {importEntries.isPending ? <Spinner /> : <UploadIcon size={16} />}
-            Import JSON
+            {t("entries.editor.importJson")}
           </Button>
           <Button variant="secondary" onClick={() => setFormModal({})}>
-            + Add entry
+            {t("entries.editor.addEntry")}
           </Button>
         </div>
       </div>
@@ -329,15 +339,15 @@ export function EntriesEditor({
       {dirty && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2.5">
           <span className="text-sm font-medium text-indigo-800">
-            {dirtyCount} unsaved change{dirtyCount === 1 ? "" : "s"}
+            {t("entries.editor.unsaved", { count: dirtyCount })}
           </span>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="ghost" onClick={discardChanges}>
-              Discard
+              {t("entries.editor.discard")}
             </Button>
             <Button size="sm" onClick={onSave} disabled={save.isPending}>
               {save.isPending && <Spinner />}
-              Save changes
+              {t("common.saveChanges")}
             </Button>
           </div>
         </div>
@@ -346,14 +356,14 @@ export function EntriesEditor({
       <div className="mt-6">
         {isLoading ? (
           <div className="flex items-center gap-2 text-slate-500">
-            <Spinner /> Loading entries…
+            <Spinner /> {t("entries.editor.loading")}
           </div>
         ) : rows.length === 0 ? (
           <EmptyState
-            title="No entries yet"
-            description="Add entries by hand or import a JSON file that matches this schema."
+            title={t("entries.editor.emptyTitle")}
+            description={t("entries.editor.emptyDescription")}
             action={
-              <Button onClick={() => setFormModal({})}>+ Add entry</Button>
+              <Button onClick={() => setFormModal({})}>{t("entries.editor.addEntry")}</Button>
             }
           />
         ) : (
@@ -361,14 +371,14 @@ export function EntriesEditor({
             <table className="w-full min-w-max text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left">
-                  <th className="px-3 py-2.5 font-medium text-slate-400">#</th>
+                  <th className="px-3 py-2.5 font-medium text-slate-400">{t("entries.editor.tableIndex")}</th>
                   {schema.fields.map((f) => (
                     <th key={f.name} className="px-3 py-2.5 font-mono font-medium text-slate-600">
                       {f.name}
-                      {f.unique && <span className="ml-1 text-xs text-green-600">unique</span>}
+                      {f.unique && <span className="ml-1 text-xs text-green-600">{t("common.unique")}</span>}
                     </th>
                   ))}
-                  <th className="px-3 py-2.5 font-medium text-slate-400">Status</th>
+                  <th className="px-3 py-2.5 font-medium text-slate-400">{t("common.status")}</th>
                   <th className="px-3 py-2.5" />
                 </tr>
               </thead>
@@ -379,6 +389,10 @@ export function EntriesEditor({
                     row={row}
                     index={i}
                     schema={schema}
+                    statusLabel={
+                      row.status === "clean" ? "" : t(`entries.editor.status.${row.status}`)
+                    }
+                    language={i18n.language}
                     onEdit={() => setFormModal({ row })}
                     onDelete={() => stageDelete(row)}
                     onRestore={() => restore(row)}
@@ -426,6 +440,8 @@ function EntryRow({
   row,
   index,
   schema,
+  statusLabel,
+  language,
   onEdit,
   onDelete,
   onRestore,
@@ -433,10 +449,13 @@ function EntryRow({
   row: DraftRow;
   index: number;
   schema: DataSchema;
+  statusLabel: string;
+  language: string;
   onEdit: () => void;
   onDelete: () => void;
   onRestore: () => void;
 }) {
+  const { t } = useTranslation();
   const deleted = row.status === "deleted";
   const hasErrors = row.errors && Object.keys(row.errors).length > 0;
 
@@ -455,13 +474,13 @@ function EntryRow({
             key={f.name}
             className={"max-w-[16rem] truncate px-3 py-2 text-slate-700 " + (deleted ? "line-through" : "")}
           >
-            {formatCell(row.data[f.name], f.type)}
+            {formatCell(row.data[f.name], f.type, t, language)}
           </td>
         ))}
         <td className="px-3 py-2">
           {row.status !== "clean" && (
             <Badge tone={statusTone[row.status as Exclude<RowStatus, "clean">]}>
-              {row.status}
+              {statusLabel}
             </Badge>
           )}
         </td>
@@ -472,21 +491,21 @@ function EntryRow({
                 onClick={onRestore}
                 className="rounded-md px-2 py-1 text-xs font-medium text-indigo-600 transition hover:bg-indigo-50"
               >
-                Restore
+                {t("common.restore")}
               </button>
             ) : (
               <>
                 <button
                   onClick={onEdit}
                   className="rounded-md p-1.5 text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-600"
-                  aria-label="Edit entry"
+                  aria-label={t("entries.editor.editAria")}
                 >
                   <PencilIcon size={15} />
                 </button>
                 <button
                   onClick={onDelete}
                   className="rounded-md p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
-                  aria-label="Delete entry"
+                  aria-label={t("entries.editor.deleteAria")}
                 >
                   <TrashIcon size={15} />
                 </button>

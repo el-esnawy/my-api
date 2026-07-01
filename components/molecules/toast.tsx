@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/client/util";
 
 export interface ToastData {
@@ -22,6 +23,8 @@ function Toast({
   toast: ToastData;
   onDismiss: (id: number) => void;
 }) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     const timer = setTimeout(() => onDismiss(toast.id), 5000);
     return () => clearTimeout(timer);
@@ -39,7 +42,7 @@ function Toast({
       <button
         onClick={() => onDismiss(toast.id)}
         className="font-semibold opacity-60 transition hover:opacity-100"
-        aria-label="Dismiss"
+        aria-label={t("common.dismiss")}
       >
         ✕
       </button>

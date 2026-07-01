@@ -2,17 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/client/util";
 
 const tabs = [
-  { href: "/dashboard/schemas", label: "Schemas" },
-  { href: "/dashboard/entries", label: "Entries" },
-  { href: "/dashboard/endpoints", label: "Endpoints" },
-  { href: "/dashboard/tokens", label: "Request Tokens" },
+  { href: "/dashboard/schemas", labelKey: "dashboard.tabs.schemas" },
+  { href: "/dashboard/entries", labelKey: "dashboard.tabs.entries" },
+  { href: "/dashboard/endpoints", labelKey: "dashboard.tabs.endpoints" },
+  { href: "/dashboard/tokens", labelKey: "dashboard.tabs.tokens" },
 ];
 
 export function DashboardTabs() {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   return (
     <nav className="mx-auto flex max-w-6xl gap-1 px-4">
@@ -27,7 +29,7 @@ export function DashboardTabs() {
               active ? "text-indigo-600" : "text-slate-500 hover:text-slate-800"
             )}
           >
-            {tab.label}
+            {t(tab.labelKey)}
             {active && (
               <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-indigo-600" />
             )}

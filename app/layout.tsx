@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import { getServerTranslator } from "@/i18n/server";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "my-api — Custom REST Endpoints",
-  description:
-    "Define your own data schemas, generate REST endpoints, and query them from anywhere with per-account access tokens.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getServerTranslator();
+  return {
+    title: t("metadata.title"),
+    description: t("metadata.description"),
+  };
+}
 
 export { default } from "@/components/templates/root";

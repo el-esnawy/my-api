@@ -5,6 +5,7 @@ import { DataSchema } from "@/lib/models/DataSchema";
 import { requireSession } from "@/lib/api/dashboardAuth";
 import { createEndpointInput } from "@/lib/validation/schemas";
 import { serializeEndpoint } from "@/lib/api/serialize";
+import { getRequestTranslator } from "@/i18n/server";
 import {
   badRequest,
   conflict,
@@ -16,9 +17,10 @@ import {
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
 
     await connectDB();
@@ -31,13 +33,14 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
 
     const body = await req.json().catch(() => null);
     const parsed = createEndpointInput.safeParse(body);
     if (!parsed.success) {
-      return badRequest("Validation failed", { fields: zodErrors(parsed.error) });
+      return badRequest(t("api.errors.validationFailed"), { fields: zodErrors(parsed.error, t) });
     }
 
     await connectDB();
@@ -47,14 +50,14 @@ export async function POST(req: NextRequest) {
       _id: parsed.data.schemaId,
       userId: auth.session.userId,
     });
-    if (!schema) return badRequest("Unknown schema");
+    if (!schema) return badRequest(t("api.errors.unknownSchema"));
 
     // Readable/writable fields must be a subset of the schema's field names.
     const fieldNames = new Set(schema.fields.map((f) => f.name));
     const unknownReadable = parsed.data.readableFields.filter((f) => !fieldNames.has(f));
     const unknownWritable = parsed.data.writableFields.filter((f) => !fieldNames.has(f));
     if (unknownReadable.length || unknownWritable.length) {
-      return badRequest("Readable/writable fields must belong to the schema", {
+      return badRequest(t("api.errors.endpointFieldsInvalid"), {
         unknownReadable,
         unknownWritable,
       });
@@ -72,7 +75,7 @@ export async function POST(req: NextRequest) {
       });
       return created({ endpoint: serializeEndpoint(endpoint) });
     } catch (err: any) {
-      if (err?.code === 11000) return conflict("You already have an endpoint with that slug");
+      if (err?.code === 11000) return conflict(t("api.errors.endpointSlugExists"));
       throw err;
     }
   });

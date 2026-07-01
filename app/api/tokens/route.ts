@@ -6,6 +6,7 @@ import { requireSession } from "@/lib/api/dashboardAuth";
 import { createTokenInput } from "@/lib/validation/schemas";
 import { generateAccessToken } from "@/lib/auth/token";
 import { serializeToken } from "@/lib/api/serialize";
+import { getRequestTranslator } from "@/i18n/server";
 import {
   badRequest,
   created,
@@ -16,9 +17,10 @@ import {
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
 
     await connectDB();
@@ -31,13 +33,14 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
 
     const body = await req.json().catch(() => null);
     const parsed = createTokenInput.safeParse(body);
     if (!parsed.success) {
-      return badRequest("Validation failed", { fields: zodErrors(parsed.error) });
+      return badRequest(t("api.errors.validationFailed"), { fields: zodErrors(parsed.error, t) });
     }
 
     await connectDB();
@@ -51,7 +54,7 @@ export async function POST(req: NextRequest) {
     const ownedSet = new Set(owned.map((e) => String(e._id)));
     const notOwned = endpointIds.filter((id) => !ownedSet.has(id));
     if (notOwned.length) {
-      return badRequest("Some endpoints are unknown or not yours", { notOwned });
+      return badRequest(t("api.errors.endpointsUnknown"), { notOwned });
     }
 
     const { token, tokenHash, tokenPrefix, tokenEncrypted } = generateAccessToken();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useEndpoints, useSchemas } from "@/lib/client/hooks";
 import type { DataSchema, Endpoint } from "@/lib/client/types";
 import { Button } from "@/components/atoms/button";
@@ -13,6 +14,7 @@ import { EndpointFormModal } from "@/components/sections/endpoints/endpoint-form
 type ModalState = { endpoint?: Endpoint } | null;
 
 export default function EndpointsPage() {
+  const { t } = useTranslation();
   const { data: endpoints, isLoading } = useEndpoints();
   const { data: schemas } = useSchemas();
   const [modal, setModal] = useState<ModalState>(null);
@@ -27,31 +29,31 @@ export default function EndpointsPage() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Endpoints</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{t("endpoints.title")}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Expose schemas as REST endpoints. Choose verbs and what can be read or written.
+            {t("endpoints.description")}
           </p>
         </div>
         <Button onClick={() => setModal({})} disabled={!schemas || schemas.length === 0}>
-          + New endpoint
+          {t("endpoints.new")}
         </Button>
       </div>
 
       <div className="mt-6">
         {isLoading ? (
           <div className="flex items-center gap-2 text-slate-500">
-            <Spinner /> Loading endpoints…
+            <Spinner /> {t("endpoints.loading")}
           </div>
         ) : !schemas || schemas.length === 0 ? (
           <EmptyState
-            title="Create a schema first"
-            description="Endpoints are built on schemas. Head to the Schemas tab to define one."
+            title={t("endpoints.emptyNeedsSchemaTitle")}
+            description={t("endpoints.emptyNeedsSchemaDescription")}
           />
         ) : !endpoints || endpoints.length === 0 ? (
           <EmptyState
-            title="No endpoints yet"
-            description="Turn one of your schemas into a callable REST endpoint."
-            action={<Button onClick={() => setModal({})}>+ New endpoint</Button>}
+            title={t("endpoints.emptyTitle")}
+            description={t("endpoints.emptyDescription")}
+            action={<Button onClick={() => setModal({})}>{t("endpoints.new")}</Button>}
           />
         ) : (
           <div className="space-y-4">

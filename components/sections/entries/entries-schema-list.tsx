@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useSchemas, useEntryCounts } from "@/lib/client/hooks";
 import type { DataSchema } from "@/lib/client/types";
 import { Badge } from "@/components/atoms/badge";
@@ -16,13 +17,14 @@ export function EntriesSchemaList({
 }: {
   onSelect: (schema: DataSchema) => void;
 }) {
+  const { t } = useTranslation();
   const { data: schemas, isLoading } = useSchemas();
   const { data: counts } = useEntryCounts();
 
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 text-slate-500">
-        <Spinner /> Loading schemas…
+        <Spinner /> {t("entries.loadingSchemas")}
       </div>
     );
   }
@@ -30,8 +32,8 @@ export function EntriesSchemaList({
   if (!schemas || schemas.length === 0) {
     return (
       <EmptyState
-        title="No schemas yet"
-        description="Entries live inside schemas. Create a schema first, then manage its data here."
+        title={t("entries.emptySchemasTitle")}
+        description={t("entries.emptySchemasDescription")}
       />
     );
   }
@@ -56,16 +58,16 @@ export function EntriesSchemaList({
                   </Badge>
                 </div>
                 <Badge tone={count > 0 ? "green" : "slate"}>
-                  {count} {count === 1 ? "entry" : "entries"}
+                  {t("common.entry", { count })}
                 </Badge>
               </div>
               <p className="mt-3 text-sm text-slate-500">
-                {schema.fields.length} {schema.fields.length === 1 ? "field" : "fields"}:{" "}
+                {t("common.field", { count: schema.fields.length })}:{" "}
                 <span className="font-mono text-xs">
                   {schema.fields.map((f) => f.name).join(", ")}
                 </span>
               </p>
-              <p className="mt-3 text-sm font-medium text-indigo-600">Manage entries →</p>
+              <p className="mt-3 text-sm font-medium text-indigo-600">{t("entries.manage")}</p>
             </Card>
           </button>
         );

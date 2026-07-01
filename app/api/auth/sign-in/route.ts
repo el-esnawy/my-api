@@ -5,16 +5,18 @@ import { verifyPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
 import { signInInput } from "@/lib/validation/schemas";
 import { serializeUser } from "@/lib/api/serialize";
+import { getRequestTranslator } from "@/i18n/server";
 import { badRequest, ok, unauthorized, withErrorHandling, zodErrors } from "@/lib/api/respond";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   return withErrorHandling(async () => {
+    const t = await getRequestTranslator(req);
     const body = await req.json().catch(() => null);
     const parsed = signInInput.safeParse(body);
     if (!parsed.success) {
-      return badRequest("Validation failed", { fields: zodErrors(parsed.error) });
+      return badRequest(t("api.errors.validationFailed"), { fields: zodErrors(parsed.error, t) });
     }
 
     await connectDB();
@@ -22,7 +24,7 @@ export async function POST(req: NextRequest) {
     const user = await User.findOne({ email: parsed.data.email });
     // Same generic error whether the email is unknown or the password is wrong,
     // to avoid leaking which emails are registered.
-    const genericFail = unauthorized("Invalid email or password");
+    const genericFail = unauthorized(t("api.errors.invalidCredentials"));
     if (!user) return genericFail;
 
     const valid = await verifyPassword(parsed.data.password, user.passwordHash);

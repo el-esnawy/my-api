@@ -5,6 +5,7 @@ import { Endpoint } from "@/lib/models/Endpoint";
 import { requireSession } from "@/lib/api/dashboardAuth";
 import { updateTokenInput } from "@/lib/validation/schemas";
 import { serializeToken } from "@/lib/api/serialize";
+import { getRequestTranslator } from "@/i18n/server";
 import {
   badRequest,
   notFound,
@@ -19,13 +20,14 @@ type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_req: NextRequest, { params }: Params) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(_req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
     const { id } = await params;
 
     await connectDB();
     const token = await AccessToken.findOne({ _id: id, userId: auth.session.userId });
-    if (!token) return notFound("Token not found");
+    if (!token) return notFound(t("api.errors.tokenNotFound"));
     return ok({ token: serializeToken(token) });
   });
 }
@@ -33,14 +35,15 @@ export async function GET(_req: NextRequest, { params }: Params) {
 // Update a token: rename, revoke/un-revoke, or change endpoint grants.
 export async function PATCH(req: NextRequest, { params }: Params) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
     const { id } = await params;
 
     const body = await req.json().catch(() => null);
     const parsed = updateTokenInput.safeParse(body);
     if (!parsed.success) {
-      return badRequest("Validation failed", { fields: zodErrors(parsed.error) });
+      return badRequest(t("api.errors.validationFailed"), { fields: zodErrors(parsed.error, t) });
     }
 
     await connectDB();
@@ -54,7 +57,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       const ownedSet = new Set(owned.map((e) => String(e._id)));
       const notOwned = endpointIds.filter((eid) => !ownedSet.has(eid));
       if (notOwned.length) {
-        return badRequest("Some endpoints are unknown or not yours", { notOwned });
+        return badRequest(t("api.errors.endpointsUnknown"), { notOwned });
       }
     }
 
@@ -63,14 +66,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       { $set: parsed.data },
       { new: true }
     );
-    if (!token) return notFound("Token not found");
+    if (!token) return notFound(t("api.errors.tokenNotFound"));
     return ok({ token: serializeToken(token) });
   });
 }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(_req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
     const { id } = await params;
 
@@ -79,7 +83,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
       _id: id,
       userId: auth.session.userId,
     });
-    if (!deleted) return notFound("Token not found");
+    if (!deleted) return notFound(t("api.errors.tokenNotFound"));
     return ok({ success: true });
   });
 }

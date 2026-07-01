@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import { CloseIcon } from "@/components/atoms/icons/close-icon";
 
 export function Modal({
@@ -18,6 +19,8 @@ export function Modal({
   children: React.ReactNode;
   widthClass?: string;
 }) {
+  const { t } = useTranslation();
+
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -44,7 +47,7 @@ export function Modal({
           <button
             onClick={onClose}
             className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-            aria-label="Close"
+            aria-label={t("common.close")}
           >
             <CloseIcon size={18} />
           </button>

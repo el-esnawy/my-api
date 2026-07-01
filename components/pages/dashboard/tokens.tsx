@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useTokens, useEndpoints } from "@/lib/client/hooks";
 import type { AccessToken, Endpoint } from "@/lib/client/types";
 import { Button } from "@/components/atoms/button";
@@ -13,6 +14,7 @@ import { TokenFormModal } from "@/components/sections/tokens/token-form-modal";
 type ModalState = { token?: AccessToken } | null;
 
 export default function TokensPage() {
+  const { t } = useTranslation();
   const { data: tokens, isLoading } = useTokens();
   const { data: endpoints } = useEndpoints();
   const [modal, setModal] = useState<ModalState>(null);
@@ -27,32 +29,31 @@ export default function TokensPage() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Request Tokens</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{t("tokens.title")}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Request tokens authenticate external calls to your endpoints. Each is scoped to
-            the endpoints and permissions you choose.
+            {t("tokens.description")}
           </p>
         </div>
         <Button onClick={() => setModal({})} disabled={!endpoints || endpoints.length === 0}>
-          + New request token
+          {t("tokens.new")}
         </Button>
       </div>
 
       <div className="mt-6">
         {isLoading ? (
           <div className="flex items-center gap-2 text-slate-500">
-            <Spinner /> Loading request tokens…
+            <Spinner /> {t("tokens.loading")}
           </div>
         ) : !endpoints || endpoints.length === 0 ? (
           <EmptyState
-            title="Create an endpoint first"
-            description="Request tokens grant access to specific endpoints. Create one in the Endpoints tab."
+            title={t("tokens.emptyNeedsEndpointTitle")}
+            description={t("tokens.emptyNeedsEndpointDescription")}
           />
         ) : !tokens || tokens.length === 0 ? (
           <EmptyState
-            title="No request tokens yet"
-            description="Mint a request token to start calling your endpoints from anywhere."
-            action={<Button onClick={() => setModal({})}>+ New request token</Button>}
+            title={t("tokens.emptyTitle")}
+            description={t("tokens.emptyDescription")}
+            action={<Button onClick={() => setModal({})}>{t("tokens.new")}</Button>}
           />
         ) : (
           <div className="space-y-3">

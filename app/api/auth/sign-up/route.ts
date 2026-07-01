@@ -5,6 +5,7 @@ import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
 import { signUpInput } from "@/lib/validation/schemas";
 import { serializeUser } from "@/lib/api/serialize";
+import { getRequestTranslator } from "@/i18n/server";
 import {
   badRequest,
   conflict,
@@ -17,10 +18,11 @@ export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   return withErrorHandling(async () => {
+    const t = await getRequestTranslator(req);
     const body = await req.json().catch(() => null);
     const parsed = signUpInput.safeParse(body);
     if (!parsed.success) {
-      return badRequest("Validation failed", { fields: zodErrors(parsed.error) });
+      return badRequest(t("api.errors.validationFailed"), { fields: zodErrors(parsed.error, t) });
     }
 
     await connectDB();
@@ -36,7 +38,7 @@ export async function POST(req: NextRequest) {
       return created({ user: serializeUser(user) });
     } catch (err: any) {
       // Duplicate key on the unique email index.
-      if (err?.code === 11000) return conflict("Email already registered");
+      if (err?.code === 11000) return conflict(t("api.errors.emailRegistered"));
       throw err;
     }
   });

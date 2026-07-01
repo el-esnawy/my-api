@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDeleteEndpoint } from "@/lib/client/hooks";
 import { ApiError } from "@/lib/client/api";
 import { appBaseUrl } from "@/lib/client/util";
@@ -29,17 +30,18 @@ export function EndpointCard({
   schema?: DataSchema;
   onEdit: () => void;
 }) {
+  const { t } = useTranslation();
   const del = useDeleteEndpoint();
   const [error, setError] = useState<string | null>(null);
   const url = `${appBaseUrl()}/api/v1/${endpoint.slug}`;
 
   async function onDelete() {
-    if (!confirm(`Delete endpoint "${endpoint.name}"? Its stored records will be removed.`)) return;
+    if (!confirm(t("endpoints.deleteConfirm", { name: endpoint.name }))) return;
     setError(null);
     try {
       await del.mutateAsync(endpoint.id);
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Failed to delete");
+      setError(e instanceof ApiError ? e.message : t("endpoints.deleteFailed"));
     }
   }
 
@@ -49,7 +51,7 @@ export function EndpointCard({
         <div>
           <h3 className="font-semibold text-slate-900">{endpoint.name}</h3>
           <p className="mt-0.5 text-sm text-slate-500">
-            Schema: <span className="font-mono">{schema?.slug ?? "—"}</span>
+            {t("endpoints.schemaLabel")} <span className="font-mono">{schema?.slug ?? "—"}</span>
           </p>
         </div>
         <div className="flex items-center gap-1.5">
@@ -69,9 +71,9 @@ export function EndpointCard({
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <EndpointFieldList label="Readable (GET)" fields={endpoint.readableFields} schema={schema} />
+        <EndpointFieldList label={t("endpoints.readableGet")} fields={endpoint.readableFields} schema={schema} />
         <EndpointFieldList
-          label="Writable (POST/PUT/PATCH)"
+          label={t("endpoints.writableMethods")}
           fields={endpoint.writableFields}
           schema={schema}
         />
@@ -81,10 +83,10 @@ export function EndpointCard({
         {error ? <ErrorText>{error}</ErrorText> : <span />}
         <div className="flex items-center gap-2">
           <Button size="sm" variant="secondary" onClick={onEdit}>
-            Edit
+            {t("common.edit")}
           </Button>
           <Button size="sm" variant="dangerGhost" onClick={onDelete} disabled={del.isPending}>
-            Delete
+            {t("common.delete")}
           </Button>
         </div>
       </div>

@@ -18,10 +18,10 @@ export async function GET(req: NextRequest, { params }: Params) {
     const { endpoint: slug, recordId } = await params;
     const g = await gate(req, slug, "GET");
     if (!g.ok) return g.response;
-    const { auth, headers } = g;
+    const { auth, headers, t } = g;
 
     if (!isValidObjectId(recordId)) {
-      return jsonWithHeaders({ error: "Record not found" }, 404, headers);
+      return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
     }
 
     await connectDB();
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       userId: auth.userId,
       schemaId: auth.endpoint.schemaId,
     });
-    if (!rec) return jsonWithHeaders({ error: "Record not found" }, 404, headers);
+    if (!rec) return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
 
     return jsonWithHeaders(
       {
@@ -52,10 +52,10 @@ async function applyUpdate(req: NextRequest, params: Params["params"], method: H
     const { endpoint: slug, recordId } = await params;
     const g = await gate(req, slug, method);
     if (!g.ok) return g.response;
-    const { auth, headers } = g;
+    const { auth, headers, t } = g;
 
     if (!isValidObjectId(recordId)) {
-      return jsonWithHeaders({ error: "Record not found" }, 404, headers);
+      return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
     }
 
     await connectDB();
@@ -64,7 +64,7 @@ async function applyUpdate(req: NextRequest, params: Params["params"], method: H
       userId: auth.userId,
       schemaId: auth.endpoint.schemaId,
     });
-    if (!rec) return jsonWithHeaders({ error: "Record not found" }, 404, headers);
+    if (!rec) return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
 
     const fields = await loadFields(auth);
     const body = await req.json().catch(() => null);
@@ -73,9 +73,10 @@ async function applyUpdate(req: NextRequest, params: Params["params"], method: H
     const result = validateRecordData(fields, body, {
       partial: method === "PATCH",
       writableFields: auth.endpoint.writableFields ?? [],
+      t,
     });
     if (!result.ok) {
-      return jsonWithHeaders({ error: "Validation failed", fields: result.errors }, 400, headers);
+      return jsonWithHeaders({ error: t("api.errors.validationFailed"), fields: result.errors }, 400, headers);
     }
 
     const nextData = { ...(rec.data as Record<string, unknown>), ...result.value };
@@ -88,8 +89,8 @@ async function applyUpdate(req: NextRequest, params: Params["params"], method: H
     });
     if (conflicts.length > 0) {
       const errors: Record<string, string> = {};
-      for (const c of conflicts) errors[c.field] = "must be unique";
-      return jsonWithHeaders({ error: "Validation failed", fields: errors }, 400, headers);
+      for (const c of conflicts) errors[c.field] = t("validation.record.unique");
+      return jsonWithHeaders({ error: t("api.errors.validationFailed"), fields: errors }, 400, headers);
     }
 
     rec.data = nextData;
@@ -127,10 +128,10 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     const { endpoint: slug, recordId } = await params;
     const g = await gate(req, slug, "DELETE");
     if (!g.ok) return g.response;
-    const { auth, headers } = g;
+    const { auth, headers, t } = g;
 
     if (!isValidObjectId(recordId)) {
-      return jsonWithHeaders({ error: "Record not found" }, 404, headers);
+      return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
     }
 
     await connectDB();
@@ -139,7 +140,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       userId: auth.userId,
       schemaId: auth.endpoint.schemaId,
     });
-    if (!deleted) return jsonWithHeaders({ error: "Record not found" }, 404, headers);
+    if (!deleted) return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
 
     return jsonWithHeaders({ success: true, id: recordId }, 200, headers);
   });

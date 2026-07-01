@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { CheckIcon } from "@/components/atoms/icons/check-icon";
 
 export interface PricingTier {
@@ -18,9 +19,10 @@ export function PricingCard({
   tier: PricingTier;
   signedIn: boolean;
 }) {
+  const { t } = useTranslation();
   // When signed in, every CTA becomes "Go to my account" → the dashboard.
   const ctaHref = signedIn ? "/dashboard/schemas" : tier.cta.href;
-  const ctaLabel = signedIn ? "Go to my account" : tier.cta.label;
+  const ctaLabel = signedIn ? t("landing.pricing.signedInCta") : tier.cta.label;
 
   return (
     <div
@@ -31,7 +33,7 @@ export function PricingCard({
     >
       {tier.featured && (
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
-          Most popular
+          {t("landing.pricing.mostPopular")}
         </span>
       )}
 

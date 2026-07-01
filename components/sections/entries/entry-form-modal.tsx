@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { DataSchema, SchemaField } from "@/lib/client/types";
 import { Modal } from "@/components/molecules/modal";
 import { Button } from "@/components/atoms/button";
@@ -63,6 +64,7 @@ export function EntryFormModal({
   onSubmit: (data: Record<string, unknown>) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const isEdit = !!initialData;
   const [state, setState] = useState(() => initialFormState(schema, initialData));
   const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
@@ -80,9 +82,9 @@ export function EntryFormModal({
       if (!field.required || field.type === "boolean") continue;
       const raw = state[field.name];
       if (typeof raw !== "string" || raw.trim() === "") {
-        errors[field.name] = "is required";
+        errors[field.name] = t("validation.record.required");
       } else if (field.type === "number" && !Number.isFinite(Number(raw.trim()))) {
-        errors[field.name] = "must be a number";
+        errors[field.name] = t("validation.record.number");
       }
     }
     if (Object.keys(errors).length > 0) {
@@ -96,8 +98,8 @@ export function EntryFormModal({
     <Modal
       open
       onClose={onClose}
-      title={isEdit ? "Edit entry" : "New entry"}
-      description={`Schema: ${schema.name}`}
+      title={isEdit ? t("entries.form.editTitle") : t("entries.form.newTitle")}
+      description={t("entries.form.schemaDescription", { name: schema.name })}
       widthClass="max-w-xl"
     >
       <form onSubmit={submit} className="space-y-4">
@@ -113,9 +115,9 @@ export function EntryFormModal({
 
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Button>
-          <Button type="submit">{isEdit ? "Apply" : "Add entry"}</Button>
+          <Button type="submit">{isEdit ? t("common.apply") : t("entries.editor.addEntry")}</Button>
         </div>
       </form>
     </Modal>
@@ -133,13 +135,14 @@ function FieldInput({
   error?: string;
   onChange: (value: string | boolean) => void;
 }) {
+  const { t } = useTranslation();
   const label = (
     <Label>
       <span className="font-mono">{field.name}</span>
       <span className="ml-2 text-xs font-normal text-slate-400">
-        {field.type}
-        {field.required && " · required"}
-        {field.unique && " · unique"}
+        {t(`common.fieldTypes.${field.type}`)}
+        {field.required && ` · ${t("common.required")}`}
+        {field.unique && ` · ${t("common.unique")}`}
       </span>
     </Label>
   );
@@ -150,7 +153,7 @@ function FieldInput({
         <label className="flex items-center gap-2">
           <Checkbox checked={value === true} onChange={(e) => onChange(e.target.checked)} />
           <span className="font-mono text-sm text-slate-700">{field.name}</span>
-          <span className="text-xs text-slate-400">boolean</span>
+          <span className="text-xs text-slate-400">{t("common.boolean")}</span>
         </label>
         <ErrorText>{error && `${field.name} ${error}`}</ErrorText>
       </div>
@@ -162,7 +165,7 @@ function FieldInput({
       <div>
         {label}
         <Select value={value as string} onChange={(e) => onChange(e.target.value)}>
-          <option value="">— none —</option>
+          <option value="">{t("entries.form.noneOption")}</option>
           {field.enumValues.map((v) => (
             <option key={v} value={v}>
               {v}

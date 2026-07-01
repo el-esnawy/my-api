@@ -72,7 +72,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const { endpoint: slug } = await params;
     const g = await gate(req, slug, "POST");
     if (!g.ok) return g.response;
-    const { auth, headers } = g;
+    const { auth, headers, t } = g;
 
     await connectDB();
     const fields = await loadFields(auth);
@@ -80,10 +80,11 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const result = validateRecordData(fields, body, {
       writableFields: auth.endpoint.writableFields ?? [],
+      t,
     });
     if (!result.ok) {
       return jsonWithHeaders(
-        { error: "Validation failed", fields: result.errors },
+        { error: t("api.errors.validationFailed"), fields: result.errors },
         400,
         headers
       );
@@ -97,8 +98,8 @@ export async function POST(req: NextRequest, { params }: Params) {
     });
     if (conflicts.length > 0) {
       const errors: Record<string, string> = {};
-      for (const c of conflicts) errors[c.field] = "must be unique";
-      return jsonWithHeaders({ error: "Validation failed", fields: errors }, 400, headers);
+      for (const c of conflicts) errors[c.field] = t("validation.record.unique");
+      return jsonWithHeaders({ error: t("api.errors.validationFailed"), fields: errors }, 400, headers);
     }
 
     const rec = await RecordModel.create({

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useCreateEndpoint, useUpdateEndpoint } from "@/lib/client/hooks";
 import { ApiError } from "@/lib/client/api";
 import { slugify } from "@/lib/client/util";
@@ -48,6 +49,7 @@ export function EndpointFormModal({
   onClose: () => void;
   schemas: DataSchema[];
 }) {
+  const { t } = useTranslation();
   const create = useCreateEndpoint();
   const update = useUpdateEndpoint();
   const isEdit = !!editing;
@@ -83,7 +85,7 @@ export function EndpointFormModal({
     e.preventDefault();
     setError(null);
     if (!schemaId) {
-      setError("Select a schema");
+      setError(t("endpoints.modal.selectSchemaError"));
       return;
     }
     // Guard the ambiguous "zero fields selected" state. An empty list is stored
@@ -93,13 +95,11 @@ export function EndpointFormModal({
     const hasGet = methods.includes("GET");
     const hasWrite = methods.some((m) => m !== "GET");
     if (hasGet && readable.length === 0) {
-      setError("Select at least one readable field, or turn off GET in Methods.");
+      setError(t("endpoints.modal.readableRequired"));
       return;
     }
     if (hasWrite && writable.length === 0) {
-      setError(
-        "Select at least one writable field, or turn off the write methods (POST/PUT/PATCH)."
-      );
+      setError(t("endpoints.modal.writableRequired"));
       return;
     }
     // Collapse to [] only when ALL fields are selected, so the endpoint
@@ -119,7 +119,7 @@ export function EndpointFormModal({
       else await create.mutateAsync(payload);
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Something went wrong");
+      setError(err instanceof ApiError ? err.message : t("common.somethingWentWrong"));
     }
   }
 
@@ -127,33 +127,33 @@ export function EndpointFormModal({
     <Modal
       open
       onClose={onClose}
-      title={isEdit ? "Edit endpoint" : "New endpoint"}
-      description="Expose a schema as a REST resource."
+      title={isEdit ? t("endpoints.modal.editTitle") : t("endpoints.modal.newTitle")}
+      description={t("endpoints.modal.description")}
       widthClass="max-w-xl"
     >
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <Label>Name</Label>
+            <Label>{t("common.name")}</Label>
             <Input
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
                 if (!slugEdited) setSlug(slugify(e.target.value));
               }}
-              placeholder="Notes"
+              placeholder={t("endpoints.modal.namePlaceholder")}
               required
             />
           </div>
           <div>
-            <Label>Slug (URL)</Label>
+            <Label>{t("endpoints.modal.slugUrl")}</Label>
             <Input
               value={slug}
               onChange={(e) => {
                 setSlugEdited(true);
                 setSlug(slugify(e.target.value));
               }}
-              placeholder="notes"
+              placeholder={t("endpoints.modal.slugPlaceholder")}
               className="font-mono"
               required
             />
@@ -161,10 +161,10 @@ export function EndpointFormModal({
         </div>
 
         <div>
-          <Label>Schema</Label>
+          <Label>{t("common.schema")}</Label>
           <Select value={schemaId} onChange={(e) => pickSchema(e.target.value)} required>
             <option value="" disabled>
-              Select a schema…
+              {t("endpoints.modal.selectSchema")}
             </option>
             {schemas.map((s) => (
               <option key={s.id} value={s.id}>
@@ -175,7 +175,7 @@ export function EndpointFormModal({
         </div>
 
         <div>
-          <Label>Allowed methods</Label>
+          <Label>{t("endpoints.modal.allowedMethods")}</Label>
           <div className="flex flex-wrap gap-2">
             {METHODS.map((m) => {
               const on = methods.includes(m);
@@ -201,15 +201,15 @@ export function EndpointFormModal({
         {selectedSchema && (
           <div className="grid gap-3 sm:grid-cols-2">
             <FieldPicker
-              title="Readable fields"
-              hint="Returned by GET"
+              title={t("endpoints.modal.readableFields")}
+              hint={t("endpoints.modal.readableHint")}
               all={schemaFields}
               selected={readable}
               onToggle={(f) => toggle(readable, f, setReadable)}
             />
             <FieldPicker
-              title="Writable fields"
-              hint="Accepted by writes"
+              title={t("endpoints.modal.writableFields")}
+              hint={t("endpoints.modal.writableHint")}
               all={schemaFields}
               selected={writable}
               onToggle={(f) => toggle(writable, f, setWritable)}
@@ -223,11 +223,11 @@ export function EndpointFormModal({
 
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button type="submit" disabled={pending || methods.length === 0}>
             {pending && <Spinner />}
-            {isEdit ? "Save changes" : "Create endpoint"}
+            {isEdit ? t("common.saveChanges") : t("endpoints.modal.create")}
           </Button>
         </div>
       </form>

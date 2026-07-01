@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSchemas } from "@/lib/client/hooks";
 import type { DataSchema } from "@/lib/client/types";
 import { Button } from "@/components/atoms/button";
@@ -13,6 +14,7 @@ import { SchemaFormModal } from "@/components/sections/schemas/schema-form-modal
 type ModalState = { schema?: DataSchema } | null;
 
 export default function SchemasPage() {
+  const { t } = useTranslation();
   const { data: schemas, isLoading } = useSchemas();
   const [modal, setModal] = useState<ModalState>(null);
 
@@ -20,24 +22,24 @@ export default function SchemasPage() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Schemas</h1>
+          <h1 className="text-2xl font-bold text-slate-900">{t("schemas.title")}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Define the shape of your data. Endpoints are built on top of schemas.
+            {t("schemas.description")}
           </p>
         </div>
-        <Button onClick={() => setModal({})}>+ New schema</Button>
+        <Button onClick={() => setModal({})}>{t("schemas.new")}</Button>
       </div>
 
       <div className="mt-6">
         {isLoading ? (
           <div className="flex items-center gap-2 text-slate-500">
-            <Spinner /> Loading schemas…
+            <Spinner /> {t("schemas.loading")}
           </div>
         ) : !schemas || schemas.length === 0 ? (
           <EmptyState
-            title="No schemas yet"
-            description="Create your first schema to describe the data your endpoints will store."
-            action={<Button onClick={() => setModal({})}>+ New schema</Button>}
+            title={t("schemas.emptyTitle")}
+            description={t("schemas.emptyDescription")}
+            action={<Button onClick={() => setModal({})}>{t("schemas.new")}</Button>}
           />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">

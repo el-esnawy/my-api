@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { AccessToken, type AccessTokenDoc } from "@/lib/models/AccessToken";
 import { Endpoint, type EndpointDoc, type HttpMethod } from "@/lib/models/Endpoint";
 import { hashToken, parseBearer } from "@/lib/auth/token";
+import type { ApiTranslator } from "./respond";
 
 /**
  * The core security gate for the public REST engine.
@@ -31,11 +32,12 @@ export type PublicAuthResult = AuthSuccess | AuthFailure;
 export async function authorizePublicRequest(
   req: Request,
   slug: string,
-  method: HttpMethod
+  method: HttpMethod,
+  t: ApiTranslator
 ): Promise<PublicAuthResult> {
   const raw = parseBearer(req.headers.get("authorization"));
   if (!raw) {
-    return { ok: false, status: 401, message: "Missing bearer access token" };
+    return { ok: false, status: 401, message: t("api.errors.missingBearer") };
   }
 
   await connectDB();
@@ -46,13 +48,13 @@ export async function authorizePublicRequest(
     revoked: false,
   });
   if (!token) {
-    return { ok: false, status: 401, message: "Invalid or revoked access token" };
+    return { ok: false, status: 401, message: t("api.errors.invalidBearer") };
   }
 
   // Resolve the endpoint strictly within the token owner's namespace.
   const endpoint = await Endpoint.findOne({ userId: token.userId, slug });
   if (!endpoint) {
-    return { ok: false, status: 404, message: "Endpoint not found" };
+    return { ok: false, status: 404, message: t("api.errors.endpointNotFound") };
   }
 
   const grant = token.grants.find(
@@ -62,20 +64,20 @@ export async function authorizePublicRequest(
     return {
       ok: false,
       status: 403,
-      message: "This token is not authorized for this endpoint",
+      message: t("api.errors.tokenEndpointForbidden"),
     };
   }
 
   if (!endpoint.methods.includes(method)) {
-    return { ok: false, status: 405, message: `${method} is not enabled for this endpoint` };
+    return { ok: false, status: 405, message: t("api.errors.methodDisabled", { method }) };
   }
 
   const isWrite = method !== "GET";
   if (isWrite && !grant.write) {
-    return { ok: false, status: 403, message: "This token lacks write permission" };
+    return { ok: false, status: 403, message: t("api.errors.writePermissionMissing") };
   }
   if (!isWrite && !grant.read) {
-    return { ok: false, status: 403, message: "This token lacks read permission" };
+    return { ok: false, status: 403, message: t("api.errors.readPermissionMissing") };
   }
 
   // Best-effort last-used timestamp; never blocks the request.

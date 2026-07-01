@@ -15,10 +15,10 @@ export function appBaseUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
-export function formatDate(value: string | null): string {
+export function formatDate(value: string | null, locale?: string): string {
   if (!value) return "—";
   try {
-    return new Date(value).toLocaleDateString(undefined, {
+    return new Date(value).toLocaleDateString(locale, {
       year: "numeric",
       month: "short",
       day: "numeric",

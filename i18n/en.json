@@ -1,0 +1,402 @@
+{
+  "metadata": {
+    "title": "my-api — Custom REST Endpoints",
+    "description": "Define your own data schemas, generate REST endpoints, and query them from anywhere with per-account access tokens."
+  },
+  "common": {
+    "brand": "my-api",
+    "language": "Language",
+    "english": "English",
+    "spanish": "Spanish",
+    "pricing": "Pricing",
+    "goToAccount": "Go to my account",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "getStarted": "Get started",
+    "cancel": "Cancel",
+    "saveChanges": "Save changes",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "copy": "Copy",
+    "copied": "Copied",
+    "done": "Done",
+    "name": "Name",
+    "slug": "Slug",
+    "schema": "Schema",
+    "loading": "Loading...",
+    "created": "Created {{date}}",
+    "lastUsed": "Last used {{date}}",
+    "none": "none",
+    "deleted": "deleted",
+    "required": "required",
+    "unique": "unique",
+    "boolean": "boolean",
+    "true": "true",
+    "false": "false",
+    "apply": "Apply",
+    "status": "Status",
+    "restore": "Restore",
+    "dismiss": "Dismiss",
+    "somethingWentWrong": "Something went wrong",
+    "somethingWentWrongRetry": "Something went wrong. Please try again.",
+    "field_one": "{{count}} field",
+    "field_other": "{{count}} fields",
+    "entry_one": "{{count}} entry",
+    "entry_other": "{{count}} entries",
+    "fieldTypes": {
+      "string": "string",
+      "number": "number",
+      "boolean": "boolean",
+      "date": "date"
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "schemas": "Schemas",
+      "entries": "Entries",
+      "endpoints": "Endpoints",
+      "tokens": "Request Tokens"
+    },
+    "signOut": "Sign out"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Your data → your REST API, in minutes",
+      "title": "Build custom REST endpoints without writing a backend",
+      "description": "Define your own data structures, generate secure REST endpoints from them, and call them from anywhere with access tokens that are unique to your account.",
+      "primaryCta": "Create your first endpoint",
+      "code": "curl -X POST https://your-app/api/v1/notes \\\n  -H \"Authorization: Bearer mapi_•••••••••\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"title\": \"Hello\", \"done\": false }'"
+    },
+    "features": {
+      "define": {
+        "title": "Define schemas",
+        "body": "Describe your data once — fields, types, required rules. No migrations, no boilerplate."
+      },
+      "generate": {
+        "title": "Generate REST endpoints",
+        "body": "Turn any schema into a real REST resource. Pick the verbs, choose what's readable and writable."
+      },
+      "query": {
+        "title": "Query with access tokens",
+        "body": "Mint per-account tokens scoped to specific endpoints. Revoke any time. Strictly isolated per user."
+      }
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "steps": {
+        "one": {
+          "title": "Create a schema",
+          "description": "e.g. a Note with title, body, done."
+        },
+        "two": {
+          "title": "Expose an endpoint",
+          "description": "/api/v1/notes with GET, POST, PUT, DELETE."
+        },
+        "three": {
+          "title": "Issue a token",
+          "description": "Scoped to that endpoint, read + write."
+        },
+        "four": {
+          "title": "Call it anywhere",
+          "description": "Authorization: Bearer <token>."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Simple, transparent pricing",
+      "description": "Start free and upgrade when you need more endpoints, tokens, and throughput.",
+      "mostPopular": "Most popular",
+      "signedInCta": "Go to my account",
+      "tiers": {
+        "hobby": {
+          "name": "Hobby",
+          "price": "$0",
+          "cadence": "/mo",
+          "tagline": "For side projects and trying things out.",
+          "features": [
+            "3 schemas",
+            "3 endpoints",
+            "1 access token",
+            "10k requests / month",
+            "Community support"
+          ],
+          "cta": "Get started"
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "$19",
+          "cadence": "/mo",
+          "tagline": "For production apps that need room to grow.",
+          "features": [
+            "Unlimited schemas & endpoints",
+            "10 access tokens",
+            "1M requests / month",
+            "Higher rate limits",
+            "Email support"
+          ],
+          "cta": "Start free trial"
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "price": "Custom",
+          "cadence": "",
+          "tagline": "For teams with scale, security, and SLA needs.",
+          "features": [
+            "Unlimited everything",
+            "SSO & audit logs",
+            "Custom rate limits",
+            "Dedicated support & SLA",
+            "On-prem / VPC options"
+          ],
+          "cta": "Contact sales"
+        }
+      }
+    },
+    "footer": "my-api — custom REST endpoints backed by MongoDB, Redis, and per-account access tokens."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Welcome back",
+      "description": "Sign in to manage your endpoints.",
+      "footerPrompt": "Don't have an account?",
+      "passwordPlaceholder": "Your password"
+    },
+    "signUp": {
+      "title": "Create your account",
+      "description": "Start building custom REST endpoints in minutes.",
+      "footerPrompt": "Already have an account?",
+      "passwordPlaceholder": "At least 8 characters"
+    },
+    "fields": {
+      "nameOptional": "Name (optional)",
+      "email": "Email",
+      "password": "Password"
+    },
+    "placeholders": {
+      "name": "Ada Lovelace",
+      "email": "you@example.com"
+    }
+  },
+  "schemas": {
+    "title": "Schemas",
+    "description": "Define the shape of your data. Endpoints are built on top of schemas.",
+    "new": "+ New schema",
+    "loading": "Loading schemas...",
+    "emptyTitle": "No schemas yet",
+    "emptyDescription": "Create your first schema to describe the data your endpoints will store.",
+    "editAria": "Edit schema",
+    "deleteAria": "Delete schema",
+    "deleteConfirm": "Delete schema \"{{name}}\"? This cannot be undone.",
+    "deleteFailed": "Failed to delete",
+    "modal": {
+      "newTitle": "New schema",
+      "editTitle": "Edit schema",
+      "description": "Describe a data type with typed fields.",
+      "namePlaceholder": "Note",
+      "slugPlaceholder": "note",
+      "fields": "Fields",
+      "addField": "+ Add field",
+      "fieldNamePlaceholder": "field_name",
+      "removeField": "Remove field",
+      "editWarning": "Editing fields won't change records already stored. Removing a field just hides it from future reads and writes.",
+      "create": "Create schema"
+    }
+  },
+  "endpoints": {
+    "title": "Endpoints",
+    "description": "Expose schemas as REST endpoints. Choose verbs and what can be read or written.",
+    "new": "+ New endpoint",
+    "loading": "Loading endpoints...",
+    "emptyNeedsSchemaTitle": "Create a schema first",
+    "emptyNeedsSchemaDescription": "Endpoints are built on schemas. Head to the Schemas tab to define one.",
+    "emptyTitle": "No endpoints yet",
+    "emptyDescription": "Turn one of your schemas into a callable REST endpoint.",
+    "schemaLabel": "Schema:",
+    "readableGet": "Readable (GET)",
+    "writableMethods": "Writable (POST/PUT/PATCH)",
+    "deleteConfirm": "Delete endpoint \"{{name}}\"? Its stored records will be removed.",
+    "deleteFailed": "Failed to delete",
+    "modal": {
+      "newTitle": "New endpoint",
+      "editTitle": "Edit endpoint",
+      "description": "Expose a schema as a REST resource.",
+      "slugUrl": "Slug (URL)",
+      "namePlaceholder": "Notes",
+      "slugPlaceholder": "notes",
+      "selectSchema": "Select a schema...",
+      "allowedMethods": "Allowed methods",
+      "readableFields": "Readable fields",
+      "readableHint": "Returned by GET",
+      "writableFields": "Writable fields",
+      "writableHint": "Accepted by writes",
+      "create": "Create endpoint",
+      "selectSchemaError": "Select a schema",
+      "readableRequired": "Select at least one readable field, or turn off GET in Methods.",
+      "writableRequired": "Select at least one writable field, or turn off the write methods (POST/PUT/PATCH)."
+    }
+  },
+  "tokens": {
+    "title": "Request Tokens",
+    "description": "Request tokens authenticate external calls to your endpoints. Each is scoped to the endpoints and permissions you choose.",
+    "new": "+ New request token",
+    "loading": "Loading request tokens...",
+    "emptyNeedsEndpointTitle": "Create an endpoint first",
+    "emptyNeedsEndpointDescription": "Request tokens grant access to specific endpoints. Create one in the Endpoints tab.",
+    "emptyTitle": "No request tokens yet",
+    "emptyDescription": "Mint a request token to start calling your endpoints from anywhere.",
+    "revoked": "revoked",
+    "revealing": "Revealing...",
+    "hide": "Hide",
+    "view": "View",
+    "reEnable": "Re-enable",
+    "revoke": "Revoke",
+    "endpointAccess": "Endpoint access",
+    "noEndpoints": "no endpoints",
+    "deleteConfirm": "Delete token \"{{name}}\"? Calls using it will stop working.",
+    "updateFailed": "Failed to update",
+    "deleteFailed": "Failed to delete",
+    "revealFailed": "Failed to reveal token",
+    "modal": {
+      "createdTitle": "Request token created",
+      "createdDescription": "Copy this token now, or view it again anytime from the token list below.",
+      "bearerHint": "Use it as a bearer token:",
+      "newTitle": "New request token",
+      "editTitle": "Edit request token",
+      "newDescription": "Choose which endpoints this request token can reach and what it can do.",
+      "editDescription": "Update the name and which endpoints this request token can reach. The token value stays the same.",
+      "name": "Request token name",
+      "namePlaceholder": "Production server",
+      "permissions": "Endpoint permissions",
+      "read": "Read",
+      "write": "Write",
+      "grantRequired": "Grant access to at least one endpoint",
+      "create": "Create token"
+    }
+  },
+  "entries": {
+    "title": "Entries",
+    "description": "Browse and edit the data stored in each of your schemas.",
+    "loadingSchemas": "Loading schemas...",
+    "emptySchemasTitle": "No schemas yet",
+    "emptySchemasDescription": "Entries live inside schemas. Create a schema first, then manage its data here.",
+    "manage": "Manage entries →",
+    "editor": {
+      "headingSuffix": "entries",
+      "description": "Changes are staged locally until you save them.",
+      "backAria": "Back to all schemas",
+      "importJson": "Import JSON",
+      "addEntry": "+ Add entry",
+      "importDisabledTitle": "Save or discard your changes before importing",
+      "unsaved_one": "{{count}} unsaved change",
+      "unsaved_other": "{{count}} unsaved changes",
+      "discard": "Discard",
+      "loading": "Loading entries...",
+      "emptyTitle": "No entries yet",
+      "emptyDescription": "Add entries by hand or import a JSON file that matches this schema.",
+      "tableIndex": "#",
+      "saved_one": "Saved {{count}} change",
+      "saved_other": "Saved {{count}} changes",
+      "nothingSaved": "Nothing was saved — fix the highlighted entries and try again",
+      "saveFailed": "Failed to save changes",
+      "invalidJson": "That file is not valid JSON",
+      "expectedArray": "Expected a JSON array of entries",
+      "imported_one": "Imported {{count}} entry",
+      "imported_other": "Imported {{count}} entries",
+      "importedPartial": "Imported {{imported}} of {{total}} — {{rejected}} rejected",
+      "importFailed": "Import failed",
+      "discardConfirm": "Discard all staged changes?",
+      "editAria": "Edit entry",
+      "deleteAria": "Delete entry",
+      "status": {
+        "new": "new",
+        "modified": "modified",
+        "deleted": "deleted"
+      }
+    },
+    "form": {
+      "newTitle": "New entry",
+      "editTitle": "Edit entry",
+      "schemaDescription": "Schema: {{name}}",
+      "noneOption": "— none —"
+    },
+    "importResult": {
+      "partialTitle": "Import partially completed",
+      "failedTitle": "Import failed",
+      "summary": "Imported <strong>{{imported}}</strong> of <strong>{{total}}</strong> entries. <strong>{{rejected}}</strong> {{rejectedLabel}} rejected.",
+      "entryWas": "entry was",
+      "entriesWere": "entries were",
+      "warning": "The rejected entries are only available right now — once you close this dialog they cannot be retrieved. Download them to fix and re-import later.",
+      "download": "Download rejected entries",
+      "downloaded": "Downloaded ✓ (download again)"
+    },
+    "unsaved": {
+      "title": "Unsaved changes",
+      "description": "You have unsaved changes in this schema's entries.",
+      "body": "If you leave now, your staged edits will be discarded. Save your changes first to keep them.",
+      "stay": "Stay",
+      "leave": "Discard & leave"
+    }
+  },
+  "api": {
+    "errors": {
+      "badRequest": "Bad request",
+      "unauthorized": "Unauthorized",
+      "forbidden": "Forbidden",
+      "notFound": "Not found",
+      "methodNotAllowed": "Method not allowed",
+      "conflict": "Conflict",
+      "rateLimitExceeded": "Rate limit exceeded",
+      "serverError": "Internal server error",
+      "validationFailed": "Validation failed",
+      "emailRegistered": "Email already registered",
+      "invalidCredentials": "Invalid email or password",
+      "fieldNamesUnique": "Field names must be unique",
+      "schemaSlugExists": "You already have a schema with that slug",
+      "schemaNotFound": "Schema not found",
+      "schemaInUse": "Schema is used by {{count}} endpoint(s). Delete those endpoints first.",
+      "unknownSchema": "Unknown schema",
+      "endpointFieldsInvalid": "Readable/writable fields must belong to the schema",
+      "endpointSlugExists": "You already have an endpoint with that slug",
+      "endpointNotFound": "Endpoint not found",
+      "tokenNotFound": "Token not found",
+      "tokenRevealUnsupported": "This token was created before viewing was supported — revoke it and create a new one",
+      "endpointsUnknown": "Some endpoints are unknown or not yours",
+      "missingBearer": "Missing bearer access token",
+      "invalidBearer": "Invalid or revoked access token",
+      "tokenEndpointForbidden": "This token is not authorized for this endpoint",
+      "methodDisabled": "{{method}} is not enabled for this endpoint",
+      "writePermissionMissing": "This token lacks write permission",
+      "readPermissionMissing": "This token lacks read permission",
+      "recordNotFound": "Record not found",
+      "unknownEntry": "Unknown entry",
+      "entriesInvalid": "Some entries are invalid — nothing was saved",
+      "duplicateBatch": "duplicate value for unique field \"{{field}}\" — an earlier entry in the file already uses it",
+      "duplicateStored": "value for unique field \"{{field}}\" already exists in your stored entries"
+    }
+  },
+  "validation": {
+    "passwordMin": "Password must be at least 8 characters",
+    "fieldName": "Use letters, numbers, underscores; must not start with a number",
+    "invalidSlug": "Invalid slug",
+    "schemaFieldsMin": "Add at least one field",
+    "endpointMethodsMin": "Enable at least one method",
+    "tokenGrantsMin": "Grant access to at least one endpoint",
+    "nothingToSave": "Nothing to save",
+    "tooManyChanges": "Too many changes in one save (max 2000)",
+    "emptyImport": "The file contains no entries",
+    "tooManyImport": "Too many entries in one import (max 5000)",
+    "noTokenFields": "No fields to update",
+    "record": {
+      "bodyObject": "Body must be a JSON object",
+      "required": "is required",
+      "string": "must be a string",
+      "number": "must be a number",
+      "boolean": "must be a boolean",
+      "date": "must be a valid date",
+      "unsupported": "unsupported type",
+      "oneOf": "must be one of: {{values}}",
+      "unique": "must be unique"
+    }
+  }
+}

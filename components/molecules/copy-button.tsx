@@ -1,19 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/client/util";
 import { CopyIcon } from "@/components/atoms/icons/copy-icon";
 import { CheckIcon } from "@/components/atoms/icons/check-icon";
 
 export function CopyButton({
   value,
-  label = "Copy",
+  label,
   className,
 }: {
   value: string;
   label?: string;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -38,12 +40,12 @@ export function CopyButton({
       {copied ? (
         <>
           <CheckIcon size={14} />
-          Copied
+          {t("common.copied")}
         </>
       ) : (
         <>
           <CopyIcon size={14} />
-          {label}
+          {label ?? t("common.copy")}
         </>
       )}
     </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useCreateToken, useUpdateToken } from "@/lib/client/hooks";
 import { ApiError } from "@/lib/client/api";
 import type { AccessToken, Endpoint, TokenGrant } from "@/lib/client/types";
@@ -31,6 +32,7 @@ export function TokenFormModal({
   onClose: () => void;
   endpoints: Endpoint[];
 }) {
+  const { t } = useTranslation();
   const create = useCreateToken();
   const update = useUpdateToken();
   const isEdit = !!editing;
@@ -60,7 +62,7 @@ export function TokenFormModal({
       .map(([endpointId, g]) => ({ endpointId, read: g.read, write: g.write }));
 
     if (selected.length === 0) {
-      setError("Grant access to at least one endpoint");
+      setError(t("tokens.modal.grantRequired"));
       return;
     }
 
@@ -73,32 +75,32 @@ export function TokenFormModal({
         setSecret(res.plaintext);
       }
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Something went wrong");
+      setError(err instanceof ApiError ? err.message : t("common.somethingWentWrong"));
     }
   }
 
   // --- Secret reveal screen (create only) ---
   if (secret) {
     return (
-      <Modal open onClose={onClose} title="Request token created" widthClass="max-w-xl">
+      <Modal open onClose={onClose} title={t("tokens.modal.createdTitle")} widthClass="max-w-xl">
         <div className="space-y-4">
           <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            Copy this token now, or view it again anytime from the token list below.
+            {t("tokens.modal.createdDescription")}
           </div>
           <div className="flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-3">
             <code className="scroll-thin flex-1 overflow-x-auto whitespace-nowrap text-sm text-green-300">
               {secret}
             </code>
-            <CopyButton value={secret} label="Copy" />
+            <CopyButton value={secret} />
           </div>
           <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
-            Use it as a bearer token:
+            {t("tokens.modal.bearerHint")}
             <pre className="scroll-thin mt-1 overflow-x-auto text-slate-700">
               {`Authorization: Bearer ${secret}`}
             </pre>
           </div>
           <div className="flex justify-end">
-            <Button onClick={onClose}>Done</Button>
+            <Button onClick={onClose}>{t("common.done")}</Button>
           </div>
         </div>
       </Modal>
@@ -110,27 +112,27 @@ export function TokenFormModal({
     <Modal
       open
       onClose={onClose}
-      title={isEdit ? "Edit request token" : "New request token"}
+      title={isEdit ? t("tokens.modal.editTitle") : t("tokens.modal.newTitle")}
       description={
         isEdit
-          ? "Update the name and which endpoints this request token can reach. The token value stays the same."
-          : "Choose which endpoints this request token can reach and what it can do."
+          ? t("tokens.modal.editDescription")
+          : t("tokens.modal.newDescription")
       }
       widthClass="max-w-xl"
     >
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <Label>Request token name</Label>
+          <Label>{t("tokens.modal.name")}</Label>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Production server"
+            placeholder={t("tokens.modal.namePlaceholder")}
             required
           />
         </div>
 
         <div>
-          <Label>Endpoint permissions</Label>
+          <Label>{t("tokens.modal.permissions")}</Label>
           <div className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200">
             {endpoints.map((ep) => {
               const g = grants[ep.id] ?? { read: false, write: false };
@@ -149,14 +151,14 @@ export function TokenFormModal({
                         checked={g.read}
                         onChange={(e) => setGrant(ep.id, { read: e.target.checked })}
                       />
-                      Read
+                      {t("tokens.modal.read")}
                     </label>
                     <label className="flex items-center gap-1.5 text-sm text-slate-600">
                       <Checkbox
                         checked={g.write}
                         onChange={(e) => setGrant(ep.id, { write: e.target.checked })}
                       />
-                      Write
+                      {t("tokens.modal.write")}
                     </label>
                   </div>
                 </div>
@@ -171,11 +173,11 @@ export function TokenFormModal({
 
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button type="submit" disabled={pending}>
             {pending && <Spinner />}
-            {isEdit ? "Save changes" : "Create token"}
+            {isEdit ? t("common.saveChanges") : t("tokens.modal.create")}
           </Button>
         </div>
       </form>

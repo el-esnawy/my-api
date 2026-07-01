@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useSignIn, keys } from "@/lib/client/hooks";
 import { ApiError } from "@/lib/client/api";
 import { Button } from "@/components/atoms/button";
@@ -14,6 +15,7 @@ import { Spinner } from "@/components/atoms/spinner";
 export function SignInForm() {
   const router = useRouter();
   const search = useSearchParams();
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const signIn = useSignIn();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -34,7 +36,7 @@ export function SignInForm() {
         setError(err.message);
         if (err.fields) setFieldErrors(err.fields);
       } else {
-        setError("Something went wrong. Please try again.");
+        setError(t("common.somethingWentWrongRetry"));
       }
     }
   }
@@ -42,26 +44,26 @@ export function SignInForm() {
   return (
     <form onSubmit={onSubmit} className="mt-6 space-y-4">
       <div>
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t("auth.fields.email")}</Label>
         <Input
           id="email"
           type="email"
           required
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
-          placeholder="you@example.com"
+          placeholder={t("auth.placeholders.email")}
         />
         <ErrorText>{fieldErrors.email}</ErrorText>
       </div>
       <div>
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t("auth.fields.password")}</Label>
         <Input
           id="password"
           type="password"
           required
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
-          placeholder="Your password"
+          placeholder={t("auth.signIn.passwordPlaceholder")}
         />
         <ErrorText>{fieldErrors.password}</ErrorText>
       </div>
@@ -72,7 +74,7 @@ export function SignInForm() {
 
       <Button type="submit" size="lg" className="w-full" disabled={signIn.isPending}>
         {signIn.isPending && <Spinner />}
-        Sign in
+        {t("common.signIn")}
       </Button>
     </form>
   );

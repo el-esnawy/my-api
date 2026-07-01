@@ -1,4 +1,5 @@
 import type { FieldType } from "@/lib/models/DataSchema";
+import type { ApiTranslator } from "@/lib/api/respond";
 
 export interface SchemaFieldLike {
   name: string;
@@ -13,6 +14,8 @@ export interface ValidateOptions {
   partial?: boolean;
   /** If set, only these field names may be written; others are rejected. */
   writableFields?: string[];
+  /** Request-specific translator for user-facing validation messages. */
+  t?: ApiTranslator;
 }
 
 export interface ValidateResult {
@@ -31,9 +34,22 @@ export function validateRecordData(
   options: ValidateOptions = {}
 ): ValidateResult {
   const { partial = false, writableFields } = options;
+  const t = options.t ?? ((key: string, values?: Record<string, unknown>) => {
+    if (key === "validation.record.oneOf") return `must be one of: ${values?.values ?? ""}`;
+    const fallback: Record<string, string> = {
+      "validation.record.bodyObject": "Body must be a JSON object",
+      "validation.record.required": "is required",
+      "validation.record.string": "must be a string",
+      "validation.record.number": "must be a number",
+      "validation.record.boolean": "must be a boolean",
+      "validation.record.date": "must be a valid date",
+      "validation.record.unsupported": "unsupported type",
+    };
+    return fallback[key] ?? key;
+  });
 
   if (typeof input !== "object" || input === null || Array.isArray(input)) {
-    return { ok: false, errors: { _root: "Body must be a JSON object" } };
+    return { ok: false, errors: { _root: t("validation.record.bodyObject") } };
   }
 
   const raw = input as Record<string, unknown>;
@@ -51,7 +67,7 @@ export function validateRecordData(
 
     if (!present) {
       if (!partial && field.required) {
-        errors[field.name] = "is required";
+        errors[field.name] = t("validation.record.required");
       }
       continue;
     }
@@ -60,12 +76,12 @@ export function validateRecordData(
 
     // Allow explicit null to clear an optional field.
     if (rawValue === null) {
-      if (field.required && !partial) errors[field.name] = "is required";
+      if (field.required && !partial) errors[field.name] = t("validation.record.required");
       else value[field.name] = null;
       continue;
     }
 
-    const coerced = coerce(field.type, rawValue);
+    const coerced = coerce(field.type, rawValue, t);
     if (coerced.error) {
       errors[field.name] = coerced.error;
       continue;
@@ -73,7 +89,9 @@ export function validateRecordData(
 
     if (field.enumValues && field.enumValues.length > 0) {
       if (!field.enumValues.includes(String(coerced.value))) {
-        errors[field.name] = `must be one of: ${field.enumValues.join(", ")}`;
+        errors[field.name] = t("validation.record.oneOf", {
+          values: field.enumValues.join(", "),
+        });
         continue;
       }
     }
@@ -87,14 +105,15 @@ export function validateRecordData(
 
 function coerce(
   type: FieldType,
-  raw: unknown
+  raw: unknown,
+  t: ApiTranslator
 ): { value?: unknown; error?: string } {
   switch (type) {
     case "string":
       if (typeof raw === "string") return { value: raw };
       if (typeof raw === "number" || typeof raw === "boolean")
         return { value: String(raw) };
-      return { error: "must be a string" };
+      return { error: t("validation.record.string") };
 
     case "number": {
       if (typeof raw === "number" && Number.isFinite(raw)) return { value: raw };
@@ -102,14 +121,14 @@ function coerce(
         const n = Number(raw);
         if (Number.isFinite(n)) return { value: n };
       }
-      return { error: "must be a number" };
+      return { error: t("validation.record.number") };
     }
 
     case "boolean":
       if (typeof raw === "boolean") return { value: raw };
       if (raw === "true") return { value: true };
       if (raw === "false") return { value: false };
-      return { error: "must be a boolean" };
+      return { error: t("validation.record.boolean") };
 
     case "date": {
       if (raw instanceof Date && !isNaN(raw.getTime())) return { value: raw };
@@ -117,11 +136,11 @@ function coerce(
         const d = new Date(raw);
         if (!isNaN(d.getTime())) return { value: d };
       }
-      return { error: "must be a valid date" };
+      return { error: t("validation.record.date") };
     }
 
     default:
-      return { error: "unsupported type" };
+      return { error: t("validation.record.unsupported") };
   }
 }
 
@@ -130,7 +149,7 @@ function coerce(
  * undefined if the value can't be coerced to the field type.
  */
 export function coerceScalar(type: FieldType, raw: string): unknown {
-  const result = coerce(type, raw);
+  const result = coerce(type, raw, ((key: string) => key) as ApiTranslator);
   return result.error ? undefined : result.value;
 }
 

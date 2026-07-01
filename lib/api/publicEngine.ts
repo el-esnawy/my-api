@@ -3,6 +3,8 @@ import type { HttpMethod } from "@/lib/models/Endpoint";
 import { DataSchema } from "@/lib/models/DataSchema";
 import { authorizePublicRequest, type AuthSuccess } from "./publicAuth";
 import { rateLimit, rateLimitHeaders } from "./rateLimit";
+import { getRequestTranslator } from "@/i18n/server";
+import type { ApiTranslator } from "./respond";
 import type { SchemaFieldLike } from "@/lib/records/validate";
 
 /**
@@ -12,7 +14,7 @@ import type { SchemaFieldLike } from "@/lib/records/validate";
  */
 
 export type Gate =
-  | { ok: true; auth: AuthSuccess; headers: HeadersInit }
+  | { ok: true; auth: AuthSuccess; headers: HeadersInit; t: ApiTranslator }
   | { ok: false; response: NextResponse };
 
 export async function gate(
@@ -20,7 +22,8 @@ export async function gate(
   slug: string,
   method: HttpMethod
 ): Promise<Gate> {
-  const auth = await authorizePublicRequest(req, slug, method);
+  const t = await getRequestTranslator(req);
+  const auth = await authorizePublicRequest(req, slug, method, t);
   if (!auth.ok) {
     return {
       ok: false,
@@ -34,13 +37,13 @@ export async function gate(
     return {
       ok: false,
       response: NextResponse.json(
-        { error: "Rate limit exceeded" },
+        { error: t("api.errors.rateLimitExceeded") },
         { status: 429, headers }
       ),
     };
   }
 
-  return { ok: true, auth, headers };
+  return { ok: true, auth, headers, t };
 }
 
 export async function loadFields(auth: AuthSuccess): Promise<SchemaFieldLike[]> {

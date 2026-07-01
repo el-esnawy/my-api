@@ -6,6 +6,7 @@ import { loadOwnedSchema } from "@/lib/api/entries";
 import { importEntriesInput } from "@/lib/validation/schemas";
 import { validateRecordData } from "@/lib/records/validate";
 import { findUniqueConflicts } from "@/lib/records/unique";
+import { getRequestTranslator } from "@/i18n/server";
 import {
   badRequest,
   notFound,
@@ -35,19 +36,20 @@ interface RejectedEntry {
  */
 export async function POST(req: NextRequest, { params }: Params) {
   return withErrorHandling(async () => {
-    const auth = await requireSession();
+    const t = await getRequestTranslator(req);
+    const auth = await requireSession(t);
     if ("response" in auth) return auth.response;
     const { id } = await params;
 
     const body = await req.json().catch(() => null);
     const parsed = importEntriesInput.safeParse(body);
     if (!parsed.success) {
-      return badRequest("Validation failed", { fields: zodErrors(parsed.error) });
+      return badRequest(t("api.errors.validationFailed"), { fields: zodErrors(parsed.error, t) });
     }
 
     await connectDB();
     const owned = await loadOwnedSchema(id, auth.session.userId);
-    if (!owned) return notFound("Schema not found");
+    if (!owned) return notFound(t("api.errors.schemaNotFound"));
     const schemaId = String(owned.schema._id);
     const userId = auth.session.userId;
 
@@ -61,7 +63,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     // --- Field-level validation, entry by entry ---
     const valid: { index: number; data: Record<string, unknown> }[] = [];
     parsed.data.entries.forEach((entry, index) => {
-      const result = validateRecordData(owned.fields, entry);
+      const result = validateRecordData(owned.fields, entry, { t });
       if (!result.ok) {
         for (const [field, message] of Object.entries(result.errors!)) {
           reject(index, entry, field === "_root" ? message : `${field} ${message}`);
@@ -86,8 +88,8 @@ export async function POST(req: NextRequest, { params }: Params) {
         item.index,
         parsed.data.entries[item.index],
         conflict.source === "batch"
-          ? `duplicate value for unique field "${conflict.field}" — an earlier entry in the file already uses it`
-          : `value for unique field "${conflict.field}" already exists in your stored entries`
+          ? t("api.errors.duplicateBatch", { field: conflict.field })
+          : t("api.errors.duplicateStored", { field: conflict.field })
       );
     }
 

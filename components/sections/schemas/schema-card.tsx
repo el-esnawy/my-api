@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDeleteSchema } from "@/lib/client/hooks";
 import { ApiError } from "@/lib/client/api";
 import { formatDate } from "@/lib/client/util";
@@ -18,16 +19,17 @@ export function SchemaCard({
   schema: DataSchema;
   onEdit: () => void;
 }) {
+  const { t, i18n } = useTranslation();
   const del = useDeleteSchema();
   const [error, setError] = useState<string | null>(null);
 
   async function onDelete() {
-    if (!confirm(`Delete schema "${schema.name}"? This cannot be undone.`)) return;
+    if (!confirm(t("schemas.deleteConfirm", { name: schema.name }))) return;
     setError(null);
     try {
       await del.mutateAsync(schema.id);
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Failed to delete");
+      setError(e instanceof ApiError ? e.message : t("schemas.deleteFailed"));
     }
   }
 
@@ -44,7 +46,7 @@ export function SchemaCard({
           <button
             onClick={onEdit}
             className="rounded-md p-1.5 text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-600"
-            aria-label="Edit schema"
+            aria-label={t("schemas.editAria")}
           >
             <PencilIcon />
           </button>
@@ -52,7 +54,7 @@ export function SchemaCard({
             onClick={onDelete}
             disabled={del.isPending}
             className="rounded-md p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-            aria-label="Delete schema"
+            aria-label={t("schemas.deleteAria")}
           >
             <TrashIcon />
           </button>
@@ -68,15 +70,17 @@ export function SchemaCard({
             <span className="font-mono text-slate-700">{f.name}</span>
             <span className="flex items-center gap-1.5">
               <Badge>{f.type}</Badge>
-              {f.required && <Badge tone="amber">required</Badge>}
-              {f.unique && <Badge tone="green">unique</Badge>}
+              {f.required && <Badge tone="amber">{t("common.required")}</Badge>}
+              {f.unique && <Badge tone="green">{t("common.unique")}</Badge>}
             </span>
           </div>
         ))}
       </div>
 
       {error && <ErrorText>{error}</ErrorText>}
-      <p className="mt-4 text-xs text-slate-400">Created {formatDate(schema.createdAt)}</p>
+      <p className="mt-4 text-xs text-slate-400">
+        {t("common.created", { date: formatDate(schema.createdAt, i18n.language) })}
+      </p>
     </Card>
   );
 }

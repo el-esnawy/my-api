@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCreateSchema, useUpdateSchema } from '@/lib/client/hooks';
 import { ApiError } from '@/lib/client/api';
 import { slugify } from '@/lib/client/util';
@@ -57,6 +58,7 @@ function draftFromSchema(s?: DataSchema): {
 }
 
 export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; onClose: () => void }) {
+  const { t } = useTranslation();
   const create = useCreateSchema();
   const update = useUpdateSchema();
   const isEdit = !!editing;
@@ -101,7 +103,7 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
         setError(err.message);
         if (err.fields) setFieldErrors(err.fields);
       } else {
-        setError('Something went wrong');
+        setError(t('common.somethingWentWrong'));
       }
     }
   }
@@ -110,8 +112,8 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
     <Modal
       open
       onClose={onClose}
-      title={isEdit ? 'Edit schema' : 'New schema'}
-      description='Describe a data type with typed fields.'
+      title={isEdit ? t('schemas.modal.editTitle') : t('schemas.modal.newTitle')}
+      description={t('schemas.modal.description')}
     >
       <form
         onSubmit={onSubmit}
@@ -119,26 +121,26 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
       >
         <div className='grid grid-cols-2 gap-3'>
           <div>
-            <Label>Name</Label>
+            <Label>{t('common.name')}</Label>
             <Input
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
                 if (!slugEdited) setSlug(slugify(e.target.value));
               }}
-              placeholder='Note'
+              placeholder={t('schemas.modal.namePlaceholder')}
               required
             />
           </div>
           <div>
-            <Label>Slug</Label>
+            <Label>{t('common.slug')}</Label>
             <Input
               value={slug}
               onChange={(e) => {
                 setSlugEdited(true);
                 setSlug(slugify(e.target.value));
               }}
-              placeholder='note'
+              placeholder={t('schemas.modal.slugPlaceholder')}
               required
               className='font-mono'
             />
@@ -147,13 +149,13 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
 
         <div>
           <div className='flex items-center justify-between'>
-            <Label className='mb-0'>Fields</Label>
+            <Label className='mb-0'>{t('schemas.modal.fields')}</Label>
             <button
               type='button'
               onClick={() => setFields((p) => [...p, emptyField()])}
               className='text-sm font-medium text-indigo-600 hover:text-indigo-500'
             >
-              + Add field
+              {t('schemas.modal.addField')}
             </button>
           </div>
 
@@ -166,7 +168,7 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
                 <Input
                   value={field.name}
                   onChange={(e) => updateField(i, { name: e.target.value })}
-                  placeholder='field_name'
+                  placeholder={t('schemas.modal.fieldNamePlaceholder')}
                   className='h-9 flex-1 font-mono'
                   required
                 />
@@ -175,12 +177,12 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
                   onChange={(e) => updateField(i, { type: e.target.value as FieldType })}
                   className='h-9 w-28'
                 >
-                  {FIELD_TYPES.map((t) => (
+                  {FIELD_TYPES.map((fieldType) => (
                     <option
-                      key={t}
-                      value={t}
+                      key={fieldType}
+                      value={fieldType}
                     >
-                      {t}
+                      {t(`common.fieldTypes.${fieldType}`)}
                     </option>
                   ))}
                 </Select>
@@ -189,21 +191,21 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
                     checked={field.required}
                     onChange={(e) => updateField(i, { required: e.target.checked })}
                   />
-                  required
+                  {t('common.required')}
                 </label>
                 <label className='flex items-center gap-1.5 text-xs text-slate-600'>
                   <Checkbox
                     checked={field.unique}
                     onChange={(e) => updateField(i, { unique: e.target.checked })}
                   />
-                  unique
+                  {t('common.unique')}
                 </label>
                 <button
                   type='button'
                   onClick={() => setFields((p) => p.filter((_, idx) => idx !== i))}
                   disabled={fields.length === 1}
                   className='rounded-md p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-30'
-                  aria-label='Remove field'
+                  aria-label={t('schemas.modal.removeField')}
                 >
                   <CloseIcon size={16} />
                 </button>
@@ -215,8 +217,7 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
 
         {isEdit && (
           <p className='rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500'>
-            Editing fields won&apos;t change records already stored. Removing a field just hides it from future reads
-            and writes.
+            {t('schemas.modal.editWarning')}
           </p>
         )}
 
@@ -228,14 +229,14 @@ export function SchemaFormModal({ editing, onClose }: { editing?: DataSchema; on
             variant='secondary'
             onClick={onClose}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             type='submit'
             disabled={pending}
           >
             {pending && <Spinner />}
-            {isEdit ? 'Save changes' : 'Create schema'}
+            {isEdit ? t('common.saveChanges') : t('schemas.modal.create')}
           </Button>
         </div>
       </form>

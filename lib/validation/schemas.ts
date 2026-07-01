@@ -10,7 +10,7 @@ export const fieldNameRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 // --- Auth ---
 export const signUpInput = z.object({
   email: z.string().email().toLowerCase(),
-  password: z.string().min(8, "Password must be at least 8 characters").max(200),
+  password: z.string().min(8, "validation.passwordMin").max(200),
   name: z.string().trim().max(120).optional(),
 });
 
@@ -21,7 +21,7 @@ export const signInInput = z.object({
 
 // --- Schemas (data types) ---
 export const schemaFieldInput = z.object({
-  name: z.string().trim().regex(fieldNameRegex, "Use letters, numbers, underscores; must not start with a number"),
+  name: z.string().trim().regex(fieldNameRegex, "validation.fieldName"),
   type: z.enum(FIELD_TYPES),
   required: z.boolean().optional().default(false),
   unique: z.boolean().optional().default(false),
@@ -30,8 +30,8 @@ export const schemaFieldInput = z.object({
 
 export const createSchemaInput = z.object({
   name: z.string().trim().min(1).max(80),
-  slug: z.string().trim().toLowerCase().regex(slugRegex, "Invalid slug").max(60),
-  fields: z.array(schemaFieldInput).min(1, "Add at least one field"),
+  slug: z.string().trim().toLowerCase().regex(slugRegex, "validation.invalidSlug").max(60),
+  fields: z.array(schemaFieldInput).min(1, "validation.schemaFieldsMin"),
 });
 
 export const updateSchemaInput = createSchemaInput.partial();
@@ -39,9 +39,9 @@ export const updateSchemaInput = createSchemaInput.partial();
 // --- Endpoints ---
 export const createEndpointInput = z.object({
   name: z.string().trim().min(1).max(80),
-  slug: z.string().trim().toLowerCase().regex(slugRegex, "Invalid slug").max(60),
+  slug: z.string().trim().toLowerCase().regex(slugRegex, "validation.invalidSlug").max(60),
   schemaId: z.string().min(1),
-  methods: z.array(z.enum(HTTP_METHODS)).min(1, "Enable at least one method"),
+  methods: z.array(z.enum(HTTP_METHODS)).min(1, "validation.endpointMethodsMin"),
   readableFields: z.array(z.string()).default([]),
   writableFields: z.array(z.string()).default([]),
 });
@@ -57,7 +57,7 @@ export const tokenGrantInput = z.object({
 
 export const createTokenInput = z.object({
   name: z.string().trim().min(1).max(80),
-  grants: z.array(tokenGrantInput).min(1, "Grant access to at least one endpoint"),
+  grants: z.array(tokenGrantInput).min(1, "validation.tokenGrantsMin"),
 });
 
 // --- Entries (schema-owned records managed from the dashboard) ---
@@ -73,18 +73,18 @@ export const batchEntriesInput = z
   })
   .refine(
     (v) => v.creates.length + v.updates.length + v.deletes.length > 0,
-    { message: "Nothing to save" }
+    { message: "validation.nothingToSave" }
   )
   .refine(
     (v) => v.creates.length + v.updates.length + v.deletes.length <= 2000,
-    { message: "Too many changes in one save (max 2000)" }
+    { message: "validation.tooManyChanges" }
   );
 
 export const importEntriesInput = z.object({
   entries: z
     .array(z.record(z.unknown()))
-    .min(1, "The file contains no entries")
-    .max(5000, "Too many entries in one import (max 5000)"),
+    .min(1, "validation.emptyImport")
+    .max(5000, "validation.tooManyImport"),
 });
 
 export const updateTokenInput = z
@@ -93,7 +93,7 @@ export const updateTokenInput = z
     grants: z.array(tokenGrantInput).min(1).optional(),
     revoked: z.boolean().optional(),
   })
-  .refine((v) => Object.keys(v).length > 0, { message: "No fields to update" });
+  .refine((v) => Object.keys(v).length > 0, { message: "validation.noTokenFields" });
 
 export type SignUpInput = z.infer<typeof signUpInput>;
 export type SignInInput = z.infer<typeof signInInput>;

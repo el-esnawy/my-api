@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useUpdateToken, useDeleteToken, useRevealToken } from "@/lib/client/hooks";
 import { ApiError } from "@/lib/client/api";
 import { formatDate } from "@/lib/client/util";
@@ -20,6 +21,7 @@ export function TokenCard({
   endpointById: Map<string, Endpoint>;
   onEdit: () => void;
 }) {
+  const { t, i18n } = useTranslation();
   const update = useUpdateToken();
   const del = useDeleteToken();
   const reveal = useRevealToken();
@@ -31,17 +33,17 @@ export function TokenCard({
     try {
       await update.mutateAsync({ id: token.id, revoked: !token.revoked });
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Failed to update");
+      setError(e instanceof ApiError ? e.message : t("tokens.updateFailed"));
     }
   }
 
   async function onDelete() {
-    if (!confirm(`Delete token "${token.name}"? Calls using it will stop working.`)) return;
+    if (!confirm(t("tokens.deleteConfirm", { name: token.name }))) return;
     setError(null);
     try {
       await del.mutateAsync(token.id);
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Failed to delete");
+      setError(e instanceof ApiError ? e.message : t("tokens.deleteFailed"));
     }
   }
 
@@ -55,7 +57,7 @@ export function TokenCard({
       const value = await reveal.mutateAsync(token.id);
       setRevealed(value);
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Failed to reveal token");
+      setError(e instanceof ApiError ? e.message : t("tokens.revealFailed"));
     }
   }
 
@@ -65,7 +67,7 @@ export function TokenCard({
         <div>
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-slate-900">{token.name}</h3>
-            {token.revoked && <Badge tone="red">revoked</Badge>}
+            {token.revoked && <Badge tone="red">{t("tokens.revoked")}</Badge>}
           </div>
           <code className="mt-1 inline-block text-sm text-slate-500">
             {token.tokenPrefix}…••••
@@ -78,16 +80,16 @@ export function TokenCard({
             onClick={onToggleReveal}
             disabled={reveal.isPending}
           >
-            {reveal.isPending ? "Revealing…" : revealed ? "Hide" : "View"}
+            {reveal.isPending ? t("tokens.revealing") : revealed ? t("tokens.hide") : t("tokens.view")}
           </Button>
           <Button size="sm" variant="secondary" onClick={onEdit}>
-            Edit
+            {t("common.edit")}
           </Button>
           <Button size="sm" variant="secondary" onClick={onRevoke} disabled={update.isPending}>
-            {token.revoked ? "Re-enable" : "Revoke"}
+            {token.revoked ? t("tokens.reEnable") : t("tokens.revoke")}
           </Button>
           <Button size="sm" variant="dangerGhost" onClick={onDelete} disabled={del.isPending}>
-            Delete
+            {t("common.delete")}
           </Button>
         </div>
       </div>
@@ -103,11 +105,11 @@ export function TokenCard({
 
       <div className="mt-4">
         <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-          Endpoint access
+          {t("tokens.endpointAccess")}
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           {token.grants.length === 0 ? (
-            <span className="text-sm text-slate-400">no endpoints</span>
+            <span className="text-sm text-slate-400">{t("tokens.noEndpoints")}</span>
           ) : (
             token.grants.map((g) => {
               const ep = endpointById.get(g.endpointId);
@@ -116,7 +118,7 @@ export function TokenCard({
                   key={g.endpointId}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-sm"
                 >
-                  <span className="font-mono text-slate-700">{ep?.slug ?? "deleted"}</span>
+                  <span className="font-mono text-slate-700">{ep?.slug ?? t("common.deleted")}</span>
                   {g.read && <Badge tone="green">R</Badge>}
                   {g.write && <Badge tone="indigo">W</Badge>}
                 </span>
@@ -128,7 +130,8 @@ export function TokenCard({
 
       {error && <ErrorText>{error}</ErrorText>}
       <p className="mt-4 text-xs text-slate-400">
-        Created {formatDate(token.createdAt)} · Last used {formatDate(token.lastUsedAt)}
+        {t("common.created", { date: formatDate(token.createdAt, i18n.language) })} ·{" "}
+        {t("common.lastUsed", { date: formatDate(token.lastUsedAt, i18n.language) })}
       </p>
     </Card>
   );
