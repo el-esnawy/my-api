@@ -7,7 +7,7 @@ External clients call:
 
 ```text
 /api/v1/:endpoint
-/api/v1/:endpoint/:recordId
+/api/v1/:endpoint/:id
 ```
 
 with:
@@ -21,7 +21,7 @@ Authorization: Bearer mapi_<secret>
 | File | Purpose |
 | --- | --- |
 | `app/api/v1/[endpoint]/route.ts` | List records and create records. |
-| `app/api/v1/[endpoint]/[recordId]/route.ts` | Fetch, update, patch, and delete one record. |
+| `app/api/v1/[endpoint]/[id]/route.ts` | Fetch, update, patch, and delete one record. |
 | `lib/api/publicEngine.ts` | Shared gate, rate-limit handling, schema field loading, JSON-with-headers helper. |
 | `lib/api/publicAuth.ts` | Bearer-token authorization and permission checks. |
 | `lib/api/rateLimit.ts` | Redis fixed-window rate limiter. |
@@ -55,14 +55,16 @@ If both succeed, the route receives:
 
 ## Method Behavior
 
-| Method | Route | Permission needed | Behavior |
+| Method | HTTP route | Permission needed | Behavior |
 | --- | --- | --- | --- |
-| `GET` | `/api/v1/:endpoint` | read | List records with optional filters and pagination. |
-| `POST` | `/api/v1/:endpoint` | write | Create one record. |
-| `GET` | `/api/v1/:endpoint/:recordId` | read | Fetch one record by id. |
-| `PUT` | `/api/v1/:endpoint/:recordId` | write | Full update. Required writable fields are enforced. |
-| `PATCH` | `/api/v1/:endpoint/:recordId` | write | Partial update. Required-field checks are skipped. |
-| `DELETE` | `/api/v1/:endpoint/:recordId` | write | Delete one record. |
+| `GET` | `GET /api/v1/:endpoint` | read | List records with optional filters and pagination. |
+| `POST` | `POST /api/v1/:endpoint` | write | Create one record. |
+| `PUT_MANY` | `PUT /api/v1/:endpoint` | write | Full update for many records. |
+| `PATCH_MANY` | `PATCH /api/v1/:endpoint` | write | Partial update for many records. |
+| `GET` | `GET /api/v1/:endpoint/:id` | read | Fetch one record by id. |
+| `PUT` | `PUT /api/v1/:endpoint/:id` | write | Full update. Required writable fields are enforced. |
+| `PATCH` | `PATCH /api/v1/:endpoint/:id` | write | Partial update. Required-field checks are skipped. |
+| `DELETE` | `DELETE /api/v1/:endpoint/:id` | write | Delete one record. |
 
 The endpoint must also have the method enabled in `endpoint.methods`.
 
@@ -140,7 +142,7 @@ endpoint.
 
 ## Fetching One Record
 
-`GET /api/v1/:endpoint/:recordId`
+`GET /api/v1/:endpoint/:id`
 
 Flow:
 
@@ -150,9 +152,9 @@ Flow:
 
 ```ts
 {
-  _id: recordId,
+  _id: id,
   userId: auth.userId,
-  endpointId: auth.endpoint._id
+  schemaId: auth.endpoint.schemaId
 }
 ```
 
@@ -188,14 +190,14 @@ are omitted from the request.
 
 ## Deleting Records
 
-`DELETE /api/v1/:endpoint/:recordId`
+`DELETE /api/v1/:endpoint/:id`
 
 Flow:
 
 1. Authorize as `DELETE`.
-2. Validate `recordId` shape.
-3. Delete by `_id`, `userId`, and `endpointId`.
-4. Return `{ success: true, id: recordId }`.
+2. Validate `id` shape.
+3. Delete by `_id`, `userId`, and `schemaId`.
+4. Return `{ success: true, id }`.
 
 ## Field Permissions
 
@@ -252,4 +254,3 @@ When adding public API behavior, preserve these rules:
 6. Return consistent JSON error shapes.
 7. Think through how the change interacts with endpoint methods, grants,
    readable fields, and writable fields.
-

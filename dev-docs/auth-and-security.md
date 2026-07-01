@@ -147,7 +147,7 @@ Important files:
 - `lib/api/publicEngine.ts`
 - `lib/api/rateLimit.ts`
 - `app/api/v1/[endpoint]/route.ts`
-- `app/api/v1/[endpoint]/[recordId]/route.ts`
+- `app/api/v1/[endpoint]/[id]/route.ts`
 
 ### Token Creation
 
@@ -279,4 +279,3 @@ Before merging auth-related changes, check:
 6. Are bearer tokens still stored only as hashes?
 7. Are revocation checks still live against MongoDB?
 8. Are errors specific enough for developers but not leaking sensitive internals?
-

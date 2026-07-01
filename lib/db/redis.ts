@@ -9,13 +9,14 @@ import { env } from "@/lib/env";
  */
 declare global {
   var _redisClient: Redis | undefined;
+  var _redisReadyPromise: Promise<void> | undefined;
 }
 
 function createClient(): Redis {
   const client = new Redis(env.REDIS_URL, {
     maxRetriesPerRequest: 2,
     enableOfflineQueue: false,
-    lazyConnect: false,
+    lazyConnect: true,
   });
 
   // Without a listener, ioredis throws on connection errors and can crash the
@@ -36,3 +37,32 @@ function createClient(): Redis {
 
 export const redis: Redis = global._redisClient ?? createClient();
 if (!env.isProd) global._redisClient = redis;
+
+export async function ensureRedisReady(): Promise<void> {
+  if (redis.status === "ready") return;
+
+  global._redisReadyPromise ??= new Promise<void>((resolve, reject) => {
+    const cleanup = () => {
+      redis.off("ready", onReady);
+      redis.off("error", onError);
+    };
+    const onReady = () => {
+      cleanup();
+      resolve();
+    };
+    const onError = (err: Error) => {
+      cleanup();
+      global._redisReadyPromise = undefined;
+      reject(err);
+    };
+
+    redis.once("ready", onReady);
+    redis.once("error", onError);
+
+    if (redis.status === "wait" || redis.status === "end") {
+      redis.connect().catch(onError);
+    }
+  });
+
+  await global._redisReadyPromise;
+}

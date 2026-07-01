@@ -90,7 +90,7 @@ Fields:
 Supported methods:
 
 ```ts
-["GET", "POST", "PUT", "PATCH", "DELETE"]
+["GET", "POST", "PUT", "PATCH", "DELETE", "PUT_MANY", "PATCH_MANY"]
 ```
 
 Index:
@@ -298,4 +298,3 @@ Token revoke:
 - Leaves the token metadata in place.
 - Sets `revoked: true`.
 - Public authorization rejects it immediately.
-

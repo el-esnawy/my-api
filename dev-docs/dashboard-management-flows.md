@@ -290,4 +290,3 @@ try {
 ```
 
 Use this pattern for new forms so validation errors can appear next to fields.
-

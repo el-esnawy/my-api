@@ -25,7 +25,7 @@ const METHODS: HttpMethod[] = [
 ];
 
 const methodLabels: Record<HttpMethod, string> = {
-  GET: "GET",
+  GET: "GET many",
   POST: "POST",
   PUT: "PUT",
   PATCH: "PATCH",

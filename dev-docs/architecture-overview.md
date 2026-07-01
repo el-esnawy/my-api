@@ -49,7 +49,7 @@ The app has two different API families with different authentication.
 | Family | Routes | Auth style | Used by |
 | --- | --- | --- | --- |
 | Dashboard API | `/api/auth/*`, `/api/schemas`, `/api/endpoints`, `/api/tokens` | HTTP-only session cookie | The React dashboard |
-| Public API engine | `/api/v1/[endpoint]`, `/api/v1/[endpoint]/[recordId]` | Bearer access token | External clients, curl, apps, scripts |
+| Public API engine | `/api/v1/[endpoint]`, `/api/v1/[endpoint]/[id]` | Bearer access token | External clients, curl, apps, scripts |
 
 Dashboard APIs are for managing configuration. Public API routes are the
 generated REST API that users call after they create endpoints and tokens.
@@ -154,4 +154,3 @@ Keep these rules in mind before editing:
    the plaintext once during creation.
 6. Serialized API responses must not include `passwordHash` or `tokenHash`.
 7. Middleware must remain Edge-safe and must not import Node-only dependencies.
-

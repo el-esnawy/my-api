@@ -218,7 +218,7 @@
     "emptyTitle": "Aún no hay endpoints",
     "emptyDescription": "Convierte uno de tus esquemas en un endpoint REST invocable.",
     "schemaLabel": "Esquema:",
-    "readableGet": "Legibles (GET)",
+    "readableGet": "Legibles (métodos GET)",
     "writableMethods": "Escribibles (POST/PUT/PATCH/PUT many/PATCH many)",
     "deleteConfirm": "¿Eliminar el endpoint \"{{name}}\"? Sus registros almacenados serán eliminados.",
     "deleteFailed": "No se pudo eliminar",
@@ -232,12 +232,12 @@
       "selectSchema": "Selecciona un esquema...",
       "allowedMethods": "Métodos permitidos",
       "readableFields": "Campos legibles",
-      "readableHint": "Devueltos por GET",
+      "readableHint": "Devueltos por GET y GET many",
       "writableFields": "Campos escribibles",
       "writableHint": "Aceptados en escrituras",
       "create": "Crear endpoint",
       "selectSchemaError": "Selecciona un esquema",
-      "readableRequired": "Selecciona al menos un campo legible o desactiva GET en Métodos.",
+      "readableRequired": "Selecciona al menos un campo legible o desactiva los métodos GET.",
       "writableRequired": "Selecciona al menos un campo escribible o desactiva los métodos de escritura."
     }
   },

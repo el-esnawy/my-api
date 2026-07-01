@@ -218,7 +218,7 @@
     "emptyTitle": "No endpoints yet",
     "emptyDescription": "Turn one of your schemas into a callable REST endpoint.",
     "schemaLabel": "Schema:",
-    "readableGet": "Readable (GET)",
+    "readableGet": "Readable (GET methods)",
     "writableMethods": "Writable (POST/PUT/PATCH/PUT many/PATCH many)",
     "deleteConfirm": "Delete endpoint \"{{name}}\"? Its stored records will be removed.",
     "deleteFailed": "Failed to delete",
@@ -232,12 +232,12 @@
       "selectSchema": "Select a schema...",
       "allowedMethods": "Allowed methods",
       "readableFields": "Readable fields",
-      "readableHint": "Returned by GET",
+      "readableHint": "Returned by GET and GET many",
       "writableFields": "Writable fields",
       "writableHint": "Accepted by writes",
       "create": "Create endpoint",
       "selectSchemaError": "Select a schema",
-      "readableRequired": "Select at least one readable field, or turn off GET in Methods.",
+      "readableRequired": "Select at least one readable field, or turn off the GET methods.",
       "writableRequired": "Select at least one writable field, or turn off the write methods."
     }
   },

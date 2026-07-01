@@ -10,23 +10,23 @@ import { withErrorHandling } from "@/lib/api/respond";
 
 export const runtime = "nodejs";
 
-type Params = { params: Promise<{ endpoint: string; recordId: string }> };
+type Params = { params: Promise<{ endpoint: string; id: string }> };
 
-/** GET /api/v1/:endpoint/:recordId — fetch one record. */
+/** GET /api/v1/:endpoint/:id — fetch one record. */
 export async function GET(req: NextRequest, { params }: Params) {
   return withErrorHandling(async () => {
-    const { endpoint: slug, recordId } = await params;
+    const { endpoint: slug, id } = await params;
     const g = await gate(req, slug, "GET");
     if (!g.ok) return g.response;
     const { auth, headers, t } = g;
 
-    if (!isValidObjectId(recordId)) {
+    if (!isValidObjectId(id)) {
       return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
     }
 
     await connectDB();
     const rec = await RecordModel.findOne({
-      _id: recordId,
+      _id: id,
       userId: auth.userId,
       schemaId: auth.endpoint.schemaId,
     });
@@ -49,18 +49,18 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 async function applyUpdate(req: NextRequest, params: Params["params"], method: HttpMethod) {
   return withErrorHandling(async () => {
-    const { endpoint: slug, recordId } = await params;
+    const { endpoint: slug, id } = await params;
     const g = await gate(req, slug, method);
     if (!g.ok) return g.response;
     const { auth, headers, t } = g;
 
-    if (!isValidObjectId(recordId)) {
+    if (!isValidObjectId(id)) {
       return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
     }
 
     await connectDB();
     const rec = await RecordModel.findOne({
-      _id: recordId,
+      _id: id,
       userId: auth.userId,
       schemaId: auth.endpoint.schemaId,
     });
@@ -112,36 +112,36 @@ async function applyUpdate(req: NextRequest, params: Params["params"], method: H
   });
 }
 
-/** PUT /api/v1/:endpoint/:recordId — full update. */
+/** PUT /api/v1/:endpoint/:id — full update. */
 export function PUT(req: NextRequest, { params }: Params) {
   return applyUpdate(req, params, "PUT");
 }
 
-/** PATCH /api/v1/:endpoint/:recordId — partial update. */
+/** PATCH /api/v1/:endpoint/:id — partial update. */
 export function PATCH(req: NextRequest, { params }: Params) {
   return applyUpdate(req, params, "PATCH");
 }
 
-/** DELETE /api/v1/:endpoint/:recordId — remove a record. */
+/** DELETE /api/v1/:endpoint/:id — remove a record. */
 export async function DELETE(req: NextRequest, { params }: Params) {
   return withErrorHandling(async () => {
-    const { endpoint: slug, recordId } = await params;
+    const { endpoint: slug, id } = await params;
     const g = await gate(req, slug, "DELETE");
     if (!g.ok) return g.response;
     const { auth, headers, t } = g;
 
-    if (!isValidObjectId(recordId)) {
+    if (!isValidObjectId(id)) {
       return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
     }
 
     await connectDB();
     const deleted = await RecordModel.findOneAndDelete({
-      _id: recordId,
+      _id: id,
       userId: auth.userId,
       schemaId: auth.endpoint.schemaId,
     });
     if (!deleted) return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
 
-    return jsonWithHeaders({ success: true, id: recordId }, 200, headers);
+    return jsonWithHeaders({ success: true, id }, 200, headers);
   });
 }

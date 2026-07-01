@@ -30,7 +30,7 @@ app/
   (dashboard)/dashboard/{schemas,endpoints,tokens}
   api/auth/{sign-up,sign-in,sign-out,me}
   api/{schemas,endpoints,tokens}        dashboard CRUD (cookie auth)
-  api/v1/[endpoint]/[[...recordId]]     PUBLIC dynamic REST engine (token auth)
+  api/v1/[endpoint] and /[id]           PUBLIC dynamic REST engine (token auth)
 lib/
   db/{mongoose,redis} · models/* · auth/* · validation/* · records/* · api/*
 ```
@@ -71,7 +71,7 @@ Open http://localhost:3000, sign up, and you'll land on the dashboard.
 ## Try a custom endpoint
 
 1. **Schemas** → create `Note` with fields `title` (string, required), `body` (string), `done` (boolean).
-2. **Endpoints** → create endpoint slug `notes` from the `Note` schema; enable `GET/POST/PUT/DELETE`;
+2. **Endpoints** → create endpoint slug `notes` from the `Note` schema; enable `GET many/POST/PUT/DELETE`;
    mark fields readable/writable. The page shows your base URL: `http://localhost:3000/api/v1/notes`.
 3. **Request Tokens** → create a request token scoped to `notes` with read + write. Copy it now,
    or view it again anytime from the token list.
@@ -86,6 +86,9 @@ curl -X POST http://localhost:3000/api/v1/notes \
 
 # List records
 curl http://localhost:3000/api/v1/notes -H "Authorization: Bearer $TOKEN"
+
+# Fetch one record by id
+curl http://localhost:3000/api/v1/notes/<id> -H "Authorization: Bearer $TOKEN"
 
 # Update / delete by id
 curl -X PUT http://localhost:3000/api/v1/notes/<id> \

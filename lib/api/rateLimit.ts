@@ -1,4 +1,4 @@
-import { redis } from "@/lib/db/redis";
+import { ensureRedisReady, redis } from "@/lib/db/redis";
 import { env } from "@/lib/env";
 
 export interface RateLimitResult {
@@ -19,6 +19,7 @@ export async function rateLimit(key: string): Promise<RateLimitResult> {
   const redisKey = `rl:${key}`;
 
   try {
+    await ensureRedisReady();
     const count = await redis.incr(redisKey);
     if (count === 1) {
       await redis.expire(redisKey, windowSec);
