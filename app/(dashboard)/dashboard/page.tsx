@@ -1,5 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default function DashboardIndex() {
-  redirect("/dashboard/schemas");
-}
+export { default } from "@/components/pages/dashboard";

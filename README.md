@@ -8,7 +8,7 @@ Redis, and TanStack Query.
 
 - **Schemas tab** — define a "data type" (fields + types + required/unique rules).
 - **Endpoints tab** — turn a schema into a REST endpoint, choose which HTTP verbs are allowed,
-  and choose which fields are *readable* (returned by GET) and *writable* (accepted by POST/PUT/PATCH).
+  and choose which fields are _readable_ (returned by GET) and _writable_ (accepted by POST/PUT/PATCH).
 - **Tokens tab** — mint access tokens scoped to specific endpoints with read/write permissions.
   Each token belongs to exactly one account and can only reach that account's endpoints.
 
@@ -106,3 +106,17 @@ curl -X DELETE http://localhost:3000/api/v1/notes/<id> -H "Authorization: Bearer
 
 See [`.env.example`](.env.example) for the full list (Mongo/Redis URLs, `SESSION_SECRET`,
 session TTL, rate-limit window).
+
+## Future Works Needed
+
+- Payment gateway and subscription tiers
+- My Account section, which has the pricing and will actually enforce the limits
+- Add proper account sign-up, Email Verification, more Info, forgot/reset password flow
+- Add Translation to the entire app
+- Add Documentation page as a guide to users
+- Add more data types
+- Use a unified dropdown instead of the default per os
+- Add dark mode
+- Revamp landing page UI
+- Think about templates and real-world usage
+- Add Analytics
