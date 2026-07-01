@@ -7,6 +7,7 @@ import {
   SUPPORTED_LANGUAGES,
   type Language,
 } from "./settings";
+import { Select } from "@/components/atoms/select";
 
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
@@ -26,10 +27,10 @@ export function LanguageSwitcher() {
   return (
     <label className="inline-flex items-center gap-2 text-sm text-slate-500">
       <span className="sr-only">{t("common.language")}</span>
-      <select
+      <Select
         value={current}
         onChange={(e) => onChange(e.target.value as Language)}
-        className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-600 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+        className="h-8 w-32 text-xs font-medium"
         aria-label={t("common.language")}
       >
         {SUPPORTED_LANGUAGES.map((language) => (
@@ -37,7 +38,7 @@ export function LanguageSwitcher() {
             {language === "en" ? t("common.english") : t("common.spanish")}
           </option>
         ))}
-      </select>
+      </Select>
     </label>
   );
 }

@@ -1,4 +1,5 @@
 export { Button } from "./button";
+export { BaseSelect } from "./base-select";
 export { Input } from "./input";
 export { Select } from "./select";
 export { Label } from "./label";
