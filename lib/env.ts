@@ -13,6 +13,9 @@ export const env = {
     process.env.SESSION_SECRET ??
     "dev-only-secret-please-change-0123456789abcdef0123456789",
   SESSION_TTL: process.env.SESSION_TTL ?? "7d",
+  TOKEN_ENCRYPTION_SECRET:
+    process.env.TOKEN_ENCRYPTION_SECRET ??
+    "dev-only-secret-please-change-fedcba9876543210fedcba9876543210",
   RATE_LIMIT_MAX: Number(process.env.RATE_LIMIT_MAX ?? 120),
   RATE_LIMIT_WINDOW: Number(process.env.RATE_LIMIT_WINDOW ?? 60),
   APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",

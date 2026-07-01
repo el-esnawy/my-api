@@ -173,3 +173,11 @@ export function useDeleteToken() {
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.tokens }),
   });
 }
+
+/** On-demand reveal of a token's plaintext (decrypted server-side, per request). */
+export function useRevealToken() {
+  return useMutation({
+    mutationFn: (id: string) =>
+      api<{ token: string }>(`/api/tokens/${id}/reveal`).then((r) => r.token),
+  });
+}

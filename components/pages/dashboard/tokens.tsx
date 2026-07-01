@@ -27,32 +27,32 @@ export default function TokensPage() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Access Tokens</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Request Tokens</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Tokens authenticate external calls to your endpoints. Each is scoped to the
-            endpoints and permissions you choose.
+            Request tokens authenticate external calls to your endpoints. Each is scoped to
+            the endpoints and permissions you choose.
           </p>
         </div>
         <Button onClick={() => setModal({})} disabled={!endpoints || endpoints.length === 0}>
-          + New token
+          + New request token
         </Button>
       </div>
 
       <div className="mt-6">
         {isLoading ? (
           <div className="flex items-center gap-2 text-slate-500">
-            <Spinner /> Loading tokens…
+            <Spinner /> Loading request tokens…
           </div>
         ) : !endpoints || endpoints.length === 0 ? (
           <EmptyState
             title="Create an endpoint first"
-            description="Tokens grant access to specific endpoints. Create one in the Endpoints tab."
+            description="Request tokens grant access to specific endpoints. Create one in the Endpoints tab."
           />
         ) : !tokens || tokens.length === 0 ? (
           <EmptyState
-            title="No tokens yet"
-            description="Mint an access token to start calling your endpoints from anywhere."
-            action={<Button onClick={() => setModal({})}>+ New token</Button>}
+            title="No request tokens yet"
+            description="Mint a request token to start calling your endpoints from anywhere."
+            action={<Button onClick={() => setModal({})}>+ New request token</Button>}
           />
         ) : (
           <div className="space-y-3">

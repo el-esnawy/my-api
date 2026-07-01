@@ -9,8 +9,9 @@ Redis, and TanStack Query.
 - **Schemas tab** — define a "data type" (fields + types + required/unique rules).
 - **Endpoints tab** — turn a schema into a REST endpoint, choose which HTTP verbs are allowed,
   and choose which fields are _readable_ (returned by GET) and _writable_ (accepted by POST/PUT/PATCH).
-- **Tokens tab** — mint access tokens scoped to specific endpoints with read/write permissions.
-  Each token belongs to exactly one account and can only reach that account's endpoints.
+- **Request Tokens tab** — mint request tokens scoped to specific endpoints with read/write
+  permissions. Each token belongs to exactly one account and can only reach that account's
+  endpoints. Tokens can be viewed again anytime after creation, not just at creation time.
 
 Your data lives in MongoDB; Redis handles token-lookup caching and per-token rate limiting.
 
@@ -72,7 +73,8 @@ Open http://localhost:3000, sign up, and you'll land on the dashboard.
 1. **Schemas** → create `Note` with fields `title` (string, required), `body` (string), `done` (boolean).
 2. **Endpoints** → create endpoint slug `notes` from the `Note` schema; enable `GET/POST/PUT/DELETE`;
    mark fields readable/writable. The page shows your base URL: `http://localhost:3000/api/v1/notes`.
-3. **Tokens** → create a token scoped to `notes` with read + write. Copy it (shown once).
+3. **Request Tokens** → create a request token scoped to `notes` with read + write. Copy it now,
+   or view it again anytime from the token list.
 
 ```bash
 TOKEN="paste-your-token"
@@ -95,8 +97,9 @@ curl -X DELETE http://localhost:3000/api/v1/notes/<id> -H "Authorization: Bearer
 ## Security model
 
 - Passwords hashed with bcrypt; sessions are signed JWTs in httpOnly, SameSite=Lax cookies.
-- Access tokens are random 32-byte secrets; only their SHA-256 hash is stored. The plaintext is
-  shown exactly once at creation.
+- Request tokens are random 32-byte secrets. A SHA-256 hash authenticates every public API call;
+  an AES-256-GCM encrypted copy (`TOKEN_ENCRYPTION_SECRET`) lets the owner view the plaintext
+  again later from the dashboard, decrypted on demand and never included in list responses.
 - Every public request resolves the tenant from the token, then checks: token not revoked →
   endpoint owned by that tenant → endpoint id in the token's allow-list → verb permitted by both the
   endpoint and the token scope. All record I/O is scoped by `{ userId, endpointId }`.

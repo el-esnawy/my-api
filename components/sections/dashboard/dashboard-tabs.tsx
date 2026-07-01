@@ -7,7 +7,7 @@ import { cn } from "@/lib/client/util";
 const tabs = [
   { href: "/dashboard/schemas", label: "Schemas" },
   { href: "/dashboard/endpoints", label: "Endpoints" },
-  { href: "/dashboard/tokens", label: "Access Tokens" },
+  { href: "/dashboard/tokens", label: "Request Tokens" },
 ];
 
 export function DashboardTabs() {

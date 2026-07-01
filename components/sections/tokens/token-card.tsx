@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useUpdateToken, useDeleteToken } from "@/lib/client/hooks";
+import { useUpdateToken, useDeleteToken, useRevealToken } from "@/lib/client/hooks";
 import { ApiError } from "@/lib/client/api";
 import { formatDate } from "@/lib/client/util";
 import type { AccessToken, Endpoint } from "@/lib/client/types";
@@ -9,6 +9,7 @@ import { Card } from "@/components/atoms/card";
 import { Badge } from "@/components/atoms/badge";
 import { Button } from "@/components/atoms/button";
 import { ErrorText } from "@/components/atoms/error-text";
+import { CopyButton } from "@/components/molecules/copy-button";
 
 export function TokenCard({
   token,
@@ -21,7 +22,9 @@ export function TokenCard({
 }) {
   const update = useUpdateToken();
   const del = useDeleteToken();
+  const reveal = useRevealToken();
   const [error, setError] = useState<string | null>(null);
+  const [revealed, setRevealed] = useState<string | null>(null);
 
   async function onRevoke() {
     setError(null);
@@ -42,6 +45,20 @@ export function TokenCard({
     }
   }
 
+  async function onToggleReveal() {
+    if (revealed) {
+      setRevealed(null);
+      return;
+    }
+    setError(null);
+    try {
+      const value = await reveal.mutateAsync(token.id);
+      setRevealed(value);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Failed to reveal token");
+    }
+  }
+
   return (
     <Card className="p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -55,6 +72,14 @@ export function TokenCard({
           </code>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={onToggleReveal}
+            disabled={reveal.isPending}
+          >
+            {reveal.isPending ? "Revealing…" : revealed ? "Hide" : "View"}
+          </Button>
           <Button size="sm" variant="secondary" onClick={onEdit}>
             Edit
           </Button>
@@ -66,6 +91,15 @@ export function TokenCard({
           </Button>
         </div>
       </div>
+
+      {revealed && (
+        <div className="mt-3 flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2">
+          <code className="scroll-thin flex-1 overflow-x-auto whitespace-nowrap text-sm text-green-300">
+            {revealed}
+          </code>
+          <CopyButton value={revealed} />
+        </div>
+      )}
 
       <div className="mt-4">
         <p className="text-xs font-medium uppercase tracking-wide text-slate-400">

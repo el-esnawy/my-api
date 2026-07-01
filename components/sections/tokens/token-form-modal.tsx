@@ -80,10 +80,10 @@ export function TokenFormModal({
   // --- Secret reveal screen (create only) ---
   if (secret) {
     return (
-      <Modal open onClose={onClose} title="Token created" widthClass="max-w-xl">
+      <Modal open onClose={onClose} title="Request token created" widthClass="max-w-xl">
         <div className="space-y-4">
           <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            Copy this token now — it&apos;s shown only once and cannot be retrieved later.
+            Copy this token now, or view it again anytime from the token list below.
           </div>
           <div className="flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-3">
             <code className="scroll-thin flex-1 overflow-x-auto whitespace-nowrap text-sm text-green-300">
@@ -110,17 +110,17 @@ export function TokenFormModal({
     <Modal
       open
       onClose={onClose}
-      title={isEdit ? "Edit token" : "New access token"}
+      title={isEdit ? "Edit request token" : "New request token"}
       description={
         isEdit
-          ? "Update the name and which endpoints this token can reach. The token value stays the same."
-          : "Choose which endpoints this token can reach and what it can do."
+          ? "Update the name and which endpoints this request token can reach. The token value stays the same."
+          : "Choose which endpoints this request token can reach and what it can do."
       }
       widthClass="max-w-xl"
     >
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <Label>Token name</Label>
+          <Label>Request token name</Label>
           <Input
             value={name}
             onChange={(e) => setName(e.target.value)}

@@ -54,16 +54,18 @@ export async function POST(req: NextRequest) {
       return badRequest("Some endpoints are unknown or not yours", { notOwned });
     }
 
-    const { token, tokenHash, tokenPrefix } = generateAccessToken();
+    const { token, tokenHash, tokenPrefix, tokenEncrypted } = generateAccessToken();
     const doc = await AccessToken.create({
       userId: auth.session.userId,
       name: parsed.data.name,
       tokenHash,
       tokenPrefix,
+      tokenEncrypted,
       grants: parsed.data.grants,
     });
 
-    // The plaintext token is returned exactly once and never stored.
+    // Returned immediately at creation; can also be re-fetched later via
+    // GET /api/tokens/[id]/reveal (decrypts tokenEncrypted on demand).
     return created({ token: serializeToken(doc), plaintext: token });
   });
 }

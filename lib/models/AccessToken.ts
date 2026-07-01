@@ -18,9 +18,13 @@ const accessTokenSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     name: { type: String, required: true, trim: true },
-    // sha256 of the plaintext token — the plaintext is never stored.
+    // sha256 of the plaintext token — used to authenticate public API requests.
     tokenHash: { type: String, required: true, unique: true },
     tokenPrefix: { type: String, required: true },
+    // AES-256-GCM ciphertext of the plaintext token, so the owner can reveal it
+    // again later. `select: false` keeps it out of default queries — only the
+    // reveal route explicitly selects it.
+    tokenEncrypted: { type: String, required: true, select: false },
     grants: { type: [grantSchema], default: [] },
     lastUsedAt: { type: Date },
     revoked: { type: Boolean, default: false },
