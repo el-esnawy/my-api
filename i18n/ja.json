@@ -1,0 +1,411 @@
+{
+  "metadata": {
+    "title": "my-api — カスタム REST エンドポイント",
+    "description": "独自のデータ スキーマを定義し、REST エンドポイントを生成し、アカウントごとのアクセス トークンを使用してどこからでもエンドポイントをクエリします。"
+  },
+  "common": {
+    "brand": "my-api",
+    "language": "言語",
+    "english": "英語",
+    "spanish": "スペイン語",
+    "pricing": "価格設定",
+    "goToAccount": "私のアカウントにアクセスしてください",
+    "signIn": "サインイン",
+    "signUp": "サインアップ",
+    "getStarted": "始めましょう",
+    "cancel": "キャンセル",
+    "saveChanges": "変更を保存する",
+    "edit": "編集",
+    "delete": "削除",
+    "close": "閉じる",
+    "copy": "コピー",
+    "copied": "コピーされました",
+    "done": "完了",
+    "name": "名前",
+    "slug": "Slug",
+    "schema": "スキーマ",
+    "loading": "読み込み中...",
+    "created": "{{date}} を作成しました",
+    "lastUsed": "最後に使用したのは {{date}}",
+    "none": "なし",
+    "deleted": "削除されました",
+    "required": "必須",
+    "unique": "ユニークな",
+    "boolean": "ブール値",
+    "true": "本当の",
+    "false": "偽",
+    "apply": "申し込む",
+    "status": "ステータス",
+    "restore": "復元",
+    "dismiss": "解雇する",
+    "somethingWentWrong": "何か問題が発生しました",
+    "somethingWentWrongRetry": "何か問題が発生しました。もう一度試してください。",
+    "field_one": "{{count}} フィールド",
+    "field_other": "{{count}} フィールド",
+    "entry_one": "{{count}} エントリ",
+    "entry_other": "{{count}} エントリ",
+    "fieldTypes": {
+      "string": "文字列",
+      "number": "番号",
+      "boolean": "ブール値",
+      "date": "日付",
+      "enum": "列挙型"
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "schemas": "スキーマ",
+      "entries": "エントリー",
+      "endpoints": "エンドポイント",
+      "tokens": "トークンのリクエスト"
+    },
+    "signOut": "サインアウト"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "データ → REST API (数分)",
+      "title": "バックエンドを作成せずにカスタム REST エンドポイントを構築する",
+      "description": "独自のデータ構造を定義し、そこから安全な REST エンドポイントを生成し、アカウントに固有のアクセス トークンを使用してどこからでもそれらを呼び出します。",
+      "primaryCta": "最初のエンドポイントを作成する",
+      "code": "curl -X POST https://your-app/api/v1/notes \\\n  -H \"Authorization: Bearer mapi_•••••••••\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"title\": \"Hello\", \"done\": false }'"
+    },
+    "features": {
+      "define": {
+        "title": "スキーマを定義する",
+        "body": "データを 1 回説明します (フィールド、タイプ、必要なルール)。移行や定型文はありません。"
+      },
+      "generate": {
+        "title": "REST エンドポイントを生成する",
+        "body": "あらゆるスキーマを実際の REST リソースに変換します。動詞を選択し、読み書き可能なものを選択してください。"
+      },
+      "query": {
+        "title": "アクセストークンを使用したクエリ",
+        "body": "特定のエンドポイントを範囲とするアカウントごとのトークンを作成します。いつでも取り消してください。ユーザーごとに厳密に分離されます。"
+      }
+    },
+    "howItWorks": {
+      "title": "仕組み",
+      "steps": {
+        "one": {
+          "title": "スキーマを作成する",
+          "description": "例:タイトル、本文が記載されたメモが完成しました。"
+        },
+        "two": {
+          "title": "エンドポイントを公開する",
+          "description": "/api/v1/notes と GET、POST、PUT、DELETE。"
+        },
+        "three": {
+          "title": "トークンを発行する",
+          "description": "そのエンドポイントをスコープとする、読み取り + 書き込み。"
+        },
+        "four": {
+          "title": "どこでも呼び出してください",
+          "description": "権限: ベアラー <token>。"
+        }
+      }
+    },
+    "pricing": {
+      "title": "シンプルで透明性のある価格設定",
+      "description": "無料で開始し、より多くのエンドポイント、トークン、スループットが必要な場合にアップグレードしてください。",
+      "mostPopular": "最も人気のある",
+      "signedInCta": "私のアカウントにアクセスしてください",
+      "tiers": {
+        "hobby": {
+          "name": "趣味",
+          "price": "$0",
+          "cadence": "/月",
+          "tagline": "サイドプロジェクトや何かを試すため。",
+          "features": [
+            "3つのスキーマ",
+            "3つのエンドポイント",
+            "1アクセストークン",
+            "10,000 リクエスト/月",
+            "コミュニティサポート"
+          ],
+          "cta": "始めましょう"
+        },
+        "pro": {
+          "name": "プロ",
+          "price": "$19",
+          "cadence": "/月",
+          "tagline": "拡張の余地が必要な実稼働アプリ向け。",
+          "features": [
+            "無制限のスキーマとエンドポイント",
+            "アクセストークン10個",
+            "100 万リクエスト/月",
+            "より高いレート制限",
+            "電子メールサポート"
+          ],
+          "cta": "無料トライアルを開始する"
+        },
+        "enterprise": {
+          "name": "エンタープライズ",
+          "price": "カスタム",
+          "cadence": "",
+          "tagline": "規模、セキュリティ、SLA のニーズを持つチーム向け。",
+          "features": [
+            "無制限のすべて",
+            "SSO と監査ログ",
+            "カスタムレート制限",
+            "献身的なサポートとSLA",
+            "オンプレミス / VPC オプション"
+          ],
+          "cta": "営業担当者にお問い合わせください"
+        }
+      }
+    },
+    "footer": "my-api — MongoDB、Redis、およびアカウントごとのアクセス トークンによってサポートされるカスタム REST エンドポイント。"
+  },
+  "auth": {
+    "signIn": {
+      "title": "おかえりなさい",
+      "description": "サインインしてエンドポイントを管理します。",
+      "footerPrompt": "アカウントをお持ちでない場合は、",
+      "passwordPlaceholder": "あなたのパスワード"
+    },
+    "signUp": {
+      "title": "アカウントを作成する",
+      "description": "カスタム REST エンドポイントの構築を数分で開始できます。",
+      "footerPrompt": "すでにアカウントをお持ちですか?",
+      "passwordPlaceholder": "少なくとも 8 文字"
+    },
+    "fields": {
+      "nameOptional": "名前 (オプション)",
+      "email": "電子メール",
+      "password": "パスワード"
+    },
+    "placeholders": {
+      "name": "エイダ・ラブレス",
+      "email": "you@example.com"
+    }
+  },
+  "schemas": {
+    "title": "スキーマ",
+    "description": "データの形状を定義します。エンドポイントはスキーマの上に構築されます。",
+    "new": "+ 新しいスキーマ",
+    "loading": "スキーマを読み込み中...",
+    "emptyTitle": "まだスキーマがありません",
+    "emptyDescription": "エンドポイントが保存するデータを記述する最初のスキーマを作成します。",
+    "editAria": "スキーマの編集",
+    "deleteAria": "スキーマの削除",
+    "deleteConfirm": "スキーマ「{{name}}」を削除しますか?これを元に戻すことはできません。",
+    "deleteFailed": "削除に失敗しました",
+    "modal": {
+      "newTitle": "新しいスキーマ",
+      "editTitle": "スキーマの編集",
+      "description": "型付きフィールドを使用してデータ型を記述します。",
+      "namePlaceholder": "注記",
+      "slugPlaceholder": "メモ",
+      "fields": "フィールド",
+      "addField": "+ フィールドを追加",
+      "fieldNamePlaceholder": "field_name",
+      "enumValues": "列挙値",
+      "addEnumValue": "+ 付加価値",
+      "enumValuePlaceholder": "値",
+      "removeEnumValue": "列挙値を削除する",
+      "removeField": "フィールドを削除",
+      "editWarning": "フィールドを編集しても、すでに保存されているレコードは変更されません。フィールドを削除すると、そのフィールドが今後の読み取りと書き込みから非表示になるだけです。",
+      "create": "スキーマの作成"
+    }
+  },
+  "endpoints": {
+    "title": "エンドポイント",
+    "description": "スキーマを REST エンドポイントとして公開します。動詞と、読み書きできるものを選択します。",
+    "new": "+ 新しいエンドポイント",
+    "loading": "エンドポイントを読み込んでいます...",
+    "emptyNeedsSchemaTitle": "最初にスキーマを作成する",
+    "emptyNeedsSchemaDescription": "エンドポイントはスキーマに基づいて構築されます。 「スキーマ」タブに移動してスキーマを定義します。",
+    "emptyTitle": "まだエンドポイントがありません",
+    "emptyDescription": "スキーマの 1 つを呼び出し可能な REST エンドポイントに変換します。",
+    "schemaLabel": "スキーマ:",
+    "readableGet": "読み取り可能 (GET メソッド)",
+    "writableMethods": "書き込み可能 (POST/PUT/PATCH/PUT many/PATCH many)",
+    "deleteConfirm": "エンドポイント「{{name}}」を削除しますか?保存されている記録は削除されます。",
+    "deleteFailed": "削除に失敗しました",
+    "modal": {
+      "newTitle": "新しいエンドポイント",
+      "editTitle": "エンドポイントの編集",
+      "description": "スキーマを REST リソースとして公開します。",
+      "slugUrl": "Slug (URL)",
+      "namePlaceholder": "注意事項",
+      "slugPlaceholder": "メモ",
+      "selectSchema": "スキーマを選択してください...",
+      "allowedMethods": "許可されたメソッド",
+      "readableFields": "読み取り可能なフィールド",
+      "readableHint": "GET と GET many で返されます",
+      "writableFields": "書き込み可能なフィールド",
+      "writableHint": "書き込みにより受け入れられます",
+      "create": "エンドポイントの作成",
+      "selectSchemaError": "スキーマを選択してください",
+      "readableRequired": "少なくとも 1 つの読み取り可能なフィールドを選択するか、GET メソッドをオフにしてください。",
+      "writableRequired": "少なくとも 1 つの書き込み可能なフィールドを選択するか、書き込みメソッドをオフにしてください。"
+    }
+  },
+  "tokens": {
+    "title": "トークンのリクエスト",
+    "description": "リクエスト トークンは、エンドポイントへの外部呼び出しを認証します。それぞれのスコープは、選択したエンドポイントと権限に限定されます。",
+    "new": "+ 新しいリクエストトークン",
+    "loading": "リクエストトークンをロードしています...",
+    "emptyNeedsEndpointTitle": "まずエンドポイントを作成します",
+    "emptyNeedsEndpointDescription": "リクエスト トークンは、特定のエンドポイントへのアクセスを許可します。 「エンドポイント」タブで作成します。",
+    "emptyTitle": "リクエストトークンはまだありません",
+    "emptyDescription": "リクエスト トークンを生成して、どこからでもエンドポイントの呼び出しを開始できます。",
+    "revoked": "取り消された",
+    "revealing": "暴露中...",
+    "hide": "隠す",
+    "view": "見る",
+    "reEnable": "再度有効にする",
+    "revoke": "取り消し",
+    "endpointAccess": "エンドポイントアクセス",
+    "noEndpoints": "エンドポイントがありません",
+    "deleteConfirm": "トークン「{{name}}」を削除しますか?それを使用した通話は機能しなくなります。",
+    "updateFailed": "更新に失敗しました",
+    "deleteFailed": "削除に失敗しました",
+    "revealFailed": "トークンの公開に失敗しました",
+    "modal": {
+      "createdTitle": "リクエストトークンが作成されました",
+      "createdDescription": "このトークンを今すぐコピーするか、下のトークン リストからいつでも再度表示できます。",
+      "bearerHint": "これをベアラー トークンとして使用します。",
+      "newTitle": "新しいリクエストトークン",
+      "editTitle": "リクエストトークンの編集",
+      "newDescription": "このリクエスト トークンが到達できるエンドポイントとそのリクエスト トークンが実行できることを選択します。",
+      "editDescription": "名前と、このリクエスト トークンが到達できるエンドポイントを更新します。トークンの値は変わりません。",
+      "name": "リクエストトークン名",
+      "namePlaceholder": "本番サーバー",
+      "permissions": "エンドポイントの権限",
+      "read": "読む",
+      "write": "書く",
+      "grantRequired": "少なくとも 1 つのエンドポイントへのアクセスを許可する",
+      "create": "トークンの作成"
+    }
+  },
+  "entries": {
+    "title": "エントリー",
+    "description": "各スキーマに保存されているデータを参照して編集します。",
+    "loadingSchemas": "スキーマを読み込み中...",
+    "emptySchemasTitle": "まだスキーマがありません",
+    "emptySchemasDescription": "エントリはスキーマ内に存在します。まずスキーマを作成し、次にそのデータをここで管理します。",
+    "manage": "エントリの管理 →",
+    "editor": {
+      "headingSuffix": "エントリ",
+      "description": "変更は保存するまでローカルにステージングされます。",
+      "backAria": "すべてのスキーマに戻る",
+      "importJson": "JSON をインポート",
+      "addEntry": "+ エントリを追加",
+      "importDisabledTitle": "インポートする前に変更を保存または破棄してください",
+      "unsaved_one": "{{count}} 変更が保存されていません",
+      "unsaved_other": "{{count}} 変更が保存されていません",
+      "discard": "廃棄する",
+      "loading": "エントリを読み込んでいます...",
+      "emptyTitle": "まだエントリーはありません",
+      "emptyDescription": "エントリを手動で追加するか、このスキーマに一致する JSON ファイルをインポートします。",
+      "tableIndex": "#",
+      "saved_one": "{{count}} の変更を保存しました",
+      "saved_other": "{{count}} の変更を保存しました",
+      "nothingSaved": "何も保存されませんでした - 強調表示されたエントリを修正して、もう一度試してください",
+      "saveFailed": "変更を保存できませんでした",
+      "invalidJson": "そのファイルは無効です JSON",
+      "expectedArray": "JSON 配列のエントリが必要です",
+      "imported_one": "{{count}} エントリをインポートしました",
+      "imported_other": "{{count}} エントリをインポートしました",
+      "importedPartial": "{{total}} の {{imported}} をインポートしました — {{rejected}} は拒否されました",
+      "importFailed": "インポートに失敗しました",
+      "discardConfirm": "段階的な変更をすべて破棄しますか?",
+      "editAria": "エントリーの編集",
+      "deleteAria": "エントリの削除",
+      "status": {
+        "new": "新しい",
+        "modified": "修正された",
+        "deleted": "削除されました"
+      }
+    },
+    "form": {
+      "newTitle": "新規エントリー",
+      "editTitle": "エントリーの編集",
+      "schemaDescription": "スキーマ: {{name}}",
+      "noneOption": "— なし —"
+    },
+    "importResult": {
+      "partialTitle": "インポートが部分的に完了しました",
+      "failedTitle": "インポートに失敗しました",
+      "summary": "<strong>{{total}}</strong> エントリのうち <strong>{{imported}}</strong> をインポートしました。 <strong>{{rejected}}</strong> {{rejectedLabel}} は拒否されました。",
+      "entryWas": "エントリーは",
+      "entriesWere": "エントリーは",
+      "warning": "拒否されたエントリは現在のみ利用可能です。このダイアログを閉じると、それらを取得することはできません。これらをダウンロードして修正し、後で再インポートします。",
+      "download": "拒否されたエントリをダウンロードする",
+      "downloaded": "ダウンロード済み ✓ (再ダウンロード)"
+    },
+    "unsaved": {
+      "title": "未保存の変更",
+      "description": "このスキーマのエントリに未保存の変更があります。",
+      "body": "今すぐ終了すると、段階的な編集は破棄されます。変更を保存するには、まず変更を保存します。",
+      "stay": "泊まる",
+      "leave": "破棄して放置する"
+    }
+  },
+  "api": {
+    "errors": {
+      "badRequest": "不正なリクエスト",
+      "unauthorized": "無許可",
+      "forbidden": "禁止",
+      "notFound": "見つかりません",
+      "methodNotAllowed": "許可されていないメソッド",
+      "conflict": "紛争",
+      "rateLimitExceeded": "レート制限を超えました",
+      "serverError": "内部サーバーエラー",
+      "validationFailed": "検証に失敗しました",
+      "emailRegistered": "メールアドレスはすでに登録されています",
+      "invalidCredentials": "無効な電子メールまたはパスワード",
+      "fieldNamesUnique": "フィールド名は一意である必要があります",
+      "schemaSlugExists": "そのスラッグを含むスキーマはすでにあります",
+      "schemaNotFound": "スキーマが見つかりません",
+      "schemaInUse": "スキーマは {{count}} エンドポイントによって使用されます。まずそれらのエンドポイントを削除します。",
+      "unknownSchema": "不明なスキーマ",
+      "endpointFieldsInvalid": "読み取り/書き込み可能なフィールドはスキーマに属している必要があります",
+      "endpointSlugExists": "そのスラッグを含むエンドポイントはすでにあります",
+      "endpointNotFound": "エンドポイントが見つかりません",
+      "tokenNotFound": "トークンが見つかりません",
+      "tokenRevealUnsupported": "このトークンは表示がサポートされる前に作成されました - 取り消して新しいトークンを作成してください",
+      "endpointsUnknown": "一部のエンドポイントが不明であるか、自分のものではありません",
+      "missingBearer": "ベアラーアクセストークンがありません",
+      "invalidBearer": "無効または取り消されたアクセス トークン",
+      "tokenEndpointForbidden": "このトークンはこのエンドポイントに対して承認されていません",
+      "methodDisabled": "{{method}} はこのエンドポイントに対して有効になっていません",
+      "writePermissionMissing": "このトークンには書き込み権限がありません",
+      "readPermissionMissing": "このトークンには読み取り権限がありません",
+      "recordNotFound": "レコードが見つかりません",
+      "unknownEntry": "不明なエントリ",
+      "duplicateUpdateId": "更新バッチ内のレコード ID が重複しています",
+      "entriesInvalid": "一部のエントリは無効です - 何も保存されていません",
+      "duplicateBatch": "一意のフィールド「{{field}}」の値が重複しています - ファイル内の以前のエントリですでに使用されています",
+      "duplicateStored": "一意のフィールド「{{field}}」の値は保存されたエントリにすでに存在します"
+    }
+  },
+  "validation": {
+    "passwordMin": "パスワードは8文字以上である必要があります",
+    "fieldName": "文字、数字、アンダースコアを使用してください。数字で始めてはいけません",
+    "invalidSlug": "無効なスラッグ",
+    "schemaFieldsMin": "少なくとも 1 つのフィールドを追加します",
+    "enumValuesMin": "少なくとも 1 つの列挙値を追加します",
+    "enumValuesUnique": "列挙値は一意である必要があります",
+    "endpointMethodsMin": "少なくとも 1 つのメソッドを有効にする",
+    "tokenGrantsMin": "少なくとも 1 つのエンドポイントへのアクセスを許可する",
+    "nothingToSave": "保存するものは何もありません",
+    "tooManyChanges": "1 回の保存での変更が多すぎます (最大 2000)",
+    "emptyImport": "ファイルにはエントリが含まれていません",
+    "tooManyImport": "1 回のインポート内のエントリが多すぎます (最大 5000)",
+    "noTokenFields": "更新するフィールドはありません",
+    "record": {
+      "bodyObject": "本体は JSON オブジェクトである必要があります",
+      "manyBody": "本体はレコードの配列、または更新/レコード配列を含むオブジェクトである必要があります。",
+      "required": "必要です",
+      "string": "文字列でなければなりません",
+      "number": "数値でなければなりません",
+      "boolean": "ブール値でなければなりません",
+      "date": "有効な日付である必要があります",
+      "unsupported": "サポートされていないタイプ",
+      "oneOf": "次のいずれかである必要があります: {{values}}",
+      "unique": "一意である必要があります"
+    }
+  }
+}

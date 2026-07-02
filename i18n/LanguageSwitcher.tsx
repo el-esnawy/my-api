@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import {
+  LANGUAGE_LABELS,
   LANGUAGE_COOKIE,
   SUPPORTED_LANGUAGES,
   type Language,
@@ -30,12 +31,12 @@ export function LanguageSwitcher() {
       <Select
         value={current}
         onChange={(e) => onChange(e.target.value as Language)}
-        className="h-8 w-32 text-xs font-medium"
+        className="h-8 w-40 text-xs font-medium"
         aria-label={t("common.language")}
       >
         {SUPPORTED_LANGUAGES.map((language) => (
           <option key={language} value={language}>
-            {language === "en" ? t("common.english") : t("common.spanish")}
+            {LANGUAGE_LABELS[language]}
           </option>
         ))}
       </Select>

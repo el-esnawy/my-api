@@ -1,0 +1,411 @@
+{
+  "metadata": {
+    "title": "my-api: endpoint REST personalizzati",
+    "description": "Definisci i tuoi schemi di dati, genera endpoint REST ed esegui query su di essi ovunque ti trovi con token di accesso per account."
+  },
+  "common": {
+    "brand": "my-api",
+    "language": "Lingua",
+    "english": "Inglese",
+    "spanish": "spagnolo",
+    "pricing": "Prezzi",
+    "goToAccount": "Vai al mio account",
+    "signIn": "Accedi",
+    "signUp": "Iscriviti",
+    "getStarted": "Inizia",
+    "cancel": "Annulla",
+    "saveChanges": "Salva modifiche",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "close": "Chiudi",
+    "copy": "Copia",
+    "copied": "Copiato",
+    "done": "Fatto",
+    "name": "Nome",
+    "slug": "Slug",
+    "schema": "Schema",
+    "loading": "Caricamento...",
+    "created": "Creato {{date}}",
+    "lastUsed": "Ultimo utilizzo {{date}}",
+    "none": "nessuno",
+    "deleted": "cancellato",
+    "required": "richiesto",
+    "unique": "unico",
+    "boolean": "booleano",
+    "true": "vero",
+    "false": "falso",
+    "apply": "Applicare",
+    "status": "Stato",
+    "restore": "Ripristina",
+    "dismiss": "Ignora",
+    "somethingWentWrong": "Qualcosa è andato storto",
+    "somethingWentWrongRetry": "Qualcosa è andato storto. Per favore riprova.",
+    "field_one": "campo {{count}}",
+    "field_other": "campi {{count}}",
+    "entry_one": "{{count}} voce",
+    "entry_other": "{{count}} voci",
+    "fieldTypes": {
+      "string": "stringa",
+      "number": "numero",
+      "boolean": "booleano",
+      "date": "data",
+      "enum": "enum"
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "schemas": "Schemi",
+      "entries": "Voci",
+      "endpoints": "Endpoint",
+      "tokens": "Richiedi token"
+    },
+    "signOut": "Esci"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "I tuoi dati → il tuo REST API, in pochi minuti",
+      "title": "Crea endpoint REST personalizzati senza scrivere un backend",
+      "description": "Definisci le tue strutture dati, genera da esse endpoint REST sicuri e chiamali da qualsiasi luogo con token di accesso univoci per il tuo account.",
+      "primaryCta": "Crea il tuo primo endpoint",
+      "code": "curl -X POST https://your-app/api/v1/notes \\\n  -H \"Authorization: Bearer mapi_•••••••••\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"title\": \"Hello\", \"done\": false }'"
+    },
+    "features": {
+      "define": {
+        "title": "Definire schemi",
+        "body": "Descrivi i tuoi dati una volta: campi, tipi, regole richieste. Nessuna migrazione, nessun boilerplate."
+      },
+      "generate": {
+        "title": "Genera endpoint REST",
+        "body": "Trasforma qualsiasi schema in una vera risorsa REST. Scegli i verbi, scegli cosa è leggibile e scrivibile."
+      },
+      "query": {
+        "title": "Interrogazione con token di accesso",
+        "body": "Crea token per account con ambito su endpoint specifici. Revocare in qualsiasi momento. Rigorosamente isolato per utente."
+      }
+    },
+    "howItWorks": {
+      "title": "Come funziona",
+      "steps": {
+        "one": {
+          "title": "Crea uno schema",
+          "description": "ad es. una nota con titolo, corpo, fatto."
+        },
+        "two": {
+          "title": "Esporre un endpoint",
+          "description": "/api/v1/notes con GET, POST, PUT, DELETE."
+        },
+        "three": {
+          "title": "Emetti un token",
+          "description": "Con ambito su quell'endpoint, lettura + scrittura."
+        },
+        "four": {
+          "title": "Chiamalo ovunque",
+          "description": "Autorizzazione: Portatore <token>."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Prezzi semplici e trasparenti",
+      "description": "Inizia gratuitamente ed esegui l'aggiornamento quando hai bisogno di più endpoint, token e velocità effettiva.",
+      "mostPopular": "Il più popolare",
+      "signedInCta": "Vai al mio account",
+      "tiers": {
+        "hobby": {
+          "name": "Hobby",
+          "price": "$ 0",
+          "cadence": "/mese",
+          "tagline": "Per progetti collaterali e provare cose.",
+          "features": [
+            "3 schemi",
+            "3 punti finali",
+            "1 token di accesso",
+            "10.000 richieste al mese",
+            "Supporto comunitario"
+          ],
+          "cta": "Inizia"
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "$ 19",
+          "cadence": "/mese",
+          "tagline": "Per le app di produzione che necessitano di spazio per crescere.",
+          "features": [
+            "Schemi ed endpoint illimitati",
+            "10 token di accesso",
+            "1 milione di richieste al mese",
+            "Limiti tariffari più elevati",
+            "Supporto via e-mail"
+          ],
+          "cta": "Inizia la prova gratuita"
+        },
+        "enterprise": {
+          "name": "Impresa",
+          "price": "Personalizzato",
+          "cadence": "",
+          "tagline": "Per team con esigenze di scalabilità, sicurezza ed SLA.",
+          "features": [
+            "Tutto illimitato",
+            "SSO e registri di controllo",
+            "Limiti tariffari personalizzati",
+            "Supporto dedicato e SLA",
+            "Opzioni in sede/VPC"
+          ],
+          "cta": "Contatta le vendite"
+        }
+      }
+    },
+    "footer": "my-api: endpoint REST personalizzati supportati da MongoDB, Redis e token di accesso per account."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Bentornato",
+      "description": "Accedi per gestire i tuoi endpoint.",
+      "footerPrompt": "Non hai un account?",
+      "passwordPlaceholder": "La tua password"
+    },
+    "signUp": {
+      "title": "Crea il tuo account",
+      "description": "Inizia a creare endpoint REST personalizzati in pochi minuti.",
+      "footerPrompt": "Hai già un account?",
+      "passwordPlaceholder": "Almeno 8 caratteri"
+    },
+    "fields": {
+      "nameOptional": "Nome (facoltativo)",
+      "email": "E-mail",
+      "password": "Parola d'ordine"
+    },
+    "placeholders": {
+      "name": "Ada Lovelace",
+      "email": "you@example.com"
+    }
+  },
+  "schemas": {
+    "title": "Schemi",
+    "description": "Definisci la forma dei tuoi dati. Gli endpoint sono costruiti sulla base di schemi.",
+    "new": "+ Nuovo schema",
+    "loading": "Caricamento schemi...",
+    "emptyTitle": "Ancora nessuno schema",
+    "emptyDescription": "Crea il tuo primo schema per descrivere i dati che i tuoi endpoint memorizzeranno.",
+    "editAria": "Modifica schema",
+    "deleteAria": "Elimina schema",
+    "deleteConfirm": "Eliminare lo schema \"{{name}}\"? Questa operazione non può essere annullata.",
+    "deleteFailed": "Impossibile eliminare",
+    "modal": {
+      "newTitle": "Nuovo schema",
+      "editTitle": "Modifica schema",
+      "description": "Descrivere un tipo di dati con campi tipizzati.",
+      "namePlaceholder": "Nota",
+      "slugPlaceholder": "nota",
+      "fields": "Campi",
+      "addField": "+ Aggiungi campo",
+      "fieldNamePlaceholder": "field_name",
+      "enumValues": "Valori di enumerazione",
+      "addEnumValue": "+ Aggiungi valore",
+      "enumValuePlaceholder": "valore",
+      "removeEnumValue": "Rimuovi il valore enum",
+      "removeField": "Rimuovi campo",
+      "editWarning": "La modifica dei campi non modificherà i record già archiviati. La rimozione di un campo lo nasconde semplicemente da letture e scritture future.",
+      "create": "Crea uno schema"
+    }
+  },
+  "endpoints": {
+    "title": "Endpoint",
+    "description": "Esporre gli schemi come endpoint REST. Scegli i verbi e cosa può essere letto o scritto.",
+    "new": "+ Nuovo punto finale",
+    "loading": "Caricamento endpoint...",
+    "emptyNeedsSchemaTitle": "Crea prima uno schema",
+    "emptyNeedsSchemaDescription": "Gli endpoint sono basati su schemi. Vai alla scheda Schemi per definirne uno.",
+    "emptyTitle": "Nessun endpoint ancora",
+    "emptyDescription": "Trasforma uno dei tuoi schemi in un endpoint REST richiamabile.",
+    "schemaLabel": "Schema:",
+    "readableGet": "Leggibile (metodi GET)",
+    "writableMethods": "Scrivibili (POST/PUT/PATCH/PUT many/PATCH many)",
+    "deleteConfirm": "Eliminare l'endpoint \"{{name}}\"? I relativi record archiviati verranno rimossi.",
+    "deleteFailed": "Impossibile eliminare",
+    "modal": {
+      "newTitle": "Nuovo punto finale",
+      "editTitle": "Modifica punto finale",
+      "description": "Esporre uno schema come risorsa REST.",
+      "slugUrl": "Slug (URL)",
+      "namePlaceholder": "Note",
+      "slugPlaceholder": "note",
+      "selectSchema": "Seleziona uno schema...",
+      "allowedMethods": "Metodi consentiti",
+      "readableFields": "Campi leggibili",
+      "readableHint": "Restituito da GET e GET many",
+      "writableFields": "Campi scrivibili",
+      "writableHint": "Accettato da scrive",
+      "create": "Crea punto finale",
+      "selectSchemaError": "Seleziona uno schema",
+      "readableRequired": "Seleziona almeno un campo leggibile o disattiva i metodi GET.",
+      "writableRequired": "Seleziona almeno un campo scrivibile o disattiva i metodi di scrittura."
+    }
+  },
+  "tokens": {
+    "title": "Richiedi token",
+    "description": "I token Richiedi autenticano le chiamate esterne ai tuoi endpoint. Ciascuno ha come ambito gli endpoint e le autorizzazioni scelti.",
+    "new": "+ Nuovo token di richiesta",
+    "loading": "Caricamento token richiesta...",
+    "emptyNeedsEndpointTitle": "Crea prima un endpoint",
+    "emptyNeedsEndpointDescription": "I token di richiesta concedono l'accesso a endpoint specifici. Creane uno nella scheda Endpoint.",
+    "emptyTitle": "Nessun token di richiesta ancora",
+    "emptyDescription": "Conia un token di richiesta per iniziare a chiamare i tuoi endpoint da qualsiasi luogo.",
+    "revoked": "revocato",
+    "revealing": "Rivelando...",
+    "hide": "Nasconditi",
+    "view": "Visualizza",
+    "reEnable": "Riattivare",
+    "revoke": "Revoca",
+    "endpointAccess": "Accesso all'endpoint",
+    "noEndpoints": "nessun endpoint",
+    "deleteConfirm": "Eliminare il token \"{{name}}\"? Le chiamate che lo utilizzano smetteranno di funzionare.",
+    "updateFailed": "Impossibile aggiornare",
+    "deleteFailed": "Impossibile eliminare",
+    "revealFailed": "Impossibile rivelare il token",
+    "modal": {
+      "createdTitle": "Token di richiesta creato",
+      "createdDescription": "Copia questo token adesso o visualizzalo di nuovo in qualsiasi momento dall'elenco dei token riportato di seguito.",
+      "bearerHint": "Usalo come token al portatore:",
+      "newTitle": "Nuovo token di richiesta",
+      "editTitle": "Modifica token di richiesta",
+      "newDescription": "Scegli quali endpoint può raggiungere questo token di richiesta e cosa può fare.",
+      "editDescription": "Aggiorna il nome e gli endpoint che questo token di richiesta può raggiungere. Il valore del token rimane lo stesso.",
+      "name": "Richiedi il nome del token",
+      "namePlaceholder": "Server di produzione",
+      "permissions": "Autorizzazioni dell'endpoint",
+      "read": "Leggi",
+      "write": "Scrivi",
+      "grantRequired": "Concedere l'accesso ad almeno un endpoint",
+      "create": "Crea gettone"
+    }
+  },
+  "entries": {
+    "title": "Voci",
+    "description": "Sfoglia e modifica i dati archiviati in ciascuno dei tuoi schemi.",
+    "loadingSchemas": "Caricamento schemi...",
+    "emptySchemasTitle": "Ancora nessuno schema",
+    "emptySchemasDescription": "Le voci vivono all'interno degli schemi. Crea prima uno schema, quindi gestiscine i dati qui.",
+    "manage": "Gestisci voci →",
+    "editor": {
+      "headingSuffix": "voci",
+      "description": "Le modifiche vengono eseguite localmente finché non le salvi.",
+      "backAria": "Torna a tutti gli schemi",
+      "importJson": "Importa JSON",
+      "addEntry": "+ Aggiungi voce",
+      "importDisabledTitle": "Salva o elimina le modifiche prima dell'importazione",
+      "unsaved_one": "{{count}} modifica non salvata",
+      "unsaved_other": "{{count}} modifiche non salvate",
+      "discard": "Scartare",
+      "loading": "Caricamento voci...",
+      "emptyTitle": "Nessuna voce ancora",
+      "emptyDescription": "Aggiungi le voci manualmente o importa un file JSON che corrisponde a questo schema.",
+      "tableIndex": "#",
+      "saved_one": "Modifica {{count}} salvata",
+      "saved_other": "Modifiche {{count}} salvate",
+      "nothingSaved": "Non è stato salvato nulla: correggi le voci evidenziate e riprova",
+      "saveFailed": "Impossibile salvare le modifiche",
+      "invalidJson": "Quel file non è valido JSON",
+      "expectedArray": "Era previsto un array di voci JSON",
+      "imported_one": "Voce {{count}} importata",
+      "imported_other": "Voci {{count}} importate",
+      "importedPartial": "Importato {{imported}} di {{total}} — {{rejected}} rifiutato",
+      "importFailed": "Importazione non riuscita",
+      "discardConfirm": "Eliminare tutte le modifiche graduali?",
+      "editAria": "Modifica voce",
+      "deleteAria": "Elimina la voce",
+      "status": {
+        "new": "nuovo",
+        "modified": "modificato",
+        "deleted": "cancellato"
+      }
+    },
+    "form": {
+      "newTitle": "Nuova voce",
+      "editTitle": "Modifica voce",
+      "schemaDescription": "Schema: {{name}}",
+      "noneOption": "— nessuno —"
+    },
+    "importResult": {
+      "partialTitle": "Importazione parzialmente completata",
+      "failedTitle": "Importazione non riuscita",
+      "summary": "Importate <strong>{{imported}}</strong> di <strong>{{total}}</strong> voci. <strong>{{rejected}}</strong> {{rejectedLabel}} rifiutato.",
+      "entryWas": "l'ingresso era",
+      "entriesWere": "le voci erano",
+      "warning": "Le voci rifiutate sono disponibili solo in questo momento: una volta chiusa questa finestra di dialogo non possono essere recuperate. Scaricali per correggerli e reimportarli in seguito.",
+      "download": "Scarica le voci rifiutate",
+      "downloaded": "Scaricato ✓ (scarica di nuovo)"
+    },
+    "unsaved": {
+      "title": "Modifiche non salvate",
+      "description": "Sono presenti modifiche non salvate nelle voci di questo schema.",
+      "body": "Se esci adesso, le modifiche graduali verranno ignorate. Salva prima le modifiche per mantenerle.",
+      "stay": "Rimani",
+      "leave": "Scarta e lascia"
+    }
+  },
+  "api": {
+    "errors": {
+      "badRequest": "Pessima richiesta",
+      "unauthorized": "Non autorizzato",
+      "forbidden": "Proibito",
+      "notFound": "Non trovato",
+      "methodNotAllowed": "Metodo non consentito",
+      "conflict": "Conflitto",
+      "rateLimitExceeded": "Limite di velocità superato",
+      "serverError": "Errore interno del server",
+      "validationFailed": "Convalida non riuscita",
+      "emailRegistered": "E-mail già registrata",
+      "invalidCredentials": "E-mail o password non valide",
+      "fieldNamesUnique": "I nomi dei campi devono essere univoci",
+      "schemaSlugExists": "Hai già uno schema con quello slug",
+      "schemaNotFound": "Schema non trovato",
+      "schemaInUse": "Lo schema viene utilizzato dagli endpoint {{count}}. Elimina prima quegli endpoint.",
+      "unknownSchema": "Schema sconosciuto",
+      "endpointFieldsInvalid": "I campi leggibili/scrivibili devono appartenere allo schema",
+      "endpointSlugExists": "Hai già un endpoint con quello slug",
+      "endpointNotFound": "Endpoint non trovato",
+      "tokenNotFound": "Gettone non trovato",
+      "tokenRevealUnsupported": "Questo token è stato creato prima che la visualizzazione fosse supportata: revocalo e creane uno nuovo",
+      "endpointsUnknown": "Alcuni endpoint sono sconosciuti o non tuoi",
+      "missingBearer": "Token di accesso al portatore mancante",
+      "invalidBearer": "Token di accesso non valido o revocato",
+      "tokenEndpointForbidden": "Questo token non è autorizzato per questo endpoint",
+      "methodDisabled": "{{method}} non è abilitato per questo endpoint",
+      "writePermissionMissing": "Questo token non dispone dell'autorizzazione di scrittura",
+      "readPermissionMissing": "Questo token non dispone dell'autorizzazione di lettura",
+      "recordNotFound": "Registrazione non trovata",
+      "unknownEntry": "Voce sconosciuta",
+      "duplicateUpdateId": "ID record duplicato nel batch di aggiornamento",
+      "entriesInvalid": "Alcune voci non sono valide: non è stato salvato nulla",
+      "duplicateBatch": "valore duplicato per il campo univoco \"{{field}}\": una voce precedente nel file lo utilizza già",
+      "duplicateStored": "il valore per il campo univoco \"{{field}}\" esiste già nelle voci memorizzate"
+    }
+  },
+  "validation": {
+    "passwordMin": "La password deve contenere almeno 8 caratteri",
+    "fieldName": "Utilizza lettere, numeri, trattini bassi; non deve iniziare con un numero",
+    "invalidSlug": "Lumaca non valida",
+    "schemaFieldsMin": "Aggiungi almeno un campo",
+    "enumValuesMin": "Aggiungi almeno un valore enum",
+    "enumValuesUnique": "I valori enum devono essere univoci",
+    "endpointMethodsMin": "Abilita almeno un metodo",
+    "tokenGrantsMin": "Concedere l'accesso ad almeno un endpoint",
+    "nothingToSave": "Niente da salvare",
+    "tooManyChanges": "Troppe modifiche in un salvataggio (max 2000)",
+    "emptyImport": "Il file non contiene voci",
+    "tooManyImport": "Troppe voci in un'unica importazione (max 5000)",
+    "noTokenFields": "Nessun campo da aggiornare",
+    "record": {
+      "bodyObject": "Il corpo deve essere un oggetto JSON",
+      "manyBody": "Il corpo deve essere un array di record o un oggetto con un array di aggiornamenti/record",
+      "required": "è richiesto",
+      "string": "deve essere una stringa",
+      "number": "deve essere un numero",
+      "boolean": "deve essere un valore booleano",
+      "date": "deve essere una data valida",
+      "unsupported": "tipo non supportato",
+      "oneOf": "deve essere uno tra: {{values}}",
+      "unique": "deve essere unico"
+    }
+  }
+}

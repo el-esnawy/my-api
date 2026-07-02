@@ -1,0 +1,411 @@
+{
+  "metadata": {
+    "title": "my-api – Benutzerdefinierte REST-Endpunkte",
+    "description": "Definieren Sie Ihre eigenen Datenschemata, generieren Sie REST-Endpunkte und fragen Sie sie von überall mit Zugriffstokens pro Konto ab."
+  },
+  "common": {
+    "brand": "my-api",
+    "language": "Sprache",
+    "english": "Englisch",
+    "spanish": "Spanisch",
+    "pricing": "Preise",
+    "goToAccount": "Gehen Sie zu meinem Konto",
+    "signIn": "Melden Sie sich an",
+    "signUp": "Melden Sie sich an",
+    "getStarted": "Fangen Sie an",
+    "cancel": "Abbrechen",
+    "saveChanges": "Änderungen speichern",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "close": "Schließen",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "done": "Fertig",
+    "name": "Name",
+    "slug": "Slug",
+    "schema": "Schema",
+    "loading": "Laden...",
+    "created": "Erstellt {{date}}",
+    "lastUsed": "Zuletzt verwendet {{date}}",
+    "none": "keine",
+    "deleted": "gelöscht",
+    "required": "erforderlich",
+    "unique": "einzigartig",
+    "boolean": "Boolescher Wert",
+    "true": "wahr",
+    "false": "falsch",
+    "apply": "Anwenden",
+    "status": "Status",
+    "restore": "Wiederherstellen",
+    "dismiss": "Schließen",
+    "somethingWentWrong": "Etwas ist schief gelaufen",
+    "somethingWentWrongRetry": "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
+    "field_one": "{{count}}-Feld",
+    "field_other": "{{count}} Felder",
+    "entry_one": "{{count}}-Eintrag",
+    "entry_other": "{{count}} Einträge",
+    "fieldTypes": {
+      "string": "Zeichenfolge",
+      "number": "Nummer",
+      "boolean": "Boolescher Wert",
+      "date": "Datum",
+      "enum": "Aufzählung"
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "schemas": "Schemata",
+      "entries": "Einträge",
+      "endpoints": "Endpunkte",
+      "tokens": "Fordern Sie Token an"
+    },
+    "signOut": "Abmelden"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Ihre Daten → Ihr REST API, in Minuten",
+      "title": "Erstellen Sie benutzerdefinierte REST-Endpunkte, ohne ein Backend zu schreiben",
+      "description": "Definieren Sie Ihre eigenen Datenstrukturen, generieren Sie daraus sichere REST-Endpunkte und rufen Sie sie von überall mit Zugriffstokens auf, die für Ihr Konto eindeutig sind.",
+      "primaryCta": "Erstellen Sie Ihren ersten Endpunkt",
+      "code": "curl -X POST https://your-app/api/v1/notes \\\n  -H \"Authorization: Bearer mapi_•••••••••\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"title\": \"Hello\", \"done\": false }'"
+    },
+    "features": {
+      "define": {
+        "title": "Definieren Sie Schemata",
+        "body": "Beschreiben Sie Ihre Daten einmal – Felder, Typen, erforderliche Regeln. Keine Migrationen, keine Boilerplate."
+      },
+      "generate": {
+        "title": "Generieren Sie REST-Endpunkte",
+        "body": "Verwandeln Sie jedes Schema in eine echte REST-Ressource. Wählen Sie die Verben aus, wählen Sie, was lesbar und beschreibbar ist."
+      },
+      "query": {
+        "title": "Abfrage mit Zugriffstoken",
+        "body": "Mint-Token pro Konto, die auf bestimmte Endpunkte beschränkt sind. Jederzeit widerrufen. Streng isoliert pro Benutzer."
+      }
+    },
+    "howItWorks": {
+      "title": "Wie es funktioniert",
+      "steps": {
+        "one": {
+          "title": "Erstellen Sie ein Schema",
+          "description": "z.B. eine Notiz mit Titel, Text, fertig."
+        },
+        "two": {
+          "title": "Machen Sie einen Endpunkt verfügbar",
+          "description": "/api/v1/notes mit GET, POST, PUT, DELETE."
+        },
+        "three": {
+          "title": "Geben Sie einen Token aus",
+          "description": "Auf diesen Endpunkt beschränkt, lesen und schreiben."
+        },
+        "four": {
+          "title": "Rufen Sie es überall an",
+          "description": "Autorisierung: Inhaber <token>."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Einfache, transparente Preisgestaltung",
+      "description": "Starten Sie kostenlos und führen Sie ein Upgrade durch, wenn Sie mehr Endpunkte, Token und Durchsatz benötigen.",
+      "mostPopular": "Am beliebtesten",
+      "signedInCta": "Gehen Sie zu meinem Konto",
+      "tiers": {
+        "hobby": {
+          "name": "Hobby",
+          "price": "0 $",
+          "cadence": "/Mo",
+          "tagline": "Für Nebenprojekte und zum Ausprobieren.",
+          "features": [
+            "3 Schemata",
+            "3 Endpunkte",
+            "1 Zugriffstoken",
+            "10.000 Anfragen/Monat",
+            "Community-Unterstützung"
+          ],
+          "cta": "Fangen Sie an"
+        },
+        "pro": {
+          "name": "Profi",
+          "price": "19 $",
+          "cadence": "/Mo",
+          "tagline": "Für Produktionsanwendungen, die Raum zum Wachsen benötigen.",
+          "features": [
+            "Unbegrenzte Schemata und Endpunkte",
+            "10 Zugriffstoken",
+            "1 Mio. Anfragen/Monat",
+            "Höhere Tarifgrenzen",
+            "E-Mail-Support"
+          ],
+          "cta": "Kostenlose Testversion starten"
+        },
+        "enterprise": {
+          "name": "Unternehmen",
+          "price": "Benutzerdefiniert",
+          "cadence": "",
+          "tagline": "Für Teams mit Skalierbarkeit, Sicherheit und SLA-Anforderungen.",
+          "features": [
+            "Unbegrenzt alles",
+            "SSO und Prüfprotokolle",
+            "Benutzerdefinierte Tariflimits",
+            "Dedizierter Support & SLA",
+            "Optionen vor Ort / VPC"
+          ],
+          "cta": "Kontaktieren Sie den Vertrieb"
+        }
+      }
+    },
+    "footer": "my-api – benutzerdefinierte REST-Endpunkte, unterstützt durch MongoDB, Redis und Zugriffstoken pro Konto."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Willkommen zurück",
+      "description": "Melden Sie sich an, um Ihre Endpunkte zu verwalten.",
+      "footerPrompt": "Sie haben noch kein Konto?",
+      "passwordPlaceholder": "Ihr Passwort"
+    },
+    "signUp": {
+      "title": "Erstellen Sie Ihr Konto",
+      "description": "Beginnen Sie in wenigen Minuten mit der Erstellung benutzerdefinierter REST-Endpunkte.",
+      "footerPrompt": "Sie haben bereits ein Konto?",
+      "passwordPlaceholder": "Mindestens 8 Zeichen"
+    },
+    "fields": {
+      "nameOptional": "Name (optional)",
+      "email": "E-Mail",
+      "password": "Passwort"
+    },
+    "placeholders": {
+      "name": "Ada Lovelace",
+      "email": "you@example.com"
+    }
+  },
+  "schemas": {
+    "title": "Schemata",
+    "description": "Definieren Sie die Form Ihrer Daten. Endpunkte basieren auf Schemata.",
+    "new": "+ Neues Schema",
+    "loading": "Schemata werden geladen...",
+    "emptyTitle": "Noch keine Schemata",
+    "emptyDescription": "Erstellen Sie Ihr erstes Schema, um die Daten zu beschreiben, die Ihre Endpunkte speichern werden.",
+    "editAria": "Schema bearbeiten",
+    "deleteAria": "Schema löschen",
+    "deleteConfirm": "Schema „{{name}}“ löschen? Dies kann nicht rückgängig gemacht werden.",
+    "deleteFailed": "Fehler beim Löschen",
+    "modal": {
+      "newTitle": "Neues Schema",
+      "editTitle": "Schema bearbeiten",
+      "description": "Beschreiben Sie einen Datentyp mit typisierten Feldern.",
+      "namePlaceholder": "Hinweis",
+      "slugPlaceholder": "Hinweis",
+      "fields": "Felder",
+      "addField": "+ Feld hinzufügen",
+      "fieldNamePlaceholder": "field_name",
+      "enumValues": "Enum-Werte",
+      "addEnumValue": "+ Mehrwert schaffen",
+      "enumValuePlaceholder": "Wert",
+      "removeEnumValue": "Enum-Wert entfernen",
+      "removeField": "Feld entfernen",
+      "editWarning": "Durch das Bearbeiten von Feldern werden bereits gespeicherte Datensätze nicht geändert. Durch das Entfernen eines Felds wird es lediglich vor zukünftigen Lese- und Schreibvorgängen ausgeblendet.",
+      "create": "Schema erstellen"
+    }
+  },
+  "endpoints": {
+    "title": "Endpunkte",
+    "description": "Machen Sie Schemata als REST-Endpunkte verfügbar. Wählen Sie Verben und was gelesen oder geschrieben werden kann.",
+    "new": "+ Neuer Endpunkt",
+    "loading": "Endpunkte werden geladen...",
+    "emptyNeedsSchemaTitle": "Erstellen Sie zunächst ein Schema",
+    "emptyNeedsSchemaDescription": "Endpunkte basieren auf Schemata. Gehen Sie zur Registerkarte Schemas, um eines zu definieren.",
+    "emptyTitle": "Noch keine Endpunkte",
+    "emptyDescription": "Verwandeln Sie eines Ihrer Schemas in einen aufrufbaren REST-Endpunkt.",
+    "schemaLabel": "Schema:",
+    "readableGet": "Lesbar (GET-Methoden)",
+    "writableMethods": "Beschreibbar (POST/PUT/PATCH/PUT many/PATCH many)",
+    "deleteConfirm": "Endpunkt „{{name}}“ löschen? Die gespeicherten Datensätze werden entfernt.",
+    "deleteFailed": "Fehler beim Löschen",
+    "modal": {
+      "newTitle": "Neuer Endpunkt",
+      "editTitle": "Endpunkt bearbeiten",
+      "description": "Machen Sie ein Schema als REST-Ressource verfügbar.",
+      "slugUrl": "Slug (URL)",
+      "namePlaceholder": "Notizen",
+      "slugPlaceholder": "Notizen",
+      "selectSchema": "Wählen Sie ein Schema aus...",
+      "allowedMethods": "Zulässige Methoden",
+      "readableFields": "Lesbare Felder",
+      "readableHint": "Zurückgegeben von GET und GET many",
+      "writableFields": "Beschreibbare Felder",
+      "writableHint": "Von Schreibern akzeptiert",
+      "create": "Endpunkt erstellen",
+      "selectSchemaError": "Wählen Sie ein Schema aus",
+      "readableRequired": "Wählen Sie mindestens ein lesbares Feld aus oder deaktivieren Sie die GET-Methoden.",
+      "writableRequired": "Wählen Sie mindestens ein beschreibbares Feld aus oder deaktivieren Sie die Schreibmethoden."
+    }
+  },
+  "tokens": {
+    "title": "Fordern Sie Token an",
+    "description": "Anforderungstoken authentifizieren externe Aufrufe an Ihre Endpunkte. Jeder ist auf die Endpunkte und Berechtigungen beschränkt, die Sie auswählen.",
+    "new": "+ Neues Anforderungstoken",
+    "loading": "Anforderungstoken werden geladen...",
+    "emptyNeedsEndpointTitle": "Erstellen Sie zuerst einen Endpunkt",
+    "emptyNeedsEndpointDescription": "Anforderungstoken gewähren Zugriff auf bestimmte Endpunkte. Erstellen Sie einen auf der Registerkarte „Endpunkte“.",
+    "emptyTitle": "Noch keine Anforderungstoken",
+    "emptyDescription": "Erstellen Sie ein Anforderungstoken, um Ihre Endpunkte von überall aus anzurufen.",
+    "revoked": "widerrufen",
+    "revealing": "Aufschlussreich...",
+    "hide": "Verstecken",
+    "view": "Ansicht",
+    "reEnable": "Wieder aktivieren",
+    "revoke": "Widerrufen",
+    "endpointAccess": "Endpunktzugriff",
+    "noEndpoints": "keine Endpunkte",
+    "deleteConfirm": "Token „{{name}}“ löschen? Anrufe, die es verwenden, funktionieren nicht mehr.",
+    "updateFailed": "Aktualisierung fehlgeschlagen",
+    "deleteFailed": "Fehler beim Löschen",
+    "revealFailed": "Token konnte nicht angezeigt werden",
+    "modal": {
+      "createdTitle": "Anforderungstoken erstellt",
+      "createdDescription": "Kopieren Sie dieses Token jetzt oder sehen Sie es sich jederzeit in der Token-Liste unten noch einmal an.",
+      "bearerHint": "Verwenden Sie es als Inhabertoken:",
+      "newTitle": "Neues Anforderungstoken",
+      "editTitle": "Anforderungstoken bearbeiten",
+      "newDescription": "Wählen Sie aus, welche Endpunkte dieses Anforderungstoken erreichen kann und was es tun kann.",
+      "editDescription": "Aktualisieren Sie den Namen und die Endpunkte, die dieses Anforderungstoken erreichen kann. Der Tokenwert bleibt gleich.",
+      "name": "Name des Anforderungstokens",
+      "namePlaceholder": "Produktionsserver",
+      "permissions": "Endpunktberechtigungen",
+      "read": "Lesen",
+      "write": "Schreiben",
+      "grantRequired": "Gewähren Sie Zugriff auf mindestens einen Endpunkt",
+      "create": "Token erstellen"
+    }
+  },
+  "entries": {
+    "title": "Einträge",
+    "description": "Durchsuchen und bearbeiten Sie die in jedem Ihrer Schemas gespeicherten Daten.",
+    "loadingSchemas": "Schemata werden geladen...",
+    "emptySchemasTitle": "Noch keine Schemata",
+    "emptySchemasDescription": "Einträge befinden sich in Schemata. Erstellen Sie zunächst ein Schema und verwalten Sie dann dessen Daten hier.",
+    "manage": "Einträge verwalten →",
+    "editor": {
+      "headingSuffix": "Einträge",
+      "description": "Änderungen werden lokal bereitgestellt, bis Sie sie speichern.",
+      "backAria": "Zurück zu allen Schemata",
+      "importJson": "JSON importieren",
+      "addEntry": "+ Eintrag hinzufügen",
+      "importDisabledTitle": "Speichern oder verwerfen Sie Ihre Änderungen vor dem Import",
+      "unsaved_one": "{{count}} nicht gespeicherte Änderung",
+      "unsaved_other": "{{count}} nicht gespeicherte Änderungen",
+      "discard": "Verwerfen",
+      "loading": "Einträge werden geladen...",
+      "emptyTitle": "Noch keine Einträge",
+      "emptyDescription": "Fügen Sie Einträge manuell hinzu oder importieren Sie eine JSON-Datei, die diesem Schema entspricht.",
+      "tableIndex": "#",
+      "saved_one": "{{count}}-Änderung gespeichert",
+      "saved_other": "{{count}} Änderungen gespeichert",
+      "nothingSaved": "Es wurde nichts gespeichert. Korrigieren Sie die markierten Einträge und versuchen Sie es erneut",
+      "saveFailed": "Änderungen konnten nicht gespeichert werden",
+      "invalidJson": "Diese Datei ist ungültig JSON",
+      "expectedArray": "Es wurde ein JSON-Array mit Einträgen erwartet",
+      "imported_one": "Importierter {{count}}-Eintrag",
+      "imported_other": "Importierte {{count}}-Einträge",
+      "importedPartial": "{{imported}} von {{total}} importiert – {{rejected}} abgelehnt",
+      "importFailed": "Der Import ist fehlgeschlagen",
+      "discardConfirm": "Alle bereitgestellten Änderungen verwerfen?",
+      "editAria": "Eintrag bearbeiten",
+      "deleteAria": "Eintrag löschen",
+      "status": {
+        "new": "neu",
+        "modified": "modifiziert",
+        "deleted": "gelöscht"
+      }
+    },
+    "form": {
+      "newTitle": "Neuer Eintrag",
+      "editTitle": "Eintrag bearbeiten",
+      "schemaDescription": "Schema: {{name}}",
+      "noneOption": "– keine –"
+    },
+    "importResult": {
+      "partialTitle": "Import teilweise abgeschlossen",
+      "failedTitle": "Der Import ist fehlgeschlagen",
+      "summary": "<strong>{{imported}}</strong> von <strong>{{total}}</strong> Einträgen wurden importiert. <strong>{{rejected}}</strong> {{rejectedLabel}} abgelehnt.",
+      "entryWas": "Eintrag war",
+      "entriesWere": "Einträge waren",
+      "warning": "Die abgelehnten Einträge sind derzeit nur verfügbar. Sobald Sie dieses Dialogfeld schließen, können sie nicht mehr wiederhergestellt werden. Laden Sie sie herunter, um sie zu reparieren und später erneut zu importieren.",
+      "download": "Abgelehnte Einträge herunterladen",
+      "downloaded": "Heruntergeladen ✓ (erneut herunterladen)"
+    },
+    "unsaved": {
+      "title": "Nicht gespeicherte Änderungen",
+      "description": "Sie haben nicht gespeicherte Änderungen an den Einträgen dieses Schemas.",
+      "body": "Wenn Sie jetzt gehen, werden Ihre bereitgestellten Änderungen verworfen. Speichern Sie Ihre Änderungen zunächst, um sie zu behalten.",
+      "stay": "Bleib",
+      "leave": "Verwerfen und gehen"
+    }
+  },
+  "api": {
+    "errors": {
+      "badRequest": "Schlechte Anfrage",
+      "unauthorized": "Nicht autorisiert",
+      "forbidden": "Verboten",
+      "notFound": "Nicht gefunden",
+      "methodNotAllowed": "Methode nicht zulässig",
+      "conflict": "Konflikt",
+      "rateLimitExceeded": "Ratenlimit überschritten",
+      "serverError": "Interner Serverfehler",
+      "validationFailed": "Die Validierung ist fehlgeschlagen",
+      "emailRegistered": "E-Mail bereits registriert",
+      "invalidCredentials": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+      "fieldNamesUnique": "Feldnamen müssen eindeutig sein",
+      "schemaSlugExists": "Sie haben bereits ein Schema mit diesem Slug",
+      "schemaNotFound": "Schema nicht gefunden",
+      "schemaInUse": "Schema wird von {{count}} Endpunkten verwendet. Löschen Sie zuerst diese Endpunkte.",
+      "unknownSchema": "Unbekanntes Schema",
+      "endpointFieldsInvalid": "Lese-/schreibbare Felder müssen zum Schema gehören",
+      "endpointSlugExists": "Mit diesem Slug haben Sie bereits einen Endpunkt",
+      "endpointNotFound": "Endpunkt nicht gefunden",
+      "tokenNotFound": "Token nicht gefunden",
+      "tokenRevealUnsupported": "Dieses Token wurde erstellt, bevor die Anzeige unterstützt wurde – widerrufen Sie es und erstellen Sie ein neues",
+      "endpointsUnknown": "Einige Endpunkte sind unbekannt oder gehören nicht Ihnen",
+      "missingBearer": "Fehlendes Inhaberzugriffstoken",
+      "invalidBearer": "Ungültiges oder widerrufenes Zugriffstoken",
+      "tokenEndpointForbidden": "Dieses Token ist für diesen Endpunkt nicht autorisiert",
+      "methodDisabled": "{{method}} ist für diesen Endpunkt nicht aktiviert",
+      "writePermissionMissing": "Diesem Token fehlt die Schreibberechtigung",
+      "readPermissionMissing": "Diesem Token fehlt die Leseberechtigung",
+      "recordNotFound": "Datensatz nicht gefunden",
+      "unknownEntry": "Unbekannter Eintrag",
+      "duplicateUpdateId": "Doppelte Datensatz-ID im Aktualisierungsstapel",
+      "entriesInvalid": "Einige Einträge sind ungültig – es wurde nichts gespeichert",
+      "duplicateBatch": "Doppelter Wert für eindeutiges Feld „{{field}}“ – ein früherer Eintrag in der Datei verwendet ihn bereits",
+      "duplicateStored": "Der Wert für das eindeutige Feld „{{field}}“ ist in Ihren gespeicherten Einträgen bereits vorhanden"
+    }
+  },
+  "validation": {
+    "passwordMin": "Das Passwort muss mindestens 8 Zeichen lang sein",
+    "fieldName": "Verwenden Sie Buchstaben, Zahlen und Unterstriche. darf nicht mit einer Zahl beginnen",
+    "invalidSlug": "Ungültiger Slug",
+    "schemaFieldsMin": "Fügen Sie mindestens ein Feld hinzu",
+    "enumValuesMin": "Fügen Sie mindestens einen Enum-Wert hinzu",
+    "enumValuesUnique": "Enum-Werte müssen eindeutig sein",
+    "endpointMethodsMin": "Aktivieren Sie mindestens eine Methode",
+    "tokenGrantsMin": "Gewähren Sie Zugriff auf mindestens einen Endpunkt",
+    "nothingToSave": "Nichts zu retten",
+    "tooManyChanges": "Zu viele Änderungen in einem Speichervorgang (maximal 2000)",
+    "emptyImport": "Die Datei enthält keine Einträge",
+    "tooManyImport": "Zu viele Einträge in einem Import (maximal 5000)",
+    "noTokenFields": "Keine Felder zum Aktualisieren",
+    "record": {
+      "bodyObject": "Der Körper muss ein JSON-Objekt sein",
+      "manyBody": "Der Körper muss ein Array von Datensätzen oder ein Objekt mit einem Updates/Records-Array sein",
+      "required": "ist erforderlich",
+      "string": "muss eine Zeichenfolge sein",
+      "number": "muss eine Zahl sein",
+      "boolean": "muss ein boolescher Wert sein",
+      "date": "muss ein gültiges Datum sein",
+      "unsupported": "nicht unterstützter Typ",
+      "oneOf": "muss einer von sein: {{values}}",
+      "unique": "muss eindeutig sein"
+    }
+  }
+}

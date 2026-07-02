@@ -1,0 +1,411 @@
+{
+  "metadata": {
+    "title": "my-api — Points de terminaison REST personnalisés",
+    "description": "Définissez vos propres schémas de données, générez des points de terminaison REST et interrogez-les depuis n'importe où avec des jetons d'accès par compte."
+  },
+  "common": {
+    "brand": "my-api",
+    "language": "Langue",
+    "english": "Anglais",
+    "spanish": "Espagnol",
+    "pricing": "Tarifs",
+    "goToAccount": "Aller sur mon compte",
+    "signIn": "Connectez-vous",
+    "signUp": "Inscrivez-vous",
+    "getStarted": "Commencez",
+    "cancel": "Annuler",
+    "saveChanges": "Enregistrer les modifications",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "close": "Fermer",
+    "copy": "Copier",
+    "copied": "Copié",
+    "done": "Terminé",
+    "name": "Nom",
+    "slug": "Slug",
+    "schema": "Schéma",
+    "loading": "Chargement...",
+    "created": "Créé {{date}}",
+    "lastUsed": "Dernière utilisation {{date}}",
+    "none": "aucun",
+    "deleted": "supprimé",
+    "required": "requis",
+    "unique": "unique",
+    "boolean": "booléen",
+    "true": "vrai",
+    "false": "faux",
+    "apply": "Postuler",
+    "status": "Statut",
+    "restore": "Restaurer",
+    "dismiss": "Rejeter",
+    "somethingWentWrong": "Quelque chose s'est mal passé",
+    "somethingWentWrongRetry": "Quelque chose s'est mal passé. Veuillez réessayer.",
+    "field_one": "Champ {{count}}",
+    "field_other": "Champs {{count}}",
+    "entry_one": "Entrée {{count}}",
+    "entry_other": "{{count}} entrées",
+    "fieldTypes": {
+      "string": "chaîne",
+      "number": "numéro",
+      "boolean": "booléen",
+      "date": "rendez-vous",
+      "enum": "énumération"
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "schemas": "Schémas",
+      "entries": "Entrées",
+      "endpoints": "Points de terminaison",
+      "tokens": "Demander des jetons"
+    },
+    "signOut": "Se déconnecter"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "Vos données → votre REST API, en quelques minutes",
+      "title": "Créez des points de terminaison REST personnalisés sans écrire de backend",
+      "description": "Définissez vos propres structures de données, générez à partir d'elles des points de terminaison REST sécurisés et appelez-les de n'importe où avec des jetons d'accès uniques à votre compte.",
+      "primaryCta": "Créez votre premier point de terminaison",
+      "code": "curl -X POST https://your-app/api/v1/notes \\\n  -H \"Authorization: Bearer mapi_•••••••••\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"title\": \"Hello\", \"done\": false }'"
+    },
+    "features": {
+      "define": {
+        "title": "Définir des schémas",
+        "body": "Décrivez vos données une fois : champs, types, règles requises. Pas de migrations, pas de passe-partout."
+      },
+      "generate": {
+        "title": "Générer des points de terminaison REST",
+        "body": "Transformez n'importe quel schéma en une véritable ressource REST. Choisissez les verbes, choisissez ce qui est lisible et inscriptible."
+      },
+      "query": {
+        "title": "Requête avec des jetons d'accès",
+        "body": "Jetons Mint par compte limités à des points de terminaison spécifiques. Révoquez à tout moment. Strictement isolé par utilisateur."
+      }
+    },
+    "howItWorks": {
+      "title": "Comment ça marche",
+      "steps": {
+        "one": {
+          "title": "Créer un schéma",
+          "description": "par ex. une note avec titre, corps, terminé."
+        },
+        "two": {
+          "title": "Exposer un point de terminaison",
+          "description": "/api/v1/notes avec GET, POST, PUT, DELETE."
+        },
+        "three": {
+          "title": "Émettre un jeton",
+          "description": "Portée sur ce point de terminaison, lecture + écriture."
+        },
+        "four": {
+          "title": "Appelez-le n'importe où",
+          "description": "Autorisation : Porteur <token>."
+        }
+      }
+    },
+    "pricing": {
+      "title": "Une tarification simple et transparente",
+      "description": "Démarrez gratuitement et effectuez une mise à niveau lorsque vous avez besoin de plus de points de terminaison, de jetons et de débit.",
+      "mostPopular": "Le plus populaire",
+      "signedInCta": "Aller sur mon compte",
+      "tiers": {
+        "hobby": {
+          "name": "Passe-temps",
+          "price": "0 $",
+          "cadence": "/mois",
+          "tagline": "Pour des projets parallèles et essayer des choses.",
+          "features": [
+            "3 schémas",
+            "3 points de terminaison",
+            "1 jeton d'accès",
+            "10 000 requêtes / mois",
+            "Soutien communautaire"
+          ],
+          "cta": "Commencez"
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "19 $",
+          "cadence": "/mois",
+          "tagline": "Pour les applications de production qui ont besoin d’espace pour se développer.",
+          "features": [
+            "Schémas et points de terminaison illimités",
+            "10 jetons d'accès",
+            "1M de requêtes / mois",
+            "Limites de taux plus élevées",
+            "Assistance par e-mail"
+          ],
+          "cta": "Commencer l'essai gratuit"
+        },
+        "enterprise": {
+          "name": "Entreprise",
+          "price": "Personnalisé",
+          "cadence": "",
+          "tagline": "Pour les équipes ayant des besoins d’évolutivité, de sécurité et SLA.",
+          "features": [
+            "Tout illimité",
+            "SSO et journaux d'audit",
+            "Limites de taux personnalisées",
+            "Assistance dédiée & SLA",
+            "Options sur site/VPC"
+          ],
+          "cta": "Contacter le service commercial"
+        }
+      }
+    },
+    "footer": "my-api — points de terminaison REST personnalisés soutenus par MongoDB, Redis et des jetons d'accès par compte."
+  },
+  "auth": {
+    "signIn": {
+      "title": "Bon retour",
+      "description": "Connectez-vous pour gérer vos points de terminaison.",
+      "footerPrompt": "Vous n'avez pas de compte ?",
+      "passwordPlaceholder": "Votre mot de passe"
+    },
+    "signUp": {
+      "title": "Créez votre compte",
+      "description": "Commencez à créer des points de terminaison REST personnalisés en quelques minutes.",
+      "footerPrompt": "Vous avez déjà un compte ?",
+      "passwordPlaceholder": "Au moins 8 caractères"
+    },
+    "fields": {
+      "nameOptional": "Nom (facultatif)",
+      "email": "Courriel",
+      "password": "Mot de passe"
+    },
+    "placeholders": {
+      "name": "Ada Lovelace",
+      "email": "you@example.com"
+    }
+  },
+  "schemas": {
+    "title": "Schémas",
+    "description": "Définissez la forme de vos données. Les points de terminaison sont construits sur des schémas.",
+    "new": "+ Nouveau schéma",
+    "loading": "Chargement des schémas...",
+    "emptyTitle": "Pas encore de schémas",
+    "emptyDescription": "Créez votre premier schéma pour décrire les données que vos points de terminaison stockeront.",
+    "editAria": "Modifier le schéma",
+    "deleteAria": "Supprimer le schéma",
+    "deleteConfirm": "Supprimer le schéma « {{name}} » ? Cela ne peut pas être annulé.",
+    "deleteFailed": "Échec de la suppression",
+    "modal": {
+      "newTitle": "Nouveau schéma",
+      "editTitle": "Modifier le schéma",
+      "description": "Décrivez un type de données avec des champs saisis.",
+      "namePlaceholder": "Remarque",
+      "slugPlaceholder": "remarque",
+      "fields": "Champs",
+      "addField": "+ Ajouter un champ",
+      "fieldNamePlaceholder": "field_name",
+      "enumValues": "Valeurs d'énumération",
+      "addEnumValue": "+ Ajouter de la valeur",
+      "enumValuePlaceholder": "valeur",
+      "removeEnumValue": "Supprimer la valeur enum",
+      "removeField": "Supprimer le champ",
+      "editWarning": "La modification des champs ne modifiera pas les enregistrements déjà stockés. La suppression d'un champ le cache simplement des lectures et écritures futures.",
+      "create": "Créer un schéma"
+    }
+  },
+  "endpoints": {
+    "title": "Points de terminaison",
+    "description": "Exposez les schémas en tant que points de terminaison REST. Choisissez les verbes et ce qui peut être lu ou écrit.",
+    "new": "+ Nouveau point de terminaison",
+    "loading": "Chargement des points de terminaison...",
+    "emptyNeedsSchemaTitle": "Créez d'abord un schéma",
+    "emptyNeedsSchemaDescription": "Les points de terminaison sont construits sur des schémas. Dirigez-vous vers l’onglet Schémas pour en définir un.",
+    "emptyTitle": "Aucun point de terminaison pour l'instant",
+    "emptyDescription": "Transformez l'un de vos schémas en un point de terminaison REST appelable.",
+    "schemaLabel": "Schéma :",
+    "readableGet": "Lisible (méthodes GET)",
+    "writableMethods": "Modifiables (POST/PUT/PATCH/PUT many/PATCH many)",
+    "deleteConfirm": "Supprimer le point de terminaison \"{{name}}\" ? Ses enregistrements stockés seront supprimés.",
+    "deleteFailed": "Échec de la suppression",
+    "modal": {
+      "newTitle": "Nouveau point de terminaison",
+      "editTitle": "Modifier le point de terminaison",
+      "description": "Exposez un schéma en tant que ressource REST.",
+      "slugUrl": "Slug (URL)",
+      "namePlaceholder": "Remarques",
+      "slugPlaceholder": "remarques",
+      "selectSchema": "Sélectionnez un schéma...",
+      "allowedMethods": "Méthodes autorisées",
+      "readableFields": "Champs lisibles",
+      "readableHint": "Renvoyé par GET et GET many",
+      "writableFields": "Champs accessibles en écriture",
+      "writableHint": "Accepté par écrit",
+      "create": "Créer un point de terminaison",
+      "selectSchemaError": "Sélectionnez un schéma",
+      "readableRequired": "Sélectionnez au moins un champ lisible ou désactivez les méthodes GET.",
+      "writableRequired": "Sélectionnez au moins un champ accessible en écriture ou désactivez les méthodes d'écriture."
+    }
+  },
+  "tokens": {
+    "title": "Demander des jetons",
+    "description": "Les jetons de demande authentifient les appels externes vers vos points de terminaison. Chacun est limité aux points de terminaison et aux autorisations que vous choisissez.",
+    "new": "+ Nouveau jeton de demande",
+    "loading": "Chargement des jetons de requête...",
+    "emptyNeedsEndpointTitle": "Créez d'abord un point de terminaison",
+    "emptyNeedsEndpointDescription": "Les jetons de requête accordent l’accès à des points de terminaison spécifiques. Créez-en un dans l'onglet Points de terminaison.",
+    "emptyTitle": "Aucun jeton de demande pour l'instant",
+    "emptyDescription": "Créez un jeton de requête pour commencer à appeler vos points de terminaison de n'importe où.",
+    "revoked": "révoqué",
+    "revealing": "Révélant...",
+    "hide": "Masquer",
+    "view": "Voir",
+    "reEnable": "Réactiver",
+    "revoke": "Révoquer",
+    "endpointAccess": "Accès aux points de terminaison",
+    "noEndpoints": "pas de points de terminaison",
+    "deleteConfirm": "Supprimer le jeton « {{name}} » ? Les appels qui l'utilisent cesseront de fonctionner.",
+    "updateFailed": "Échec de la mise à jour",
+    "deleteFailed": "Échec de la suppression",
+    "revealFailed": "Échec de la révélation du jeton",
+    "modal": {
+      "createdTitle": "Jeton de demande créé",
+      "createdDescription": "Copiez ce jeton maintenant ou affichez-le à nouveau à tout moment à partir de la liste des jetons ci-dessous.",
+      "bearerHint": "Utilisez-le comme jeton au porteur :",
+      "newTitle": "Nouveau jeton de demande",
+      "editTitle": "Modifier le jeton de demande",
+      "newDescription": "Choisissez les points de terminaison que ce jeton de requête peut atteindre et ce qu'il peut faire.",
+      "editDescription": "Mettez à jour le nom et les points de terminaison que ce jeton de demande peut atteindre. La valeur du jeton reste la même.",
+      "name": "Nom du jeton de demande",
+      "namePlaceholder": "Serveur de production",
+      "permissions": "Autorisations du point de terminaison",
+      "read": "Lire",
+      "write": "Écrire",
+      "grantRequired": "Accorder l'accès à au moins un point de terminaison",
+      "create": "Créer un jeton"
+    }
+  },
+  "entries": {
+    "title": "Entrées",
+    "description": "Parcourez et modifiez les données stockées dans chacun de vos schémas.",
+    "loadingSchemas": "Chargement des schémas...",
+    "emptySchemasTitle": "Pas encore de schémas",
+    "emptySchemasDescription": "Les entrées vivent dans des schémas. Créez d'abord un schéma, puis gérez ses données ici.",
+    "manage": "Gérer les entrées →",
+    "editor": {
+      "headingSuffix": "entrées",
+      "description": "Les modifications sont effectuées localement jusqu'à ce que vous les enregistriez.",
+      "backAria": "Retour à tous les schémas",
+      "importJson": "Importer JSON",
+      "addEntry": "+ Ajouter une entrée",
+      "importDisabledTitle": "Enregistrez ou supprimez vos modifications avant de les importer",
+      "unsaved_one": "{{count}} modification non enregistrée",
+      "unsaved_other": "{{count}} modifications non enregistrées",
+      "discard": "Jeter",
+      "loading": "Chargement des entrées...",
+      "emptyTitle": "Aucune entrée pour l'instant",
+      "emptyDescription": "Ajoutez des entrées manuellement ou importez un fichier JSON qui correspond à ce schéma.",
+      "tableIndex": "#",
+      "saved_one": "Modification {{count}} enregistrée",
+      "saved_other": "Modifications {{count}} enregistrées",
+      "nothingSaved": "Rien n'a été enregistré : corrigez les entrées en surbrillance et réessayez",
+      "saveFailed": "Échec de l'enregistrement des modifications",
+      "invalidJson": "Ce fichier n'est pas valide JSON",
+      "expectedArray": "Attendu un tableau JSON d'entrées",
+      "imported_one": "Entrée {{count}} importée",
+      "imported_other": "Entrées {{count}} importées",
+      "importedPartial": "{{imported}} importé de {{total}} — {{rejected}} rejeté",
+      "importFailed": "Échec de l'importation",
+      "discardConfirm": "Supprimer toutes les modifications par étapes ?",
+      "editAria": "Modifier l'entrée",
+      "deleteAria": "Supprimer l'entrée",
+      "status": {
+        "new": "nouveau",
+        "modified": "modifié",
+        "deleted": "supprimé"
+      }
+    },
+    "form": {
+      "newTitle": "Nouvelle entrée",
+      "editTitle": "Modifier l'entrée",
+      "schemaDescription": "Schéma : {{name}}",
+      "noneOption": "— aucun —"
+    },
+    "importResult": {
+      "partialTitle": "Importation partiellement terminée",
+      "failedTitle": "Échec de l'importation",
+      "summary": "Importation de <strong>{{imported}}</strong> des <strong>{{total}}</strong> entrées. <strong>{{rejected}}</strong> {{rejectedLabel}} rejeté.",
+      "entryWas": "l'entrée était",
+      "entriesWere": "les entrées étaient",
+      "warning": "Les entrées rejetées ne sont disponibles que pour le moment : une fois que vous fermez cette boîte de dialogue, elles ne peuvent plus être récupérées. Téléchargez-les pour les corriger et les réimporter plus tard.",
+      "download": "Télécharger les entrées rejetées",
+      "downloaded": "Téléchargé ✓ (télécharger à nouveau)"
+    },
+    "unsaved": {
+      "title": "Modifications non enregistrées",
+      "description": "Vous avez des modifications non enregistrées dans les entrées de ce schéma.",
+      "body": "Si vous partez maintenant, vos modifications par étapes seront supprimées. Enregistrez d'abord vos modifications pour les conserver.",
+      "stay": "Rester",
+      "leave": "Jeter et partir"
+    }
+  },
+  "api": {
+    "errors": {
+      "badRequest": "Mauvaise demande",
+      "unauthorized": "Non autorisé",
+      "forbidden": "Interdit",
+      "notFound": "Pas trouvé",
+      "methodNotAllowed": "Méthode non autorisée",
+      "conflict": "Conflit",
+      "rateLimitExceeded": "Limite de débit dépassée",
+      "serverError": "Erreur de serveur interne",
+      "validationFailed": "Échec de la validation",
+      "emailRegistered": "Email déjà enregistré",
+      "invalidCredentials": "Email ou mot de passe invalide",
+      "fieldNamesUnique": "Les noms de champs doivent être uniques",
+      "schemaSlugExists": "Tu as déjà un schéma avec ce slug",
+      "schemaNotFound": "Schéma introuvable",
+      "schemaInUse": "Le schéma est utilisé par le(s) point(s) final(s) {{count}}. Supprimez d’abord ces points de terminaison.",
+      "unknownSchema": "Schéma inconnu",
+      "endpointFieldsInvalid": "Les champs lisibles/inscriptibles doivent appartenir au schéma",
+      "endpointSlugExists": "Vous avez déjà un point de terminaison avec ce slug",
+      "endpointNotFound": "Point de terminaison introuvable",
+      "tokenNotFound": "Jeton introuvable",
+      "tokenRevealUnsupported": "Ce jeton a été créé avant que la visualisation ne soit prise en charge : révoquez-le et créez-en un nouveau.",
+      "endpointsUnknown": "Certains points de terminaison sont inconnus ou ne vous appartiennent pas",
+      "missingBearer": "Jeton d'accès au porteur manquant",
+      "invalidBearer": "Jeton d'accès invalide ou révoqué",
+      "tokenEndpointForbidden": "Ce jeton n'est pas autorisé pour ce point de terminaison",
+      "methodDisabled": "{{method}} n'est pas activé pour ce point de terminaison",
+      "writePermissionMissing": "Ce jeton n'a pas d'autorisation d'écriture",
+      "readPermissionMissing": "Ce jeton n'a pas d'autorisation de lecture",
+      "recordNotFound": "Enregistrement introuvable",
+      "unknownEntry": "Entrée inconnue",
+      "duplicateUpdateId": "ID d'enregistrement en double dans le lot de mise à jour",
+      "entriesInvalid": "Certaines entrées ne sont pas valides — rien n'a été enregistré",
+      "duplicateBatch": "valeur en double pour le champ unique \"{{field}}\" — une entrée antérieure dans le fichier l'utilise déjà",
+      "duplicateStored": "la valeur du champ unique \"{{field}}\" existe déjà dans vos entrées stockées"
+    }
+  },
+  "validation": {
+    "passwordMin": "Le mot de passe doit contenir au moins 8 caractères",
+    "fieldName": "Utilisez des lettres, des chiffres, des traits de soulignement ; ne doit pas commencer par un chiffre",
+    "invalidSlug": "Limace invalide",
+    "schemaFieldsMin": "Ajouter au moins un champ",
+    "enumValuesMin": "Ajouter au moins une valeur enum",
+    "enumValuesUnique": "Les valeurs d'énumération doivent être uniques",
+    "endpointMethodsMin": "Activer au moins une méthode",
+    "tokenGrantsMin": "Accorder l'accès à au moins un point de terminaison",
+    "nothingToSave": "Rien à sauver",
+    "tooManyChanges": "Trop de modifications en une seule sauvegarde (max 2000)",
+    "emptyImport": "Le fichier ne contient aucune entrée",
+    "tooManyImport": "Trop d'entrées dans une seule importation (max 5 000)",
+    "noTokenFields": "Aucun champ à mettre à jour",
+    "record": {
+      "bodyObject": "Le corps doit être un objet JSON",
+      "manyBody": "Le corps doit être un tableau d'enregistrements ou un objet avec un tableau de mises à jour/enregistrements",
+      "required": "est requis",
+      "string": "doit être une chaîne",
+      "number": "ça doit être un nombre",
+      "boolean": "doit être un booléen",
+      "date": "doit être une date valide",
+      "unsupported": "type non pris en charge",
+      "oneOf": "doit être l'un des : {{values}}",
+      "unique": "doit être unique"
+    }
+  }
+}

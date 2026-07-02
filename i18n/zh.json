@@ -1,0 +1,411 @@
+{
+  "metadata": {
+    "title": "my-api — 自定义 REST 端点",
+    "description": "定义您自己的数据模式，生成 REST 端点，并使用每个帐户访问令牌从任何地方查询它们。"
+  },
+  "common": {
+    "brand": "my-api",
+    "language": "语言",
+    "english": "英语",
+    "spanish": "西班牙语",
+    "pricing": "定价",
+    "goToAccount": "转到我的帐户",
+    "signIn": "登录",
+    "signUp": "注册",
+    "getStarted": "开始使用",
+    "cancel": "取消",
+    "saveChanges": "保存更改",
+    "edit": "编辑",
+    "delete": "删除",
+    "close": "关闭",
+    "copy": "复制",
+    "copied": "已复制",
+    "done": "完成",
+    "name": "名称",
+    "slug": "Slug",
+    "schema": "模式",
+    "loading": "正在加载...",
+    "created": "创建 {{date}}",
+    "lastUsed": "最后使用 {{date}}",
+    "none": "无",
+    "deleted": "已删除",
+    "required": "必填",
+    "unique": "独特的",
+    "boolean": "布尔值",
+    "true": "真实",
+    "false": "假的",
+    "apply": "申请",
+    "status": "状态",
+    "restore": "恢复",
+    "dismiss": "解雇",
+    "somethingWentWrong": "出了点问题",
+    "somethingWentWrongRetry": "出了点问题。请再试一次。",
+    "field_one": "{{count}} 字段",
+    "field_other": "{{count}} 字段",
+    "entry_one": "{{count}} 条目",
+    "entry_other": "{{count}} 条目",
+    "fieldTypes": {
+      "string": "字符串",
+      "number": "数量",
+      "boolean": "布尔值",
+      "date": "日期",
+      "enum": "枚举"
+    }
+  },
+  "dashboard": {
+    "tabs": {
+      "schemas": "模式",
+      "entries": "参赛作品",
+      "endpoints": "端点",
+      "tokens": "请求令牌"
+    },
+    "signOut": "退出"
+  },
+  "landing": {
+    "hero": {
+      "eyebrow": "您的数据 → 您的 REST API，只需几分钟",
+      "title": "无需编写后端即可构建自定义 REST 端点",
+      "description": "定义您自己的数据结构，从中生成安全的 REST 端点，并使用您帐户独有的访问令牌从任何地方调用它们。",
+      "primaryCta": "创建您的第一个端点",
+      "code": "curl -X POST https://your-app/api/v1/notes \\\n  -H \"Authorization: Bearer mapi_•••••••••\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{ \"title\": \"Hello\", \"done\": false }'"
+    },
+    "features": {
+      "define": {
+        "title": "定义模式",
+        "body": "描述一次您的数据——字段、类型、所需规则。没有迁移，没有样板。"
+      },
+      "generate": {
+        "title": "生成 REST 端点",
+        "body": "将任何模式转变为真正的 REST 资源。选择动词，选择可读可写的内容。"
+      },
+      "query": {
+        "title": "使用访问令牌进行查询",
+        "body": "铸造适用于特定端点的每个帐户令牌。随时撤销。每个用户严格隔离。"
+      }
+    },
+    "howItWorks": {
+      "title": "它是如何运作的",
+      "steps": {
+        "one": {
+          "title": "创建架构",
+          "description": "例如带有标题、正文的注释，完成。"
+        },
+        "two": {
+          "title": "暴露端点",
+          "description": "/api/v1/notes 与 GET、POST、PUT、DELETE。"
+        },
+        "three": {
+          "title": "发行代币",
+          "description": "作用域为该端点，读+写。"
+        },
+        "four": {
+          "title": "随处调用",
+          "description": "授权：持有者<token>。"
+        }
+      }
+    },
+    "pricing": {
+      "title": "简单、透明的定价",
+      "description": "当您需要更多端点、令牌和吞吐量时，开始免费并升级。",
+      "mostPopular": "最受欢迎",
+      "signedInCta": "转到我的帐户",
+      "tiers": {
+        "hobby": {
+          "name": "爱好",
+          "price": "$0",
+          "cadence": "/月",
+          "tagline": "用于副业项目和尝试。",
+          "features": [
+            "3 模式",
+            "3个端点",
+            "1 个访问令牌",
+            "10k 请求/月",
+            "社区支持"
+          ],
+          "cta": "开始使用"
+        },
+        "pro": {
+          "name": "专业版",
+          "price": "19 美元",
+          "cadence": "/月",
+          "tagline": "适用于需要增长空间的生产应用程序。",
+          "features": [
+            "无限的模式和端点",
+            "10 个访问令牌",
+            "100 万个请求/月",
+            "更高的速率限制",
+            "电子邮件支持"
+          ],
+          "cta": "开始免费试用"
+        },
+        "enterprise": {
+          "name": "企业",
+          "price": "定制",
+          "cadence": "",
+          "tagline": "适合具有规模、安全性和 SLA 需求的团队。",
+          "features": [
+            "无限一切",
+            "SSO 和审核日志",
+            "自定义速率限制",
+            "专门支持和SLA",
+            "本地/VPC 选项"
+          ],
+          "cta": "联系销售人员"
+        }
+      }
+    },
+    "footer": "my-api — 由 MongoDB、Redis 和每个帐户访问令牌支持的自定义 REST 端点。"
+  },
+  "auth": {
+    "signIn": {
+      "title": "欢迎回来",
+      "description": "登录以管理您的端点。",
+      "footerPrompt": "没有帐户？",
+      "passwordPlaceholder": "您的密码"
+    },
+    "signUp": {
+      "title": "创建您的帐户",
+      "description": "在几分钟内开始构建自定义 REST 端点。",
+      "footerPrompt": "已经有帐户？",
+      "passwordPlaceholder": "至少 8 个字符"
+    },
+    "fields": {
+      "nameOptional": "姓名（可选）",
+      "email": "电子邮件",
+      "password": "密码"
+    },
+    "placeholders": {
+      "name": "艾达·洛夫莱斯",
+      "email": "you@example.com"
+    }
+  },
+  "schemas": {
+    "title": "模式",
+    "description": "定义数据的形状。端点构建在模式之上。",
+    "new": "+ 新架构",
+    "loading": "正在加载架构...",
+    "emptyTitle": "还没有架构",
+    "emptyDescription": "创建您的第一个架构来描述您的端点将存储的数据。",
+    "editAria": "编辑架构",
+    "deleteAria": "删除架构",
+    "deleteConfirm": "删除模式“{{name}}”？此操作无法撤消。",
+    "deleteFailed": "删除失败",
+    "modal": {
+      "newTitle": "新模式",
+      "editTitle": "编辑架构",
+      "description": "描述带有类型化字段的数据类型。",
+      "namePlaceholder": "注意事项",
+      "slugPlaceholder": "注释",
+      "fields": "领域",
+      "addField": "+ 添加字段",
+      "fieldNamePlaceholder": "field_name",
+      "enumValues": "枚举值",
+      "addEnumValue": "+ 增值",
+      "enumValuePlaceholder": "值",
+      "removeEnumValue": "删除枚举值",
+      "removeField": "删除字段",
+      "editWarning": "编辑字段不会更改已存储的记录。删除字段只会将其隐藏起来，以防止将来的读取和写入。",
+      "create": "创建架构"
+    }
+  },
+  "endpoints": {
+    "title": "端点",
+    "description": "将架构公开为 REST 端点。选择动词以及可以读或写的内容。",
+    "new": "+ 新端点",
+    "loading": "正在加载端点...",
+    "emptyNeedsSchemaTitle": "首先创建一个架构",
+    "emptyNeedsSchemaDescription": "端点是建立在模式之上的。前往 Schemas 选项卡来定义一个。",
+    "emptyTitle": "还没有终点",
+    "emptyDescription": "将您的模式之一转换为可调用的 REST 端点。",
+    "schemaLabel": "架构：",
+    "readableGet": "可读（GET 方法）",
+    "writableMethods": "可写 (POST/PUT/PATCH/PUT many/PATCH many)",
+    "deleteConfirm": "删除端点“{{name}}”？其存储的记录将被删除。",
+    "deleteFailed": "删除失败",
+    "modal": {
+      "newTitle": "新端点",
+      "editTitle": "编辑端点",
+      "description": "将架构公开为 REST 资源。",
+      "slugUrl": "Slug (URL)",
+      "namePlaceholder": "注释",
+      "slugPlaceholder": "笔记",
+      "selectSchema": "选择一个架构...",
+      "allowedMethods": "允许的方法",
+      "readableFields": "可读字段",
+      "readableHint": "由 GET 和 GET many 返回",
+      "writableFields": "可写字段",
+      "writableHint": "被写入接受",
+      "create": "创建端点",
+      "selectSchemaError": "选择一个架构",
+      "readableRequired": "选择至少一个可读字段，或关闭 GET 方法。",
+      "writableRequired": "选择至少一个可写字段，或关闭写入方法。"
+    }
+  },
+  "tokens": {
+    "title": "请求令牌",
+    "description": "请求令牌验证对端点的外部调用。每个的范围仅限于您选择的端点和权限。",
+    "new": "+ 新的请求令牌",
+    "loading": "正在加载请求令牌...",
+    "emptyNeedsEndpointTitle": "首先创建一个端点",
+    "emptyNeedsEndpointDescription": "请求令牌授予对特定端点的访问权限。在“端点”选项卡中创建一个。",
+    "emptyTitle": "还没有请求令牌",
+    "emptyDescription": "创建请求令牌以开始从任何地方调用您的端点。",
+    "revoked": "撤销",
+    "revealing": "揭示...",
+    "hide": "隐藏",
+    "view": "查看",
+    "reEnable": "重新启用",
+    "revoke": "撤销",
+    "endpointAccess": "端点访问",
+    "noEndpoints": "无端点",
+    "deleteConfirm": "删除令牌“{{name}}”？使用它的呼叫将停止工作。",
+    "updateFailed": "更新失败",
+    "deleteFailed": "删除失败",
+    "revealFailed": "未能透露令牌",
+    "modal": {
+      "createdTitle": "已创建请求令牌",
+      "createdDescription": "立即复制此令牌，或随时从下面的令牌列表中再次查看它。",
+      "bearerHint": "将其用作不记名令牌：",
+      "newTitle": "新的请求令牌",
+      "editTitle": "编辑请求令牌",
+      "newDescription": "选择此请求令牌可以到达哪些端点以及它可以执行哪些操作。",
+      "editDescription": "更新名称以及此请求令牌可以到达的端点。代币价值保持不变。",
+      "name": "请求令牌名称",
+      "namePlaceholder": "生产服务器",
+      "permissions": "端点权限",
+      "read": "阅读",
+      "write": "写",
+      "grantRequired": "授予对至少一个端点的访问权限",
+      "create": "创建代币"
+    }
+  },
+  "entries": {
+    "title": "参赛作品",
+    "description": "浏览和编辑每个模式中存储的数据。",
+    "loadingSchemas": "正在加载架构...",
+    "emptySchemasTitle": "还没有架构",
+    "emptySchemasDescription": "条目存在于模式内部。首先创建一个模式，然后在此处管理其数据。",
+    "manage": "管理条目 →",
+    "editor": {
+      "headingSuffix": "条目",
+      "description": "更改将在本地暂存，直到您保存它们。",
+      "backAria": "返回所有模式",
+      "importJson": "导入 JSON",
+      "addEntry": "+ 添加条目",
+      "importDisabledTitle": "导入前保存或放弃您的更改",
+      "unsaved_one": "{{count}} 未保存的更改",
+      "unsaved_other": "{{count}} 未保存的更改",
+      "discard": "丢弃",
+      "loading": "正在加载条目...",
+      "emptyTitle": "还没有条目",
+      "emptyDescription": "手动添加条目或导入与此架构匹配的 JSON 文件。",
+      "tableIndex": "#",
+      "saved_one": "已保存 {{count}} 更改",
+      "saved_other": "已保存 {{count}} 更改",
+      "nothingSaved": "没有保存任何内容 - 修复突出显示的条目并重试",
+      "saveFailed": "无法保存更改",
+      "invalidJson": "该文件无效 JSON",
+      "expectedArray": "需要 JSON 条目数组",
+      "imported_one": "导入的 {{count}} 条目",
+      "imported_other": "导入的 {{count}} 条目",
+      "importedPartial": "导入 {{total}} 的 {{imported}} — {{rejected}} 被拒绝",
+      "importFailed": "导入失败",
+      "discardConfirm": "放弃所有分阶段的更改？",
+      "editAria": "编辑条目",
+      "deleteAria": "删除条目",
+      "status": {
+        "new": "新的",
+        "modified": "修改过的",
+        "deleted": "已删除"
+      }
+    },
+    "form": {
+      "newTitle": "新条目",
+      "editTitle": "编辑条目",
+      "schemaDescription": "架构：{{name}}",
+      "noneOption": "— 无 —"
+    },
+    "importResult": {
+      "partialTitle": "导入部分完成",
+      "failedTitle": "导入失败",
+      "summary": "已导入 <strong>{{imported}}</strong>（共 <strong>{{total}}</strong> 条目）。 <strong>{{rejected}}</strong> {{rejectedLabel}} 被拒绝。",
+      "entryWas": "条目是",
+      "entriesWere": "条目是",
+      "warning": "被拒绝的条目仅现在可用 - 一旦您关闭此对话框，它们将无法检索。下载它们以修复并稍后重新导入。",
+      "download": "下载被拒绝的条目",
+      "downloaded": "已下载 ✓（再次下载）"
+    },
+    "unsaved": {
+      "title": "未保存的更改",
+      "description": "您在此架构的条目中有未保存的更改。",
+      "body": "如果您现在离开，您的分阶段编辑将被丢弃。首先保存您的更改以保留它们。",
+      "stay": "住宿",
+      "leave": "丢弃并离开"
+    }
+  },
+  "api": {
+    "errors": {
+      "badRequest": "错误的请求",
+      "unauthorized": "未经授权",
+      "forbidden": "禁止",
+      "notFound": "未找到",
+      "methodNotAllowed": "方法不允许",
+      "conflict": "冲突",
+      "rateLimitExceeded": "超出速率限制",
+      "serverError": "服务器内部错误",
+      "validationFailed": "验证失败",
+      "emailRegistered": "邮箱已注册",
+      "invalidCredentials": "电子邮件或密码无效",
+      "fieldNamesUnique": "字段名称必须是唯一的",
+      "schemaSlugExists": "您已经有了一个包含该 slug 的架构",
+      "schemaNotFound": "未找到架构",
+      "schemaInUse": "架构由 {{count}} 端点使用。首先删除这些端点。",
+      "unknownSchema": "未知架构",
+      "endpointFieldsInvalid": "可读/可写字段必须属于架构",
+      "endpointSlugExists": "您已经有一个带有该 slug 的端点",
+      "endpointNotFound": "未找到端点",
+      "tokenNotFound": "未找到令牌",
+      "tokenRevealUnsupported": "该令牌是在支持查看之前创建的 - 撤销它并创建一个新令牌",
+      "endpointsUnknown": "某些端点未知或不是您的",
+      "missingBearer": "缺少承载访问令牌",
+      "invalidBearer": "访问令牌无效或已撤销",
+      "tokenEndpointForbidden": "此令牌未获得此端点的授权",
+      "methodDisabled": "未为此端点启用 {{method}}",
+      "writePermissionMissing": "该令牌缺少写入权限",
+      "readPermissionMissing": "该令牌缺少读取权限",
+      "recordNotFound": "未找到记录",
+      "unknownEntry": "未知条目",
+      "duplicateUpdateId": "更新批次中重复记录 ID",
+      "entriesInvalid": "某些条目无效 - 未保存任何内容",
+      "duplicateBatch": "唯一字段“{{field}}”的重复值 - 文件中较早的条目已使用它",
+      "duplicateStored": "唯一字段“{{field}}”的值已存在于您存储的条目中"
+    }
+  },
+  "validation": {
+    "passwordMin": "密码必须至少为 8 个字符",
+    "fieldName": "使用字母、数字、下划线；不得以数字开头",
+    "invalidSlug": "无效的段头",
+    "schemaFieldsMin": "添加至少一个字段",
+    "enumValuesMin": "添加至少一个枚举值",
+    "enumValuesUnique": "枚举值必须是唯一的",
+    "endpointMethodsMin": "启用至少一种方法",
+    "tokenGrantsMin": "授予对至少一个端点的访问权限",
+    "nothingToSave": "没有什么可保存的",
+    "tooManyChanges": "一次保存中的更改过多（最多 2000 个）",
+    "emptyImport": "该文件不包含任何条目",
+    "tooManyImport": "一次导入中的条目过多（最多 5000 个）",
+    "noTokenFields": "没有要更新的字段",
+    "record": {
+      "bodyObject": "主体必须是 JSON 对象",
+      "manyBody": "正文必须是记录数组，或者具有更新/记录数组的对象",
+      "required": "是必需的",
+      "string": "必须是一个字符串",
+      "number": "必须是一个数字",
+      "boolean": "必须是布尔值",
+      "date": "必须是有效日期",
+      "unsupported": "不支持的类型",
+      "oneOf": "必须是以下之一： {{values}}",
+      "unique": "必须是唯一的"
+    }
+  }
+}
