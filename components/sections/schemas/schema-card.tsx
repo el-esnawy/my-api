@@ -37,8 +37,8 @@ export function SchemaCard({
 
   return (
     <>
-      <Card className="flex flex-col p-5">
-        <div className="flex items-start justify-between">
+      <Card className="flex flex-col p-5 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg dark:hover:border-indigo-500/50">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="font-semibold text-slate-900">{schema.name}</h3>
             <Badge tone="indigo" className="mt-1 font-mono">
@@ -64,11 +64,11 @@ export function SchemaCard({
           </div>
         </div>
 
-        <div className="mt-4 space-y-1.5">
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
           {schema.fields.map((f) => (
             <div
               key={f.name}
-              className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-1.5 text-sm"
+              className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950/60"
             >
               <span className="font-mono text-slate-700">{f.name}</span>
               <span className="flex items-center gap-1.5">

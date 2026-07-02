@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/atoms/logo";
+import { ThemeToggle } from "@/components/atoms/theme-toggle";
 import { LanguageSwitcher } from "@/i18n/LanguageSwitcher";
 import { getServerTranslator } from "@/i18n/server";
 import { InviteAcceptForm } from "@/components/sections/auth/invite-accept-form";
@@ -18,16 +19,19 @@ export default async function InviteAcceptPage({
   const t = await getServerTranslator();
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-white to-slate-50">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-white to-slate-50 dark:from-slate-950 dark:to-slate-900">
+      <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-5">
         <Link href="/" className="inline-flex items-center gap-2 font-semibold text-slate-900">
           <Logo />
-          <span>{t("common.brand")}</span>
+          <span className="hidden sm:inline">{t("common.brand")}</span>
         </Link>
-        <LanguageSwitcher />
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <ThemeToggle />
+        </div>
       </header>
       <main className="flex flex-1 items-center justify-center px-6 py-10">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md animate-fade-up">
           <InviteAcceptForm token={token} />
         </div>
       </main>

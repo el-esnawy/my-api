@@ -27,12 +27,14 @@ export function PricingCard({
   return (
     <div
       className={
-        "relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm " +
-        (tier.featured ? "border-indigo-300 ring-2 ring-indigo-200" : "border-slate-200")
+        "relative flex flex-col rounded-lg border bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-xl dark:bg-slate-900/80 " +
+        (tier.featured
+          ? "border-indigo-300 ring-2 ring-indigo-200 dark:border-indigo-500/60 dark:ring-indigo-500/20"
+          : "border-slate-200 dark:border-slate-800")
       }
     >
       {tier.featured && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white shadow-sm dark:bg-indigo-500">
           {t("landing.pricing.mostPopular")}
         </span>
       )}
@@ -41,7 +43,7 @@ export function PricingCard({
       <p className="mt-1 text-sm text-slate-500">{tier.tagline}</p>
 
       <div className="mt-5 flex items-baseline gap-1">
-        <span className="text-4xl font-bold tracking-tight text-slate-900">{tier.price}</span>
+        <span className="text-4xl font-bold text-slate-900">{tier.price}</span>
         {tier.cadence && <span className="text-sm text-slate-500">{tier.cadence}</span>}
       </div>
 
@@ -59,8 +61,8 @@ export function PricingCard({
         className={
           "mt-8 inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold transition " +
           (tier.featured
-            ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-500"
-            : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50")
+            ? "bg-indigo-600 text-white shadow-sm hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-md dark:bg-indigo-500 dark:hover:bg-indigo-400"
+            : "border border-slate-200 bg-white text-slate-800 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-800")
         }
       >
         {ctaLabel}

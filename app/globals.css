@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #f6f7fb;
-  --foreground: #0f172a;
+  --background: #f4f7fb;
+  --foreground: #111827;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #08111f;
+  --foreground: #e5edf8;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -21,6 +30,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 /* Subtle scrollbar for code/preview blocks */
@@ -31,4 +41,133 @@ body {
 .scroll-thin::-webkit-scrollbar-thumb {
   background: rgba(100, 116, 139, 0.4);
   border-radius: 9999px;
+}
+
+::selection {
+  background: rgba(79, 70, 229, 0.2);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 520ms ease-out both;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* Dark-mode bridge for existing Tailwind utility-heavy components. */
+.dark .from-white {
+  --tw-gradient-from: #0b1220 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(11 18 32 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.dark .to-slate-50 {
+  --tw-gradient-to: #08111f var(--tw-gradient-to-position);
+}
+.dark .bg-white {
+  background-color: #101827;
+}
+.dark .bg-white\/50 {
+  background-color: rgb(16 24 39 / 0.55);
+}
+.dark .bg-slate-50 {
+  background-color: #0b1220;
+}
+.dark .bg-slate-100 {
+  background-color: #1c293a;
+}
+.dark .bg-indigo-50 {
+  background-color: rgb(49 46 129 / 0.22);
+}
+.dark .bg-red-50 {
+  background-color: rgb(127 29 29 / 0.22);
+}
+.dark .bg-amber-50 {
+  background-color: rgb(120 53 15 / 0.22);
+}
+.dark .bg-green-50 {
+  background-color: rgb(20 83 45 / 0.22);
+}
+.dark .border-slate-100 {
+  border-color: #1e293b;
+}
+.dark .border-slate-200 {
+  border-color: #243246;
+}
+.dark .border-slate-300 {
+  border-color: #334155;
+}
+.dark .text-slate-900 {
+  color: #f8fafc;
+}
+.dark .text-slate-950 {
+  color: #f8fafc;
+}
+.dark .text-slate-800 {
+  color: #f1f5f9;
+}
+.dark .text-slate-700 {
+  color: #dbe5f1;
+}
+.dark .text-slate-600 {
+  color: #c5d0df;
+}
+.dark .text-slate-500 {
+  color: #94a3b8;
+}
+.dark .text-slate-400 {
+  color: #7f8ea3;
+}
+.dark .text-indigo-600 {
+  color: #a5b4fc;
+}
+.dark .text-indigo-700 {
+  color: #c7d2fe;
+}
+.dark .hover\:bg-slate-50:hover {
+  background-color: #162235;
+}
+.dark .hover\:bg-slate-100:hover {
+  background-color: #1c293a;
+}
+.dark .hover\:bg-indigo-50:hover {
+  background-color: rgb(49 46 129 / 0.28);
+}
+.dark .hover\:text-slate-800:hover {
+  color: #f8fafc;
+}
+.dark .hover\:text-slate-600:hover {
+  color: #dbe5f1;
 }

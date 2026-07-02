@@ -11,9 +11,9 @@ export interface ToastData {
 }
 
 const tones: Record<ToastData["tone"], string> = {
-  success: "border-green-200 bg-green-50 text-green-800",
-  warning: "border-amber-200 bg-amber-50 text-amber-800",
-  error: "border-red-200 bg-red-50 text-red-800",
+  success: "border-green-200 bg-green-50 text-green-800 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-100",
+  warning: "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-100",
+  error: "border-red-200 bg-red-50 text-red-800 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-100",
 };
 
 function Toast({

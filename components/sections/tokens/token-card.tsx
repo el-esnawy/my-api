@@ -65,10 +65,10 @@ export function TokenCard({
 
   return (
     <>
-      <Card className="p-5">
+      <Card className="p-5 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg dark:hover:border-indigo-500/50">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-semibold text-slate-900">{token.name}</h3>
               {token.revoked && <Badge tone="red">{t("tokens.revoked")}</Badge>}
             </div>
@@ -76,7 +76,7 @@ export function TokenCard({
               {token.tokenPrefix}…••••
             </code>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               size="sm"
               variant="secondary"
@@ -98,7 +98,7 @@ export function TokenCard({
         </div>
 
         {revealed && (
-          <div className="mt-3 flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2">
+          <div className="mt-3 flex items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 shadow-sm">
             <code className="scroll-thin flex-1 overflow-x-auto whitespace-nowrap text-sm text-green-300">
               {revealed}
             </code>
@@ -107,7 +107,7 @@ export function TokenCard({
         )}
 
         <div className="mt-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+          <p className="text-xs font-medium uppercase text-slate-400">
             {t("tokens.endpointAccess")}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -119,7 +119,7 @@ export function TokenCard({
                 return (
                   <span
                     key={g.endpointId}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-sm"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-sm dark:border-slate-800 dark:bg-slate-950/60"
                   >
                     <span className="font-mono text-slate-700">{ep?.slug ?? t("common.deleted")}</span>
                     {g.read && <Badge tone="green">R</Badge>}

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useAccountProfile, useInvites, useMembers, useUpdateOrganization } from "@/lib/client/hooks";
 import { ApiError } from "@/lib/client/api";
 import { Button } from "@/components/atoms/button";
+import { Card } from "@/components/atoms/card";
 import { Input } from "@/components/atoms/input";
 import { Label } from "@/components/atoms/label";
 import { Spinner } from "@/components/atoms/spinner";
@@ -49,30 +50,35 @@ export default function TeamPage() {
 
   return (
     <div>
-      {canManage && profile && (
-        <div className="flex items-end gap-2">
-          <div className="max-w-xs flex-1">
-            <Label htmlFor="orgName">{t("account.team.orgNameLabel")}</Label>
-            <Input id="orgName" value={orgName} onChange={(e) => setOrgName(e.target.value)} />
+      <Card className="p-5">
+        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+          <div className="max-w-3xl">
+            <h2 className="font-semibold text-slate-900">{t("account.tabs.team")}</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">{t("account.team.description")}</p>
           </div>
-          <Button
-            variant="secondary"
-            onClick={onSaveOrgName}
-            disabled={!orgName || orgName === profile.organization.name || updateOrg.isPending}
-          >
-            {updateOrg.isPending && <Spinner />}
-            {t("account.team.orgNameSave")}
-          </Button>
+          {canManage && <Button onClick={() => setInviteOpen(true)}>{t("account.team.invite")}</Button>}
         </div>
-      )}
 
-      <div className="mt-6 flex items-start justify-between gap-4">
-        <p className="max-w-2xl text-sm text-slate-500">{t("account.team.description")}</p>
-        {canManage && <Button onClick={() => setInviteOpen(true)}>{t("account.team.invite")}</Button>}
-      </div>
+        {canManage && profile && (
+          <div className="mt-5 flex flex-col gap-2 sm:max-w-xl sm:flex-row sm:items-end">
+            <div className="flex-1">
+              <Label htmlFor="orgName">{t("account.team.orgNameLabel")}</Label>
+              <Input id="orgName" value={orgName} onChange={(e) => setOrgName(e.target.value)} />
+            </div>
+            <Button
+              variant="secondary"
+              onClick={onSaveOrgName}
+              disabled={!orgName || orgName === profile.organization.name || updateOrg.isPending}
+            >
+              {updateOrg.isPending && <Spinner />}
+              {t("account.team.orgNameSave")}
+            </Button>
+          </div>
+        )}
+      </Card>
 
       <div className="mt-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+        <h2 className="text-sm font-semibold uppercase text-slate-400">
           {t("account.team.membersTitle")}
         </h2>
         <div className="mt-3 space-y-3">
@@ -95,7 +101,7 @@ export default function TeamPage() {
 
       {canManage && (
         <div className="mt-8">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+          <h2 className="text-sm font-semibold uppercase text-slate-400">
             {t("account.team.invitesTitle")}
           </h2>
           <div className="mt-3 space-y-3">

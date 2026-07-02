@@ -27,7 +27,7 @@ export default function EndpointsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{t("endpoints.title")}</h1>
           <p className="mt-1 text-sm text-slate-500">

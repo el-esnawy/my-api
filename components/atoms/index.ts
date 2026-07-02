@@ -9,6 +9,7 @@ export { Badge } from "./badge";
 export { Spinner } from "./spinner";
 export { ErrorText } from "./error-text";
 export { Logo } from "./logo";
+export { ThemeToggle } from "./theme-toggle";
 
 export { CloseIcon } from "./icons/close-icon";
 export { CheckIcon } from "./icons/check-icon";

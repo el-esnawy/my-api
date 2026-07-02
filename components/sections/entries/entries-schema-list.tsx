@@ -39,7 +39,7 @@ export function EntriesSchemaList({
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4">
       {schemas.map((schema) => {
         const count = counts?.[schema.id] ?? 0;
         return (
@@ -49,8 +49,8 @@ export function EntriesSchemaList({
             onClick={() => onSelect(schema)}
             className="text-left"
           >
-            <Card className="h-full p-5 transition hover:border-indigo-300 hover:shadow-md">
-              <div className="flex items-start justify-between gap-2">
+            <Card className="h-full p-5 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg dark:hover:border-indigo-500/50">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h3 className="font-semibold text-slate-900">{schema.name}</h3>
                   <Badge tone="indigo" className="mt-1 font-mono">
@@ -61,7 +61,7 @@ export function EntriesSchemaList({
                   {t("common.entry", { count })}
                 </Badge>
               </div>
-              <p className="mt-3 text-sm text-slate-500">
+              <p className="mt-3 max-w-5xl text-sm text-slate-500">
                 {t("common.field", { count: schema.fields.length })}:{" "}
                 <span className="font-mono text-xs">
                   {schema.fields.map((f) => f.name).join(", ")}

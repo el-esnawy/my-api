@@ -20,7 +20,7 @@ export default function SchemasPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{t("schemas.title")}</h1>
           <p className="mt-1 text-sm text-slate-500">
@@ -42,7 +42,7 @@ export default function SchemasPage() {
             action={<Button onClick={() => setModal({})}>{t("schemas.new")}</Button>}
           />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4">
             {schemas.map((schema) => (
               <SchemaCard
                 key={schema.id}

@@ -56,7 +56,7 @@ export function MemberRow({
 
   return (
     <>
-      <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
+      <Card className="flex flex-wrap items-center justify-between gap-3 p-4 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:hover:border-indigo-500/50">
         <div>
           <div className="flex items-center gap-2">
             <span className="font-medium text-slate-900">{member.name || member.email}</span>

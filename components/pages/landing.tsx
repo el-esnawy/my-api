@@ -11,7 +11,7 @@ export default async function LandingPage() {
   const signedIn = !!session;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <LandingHeader signedIn={signedIn} />
       <LandingHero signedIn={signedIn} />
       <LandingFeatures />

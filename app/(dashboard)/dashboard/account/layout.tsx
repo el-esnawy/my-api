@@ -12,7 +12,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
       <div className="mt-4">
         <AccountNav />
       </div>
-      <div className="mt-6">{children}</div>
+      <div className="mt-6 animate-fade-up">{children}</div>
     </div>
   );
 }

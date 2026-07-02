@@ -54,11 +54,12 @@ export default function SecurityPage() {
 
   return (
     <div>
-      <Card className="max-w-lg p-6">
-        <h2 className="font-semibold text-slate-900">{t("account.security.title")}</h2>
-        <p className="mt-1 text-sm text-slate-500">{t("account.security.description")}</p>
+      <Card className="p-6">
+        <div className="max-w-2xl">
+          <h2 className="font-semibold text-slate-900">{t("account.security.title")}</h2>
+          <p className="mt-1 text-sm text-slate-500">{t("account.security.description")}</p>
 
-        <form onSubmit={onSubmit} className="mt-5 space-y-4">
+          <form onSubmit={onSubmit} className="mt-5 space-y-4">
           <div>
             <Label htmlFor="currentPassword">{t("account.security.currentPassword")}</Label>
             <Input
@@ -103,7 +104,8 @@ export default function SecurityPage() {
             {changePassword.isPending && <Spinner />}
             {t("account.security.save")}
           </Button>
-        </form>
+          </form>
+        </div>
       </Card>
 
       <ToastStack toasts={toasts} onDismiss={dismissToast} />

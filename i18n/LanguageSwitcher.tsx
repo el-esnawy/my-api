@@ -31,7 +31,7 @@ export function LanguageSwitcher() {
       <Select
         value={current}
         onChange={(e) => onChange(e.target.value as Language)}
-        className="h-8 w-40 text-xs font-medium"
+        className="h-8 w-28 text-xs font-medium sm:w-40"
         aria-label={t("common.language")}
       >
         {SUPPORTED_LANGUAGES.map((language) => (

@@ -371,7 +371,7 @@ export function EntriesEditor({
             }
           />
         ) : (
-          <div className="scroll-thin overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="scroll-thin overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <table className="w-full min-w-max text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left">

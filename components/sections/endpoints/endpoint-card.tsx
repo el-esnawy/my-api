@@ -66,7 +66,7 @@ export function EndpointCard({
 
   return (
     <>
-      <Card className='p-5'>
+      <Card className='p-5 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lg dark:hover:border-indigo-500/50'>
         <div className='flex flex-wrap items-start justify-between gap-3'>
           <div>
             <h3 className='font-semibold text-slate-900'>{endpoint.name}</h3>
@@ -93,7 +93,7 @@ export function EndpointCard({
             return (
               <div
                 key={method}
-                className='flex flex-wrap items-center gap-2 rounded-lg bg-slate-900 px-3 py-2'
+                className='flex flex-wrap items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 shadow-sm'
               >
                 <Badge
                   tone={methodTone[method]}
@@ -110,7 +110,7 @@ export function EndpointCard({
           })}
         </div>
 
-        <div className='mt-4 grid gap-3 sm:grid-cols-2'>
+        <div className='mt-4 grid gap-3 lg:grid-cols-2'>
           <EndpointFieldList
             label={t('endpoints.readableGet')}
             fields={endpoint.readableFields}

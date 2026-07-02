@@ -59,7 +59,7 @@ export default function BillingPage() {
     <div>
       <p className="text-sm text-slate-500">{t("account.billing.description")}</p>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-3">
+      <div className="mt-8 grid gap-4 xl:grid-cols-3">
         {tiers.map((tier) => (
           <PlanCard
             key={tier.key}

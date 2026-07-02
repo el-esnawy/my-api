@@ -41,14 +41,15 @@ export function LandingPricing({ signedIn }: { signedIn: boolean }) {
   const tiers = usePricingTiers();
 
   return (
-    <section id="pricing" className="mx-auto max-w-6xl scroll-mt-8 px-6 py-16">
+    <section id="pricing" className="mx-auto max-w-7xl scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-slate-900">{t("landing.pricing.title")}</h2>
+        <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-300">Plans</p>
+        <h2 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">{t("landing.pricing.title")}</h2>
         <p className="mx-auto mt-2 max-w-xl text-slate-600">
           {t("landing.pricing.description")}
         </p>
       </div>
-      <div className="mt-10 grid gap-6 lg:grid-cols-3">
+      <div className="mt-10 grid gap-4 lg:grid-cols-3">
         {tiers.map((tier) => (
           <PricingCard key={tier.name} tier={tier} signedIn={signedIn} />
         ))}
