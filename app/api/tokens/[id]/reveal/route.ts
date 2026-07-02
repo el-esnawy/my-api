@@ -23,7 +23,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const { id } = await params;
 
     await connectDB();
-    const token = await AccessToken.findOne({ _id: id, userId: auth.session.userId }).select(
+    const token = await AccessToken.findOne({ _id: id, organizationId: auth.session.orgId }).select(
       "+tokenEncrypted"
     );
     if (!token) return notFound(t("api.errors.tokenNotFound"));

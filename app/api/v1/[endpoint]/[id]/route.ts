@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, { params }: Params) {
     await connectDB();
     const rec = await RecordModel.findOne({
       _id: id,
-      userId: auth.userId,
+      organizationId: auth.organizationId,
       schemaId: auth.endpoint.schemaId,
     });
     if (!rec) return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
@@ -61,7 +61,7 @@ async function applyUpdate(req: NextRequest, params: Params["params"], method: H
     await connectDB();
     const rec = await RecordModel.findOne({
       _id: id,
-      userId: auth.userId,
+      organizationId: auth.organizationId,
       schemaId: auth.endpoint.schemaId,
     });
     if (!rec) return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);
@@ -83,7 +83,7 @@ async function applyUpdate(req: NextRequest, params: Params["params"], method: H
 
     const conflicts = await findUniqueConflicts({
       schemaId: String(auth.endpoint.schemaId),
-      userId: auth.userId,
+      organizationId: auth.organizationId,
       fields,
       candidates: [{ data: nextData, excludeId: String(rec._id) }],
     });
@@ -137,7 +137,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     await connectDB();
     const deleted = await RecordModel.findOneAndDelete({
       _id: id,
-      userId: auth.userId,
+      organizationId: auth.organizationId,
       schemaId: auth.endpoint.schemaId,
     });
     if (!deleted) return jsonWithHeaders({ error: t("api.errors.recordNotFound") }, 404, headers);

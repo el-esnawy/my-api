@@ -68,6 +68,16 @@ export function generateAccessToken(): GeneratedToken {
   };
 }
 
+/**
+ * Invite tokens are single-use, short-lived, and only ever verified (never
+ * redisplayed to the inviter) — so unlike access tokens, only the hash is
+ * kept; there's no encrypted-for-reveal copy.
+ */
+export function generateInviteToken(): { token: string; tokenHash: string } {
+  const token = randomBytes(32).toString("base64url");
+  return { token, tokenHash: hashToken(token) };
+}
+
 /** Constant-time compare of two hex digests. */
 export function safeHashEqual(a: string, b: string): boolean {
   const ba = Buffer.from(a, "hex");

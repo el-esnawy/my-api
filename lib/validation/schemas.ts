@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { FIELD_TYPES } from "@/lib/models/DataSchema";
 import { HTTP_METHODS } from "@/lib/models/Endpoint";
+import { PLANS } from "@/lib/models/Organization";
+import { ORG_ROLES } from "@/lib/models/Membership";
+import { INVITE_ROLES } from "@/lib/models/Invite";
 
 /** URL-safe slug: lowercase, starts alphanumeric, allows hyphens. */
 export const slugRegex = /^[a-z0-9][a-z0-9-]*$/;
@@ -8,16 +11,100 @@ export const slugRegex = /^[a-z0-9][a-z0-9-]*$/;
 export const fieldNameRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 
 // --- Auth ---
-export const signUpInput = z.object({
-  email: z.string().email().toLowerCase(),
-  password: z.string().min(8, "validation.passwordMin").max(200),
-  name: z.string().trim().max(120).optional(),
-});
+export const signUpInput = z
+  .object({
+    email: z.string().email().toLowerCase(),
+    password: z.string().min(8, "validation.passwordMin").max(200),
+    confirmPassword: z.string().min(1),
+    name: z.string().trim().max(120).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["confirmPassword"],
+        message: "validation.passwordMismatch",
+      });
+    }
+  });
 
 export const signInInput = z.object({
   email: z.string().email().toLowerCase(),
   password: z.string().min(1),
 });
+
+// --- Account ---
+export const updateProfileInput = z
+  .object({
+    name: z.string().trim().max(120).optional(),
+    email: z.string().email().toLowerCase().optional(),
+    currentPassword: z.string().min(1).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.name === undefined && data.email === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["_root"],
+        message: "validation.nothingToSave",
+      });
+    }
+    if (data.email !== undefined && !data.currentPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["currentPassword"],
+        message: "validation.currentPasswordRequired",
+      });
+    }
+  });
+
+export const changePasswordInput = z
+  .object({
+    currentPassword: z.string().min(1),
+    newPassword: z.string().min(8, "validation.passwordMin").max(200),
+    confirmNewPassword: z.string().min(1),
+  })
+  .superRefine((data, ctx) => {
+    if (data.newPassword !== data.confirmNewPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["confirmNewPassword"],
+        message: "validation.passwordMismatch",
+      });
+    }
+  });
+
+export const updateOrganizationInput = z.object({
+  name: z.string().trim().min(1).max(120),
+});
+
+export const updatePlanInput = z.object({
+  plan: z.enum(PLANS),
+});
+
+export const updateMemberInput = z.object({
+  role: z.enum(ORG_ROLES),
+});
+
+export const createInviteInput = z.object({
+  email: z.string().email().toLowerCase(),
+  role: z.enum(INVITE_ROLES).default("member"),
+});
+
+export const acceptInviteInput = z
+  .object({
+    name: z.string().trim().max(120).optional(),
+    password: z.string().min(8, "validation.passwordMin").max(200).optional(),
+    confirmPassword: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.password !== undefined && data.password !== data.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["confirmPassword"],
+        message: "validation.passwordMismatch",
+      });
+    }
+  });
 
 // --- Schemas (data types) ---
 const enumValuesInput = z.preprocess(

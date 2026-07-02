@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
 import type { HttpMethod } from "@/lib/models/Endpoint";
 import { DataSchema } from "@/lib/models/DataSchema";
+import { Organization } from "@/lib/models/Organization";
 import { authorizePublicRequest, type AuthSuccess } from "./publicAuth";
-import { rateLimit, rateLimitHeaders } from "./rateLimit";
+import { rateLimit, rateLimitHeaders, checkMonthlyQuota, quotaHeaders } from "./rateLimit";
+import { limitsFor } from "@/lib/billing/plans";
+import { env } from "@/lib/env";
 import { getRequestTranslator } from "@/i18n/server";
 import type { ApiTranslator } from "./respond";
 import type { SchemaFieldLike } from "@/lib/records/validate";
 
 /**
- * Shared plumbing for the public REST engine: authorize the request, apply the
- * per-token rate limit, and load the endpoint's schema fields. Both v1 route
- * files funnel through `gate()` so the security checks live in exactly one place.
+ * Shared plumbing for the public REST engine: authorize the request, apply
+ * the org's plan-derived rate limit and monthly quota, and load the
+ * endpoint's schema fields. Both v1 route files funnel through `gate()` so
+ * the security checks live in exactly one place.
  */
 
 export type Gate =
@@ -31,13 +35,30 @@ export async function gate(
     };
   }
 
-  const rl = await rateLimit(String(auth.token._id));
-  const headers = rateLimitHeaders(rl);
+  // The tier's throughput budget is shared across every token in the org —
+  // minting more tokens doesn't buy more throughput.
+  const org = await Organization.findById(auth.organizationId).select("plan");
+  const limits = limitsFor(org?.plan ?? "hobby");
+
+  const rl = await rateLimit(`org:${auth.organizationId}`, limits.requestsPerMinute, env.RATE_LIMIT_WINDOW);
+  const headers = { ...rateLimitHeaders(rl) };
   if (!rl.allowed) {
     return {
       ok: false,
       response: NextResponse.json(
         { error: t("api.errors.rateLimitExceeded") },
+        { status: 429, headers }
+      ),
+    };
+  }
+
+  const quota = await checkMonthlyQuota(auth.organizationId, limits.requestsPerMonth);
+  Object.assign(headers, quotaHeaders(quota));
+  if (!quota.allowed) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: t("api.errors.monthlyQuotaExceeded") },
         { status: 429, headers }
       ),
     };

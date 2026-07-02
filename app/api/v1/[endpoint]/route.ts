@@ -55,7 +55,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     // Records are owned by the schema; the endpoint is a projection over them.
     const filter: Record<string, unknown> = {
-      userId: auth.userId,
+      organizationId: auth.organizationId,
       schemaId: auth.endpoint.schemaId,
     };
     for (const field of fields) {
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     const conflicts = await findUniqueConflicts({
       schemaId: String(auth.endpoint.schemaId),
-      userId: auth.userId,
+      organizationId: auth.organizationId,
       fields,
       candidates: [{ data: result.value! }],
     });
@@ -115,7 +115,8 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     const rec = await RecordModel.create({
-      userId: auth.userId,
+      organizationId: auth.organizationId,
+      createdBy: auth.token.createdBy,
       schemaId: auth.endpoint.schemaId,
       endpointId: auth.endpoint._id,
       data: result.value,
@@ -189,7 +190,7 @@ async function applyManyUpdate(
     await connectDB();
     const fields = await loadFields(auth);
     const schemaId = String(auth.endpoint.schemaId);
-    const userId = auth.userId;
+    const organizationId = auth.organizationId;
     const partial = method === "PATCH_MANY";
 
     const errors: { id: string; fields: Record<string, string> }[] = [];
@@ -211,7 +212,7 @@ async function applyManyUpdate(
     const validIds = items.map((item) => item.id).filter((id) => isValidObjectId(id));
     const existingRecords = await RecordModel.find({
       _id: { $in: validIds },
-      userId,
+      organizationId,
       schemaId,
     });
     const recordById = new Map(existingRecords.map((record) => [String(record._id), record]));
@@ -253,7 +254,7 @@ async function applyManyUpdate(
     }));
     const conflicts = await findUniqueConflicts({
       schemaId,
-      userId,
+      organizationId,
       fields,
       candidates,
     });
@@ -276,7 +277,7 @@ async function applyManyUpdate(
     await RecordModel.bulkWrite(
       validatedUpdates.map((update) => ({
         updateOne: {
-          filter: { _id: update.id, userId, schemaId },
+          filter: { _id: update.id, organizationId, schemaId },
           update: { $set: { data: update.nextData } },
         },
       }))
@@ -285,7 +286,7 @@ async function applyManyUpdate(
     const updatedIds = validatedUpdates.map((update) => update.id);
     const updatedDocs = await RecordModel.find({
       _id: { $in: updatedIds },
-      userId,
+      organizationId,
       schemaId,
     });
     const updatedById = new Map(updatedDocs.map((record) => [String(record._id), record]));

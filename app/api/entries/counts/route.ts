@@ -15,7 +15,7 @@ export async function GET() {
     await connectDB();
     // Aggregation pipelines don't auto-cast strings to ObjectId — cast explicitly.
     const rows = await RecordModel.aggregate([
-      { $match: { userId: new Types.ObjectId(auth.session.userId) } },
+      { $match: { organizationId: new Types.ObjectId(auth.session.orgId) } },
       { $group: { _id: "$schemaId", count: { $sum: 1 } } },
     ]);
 

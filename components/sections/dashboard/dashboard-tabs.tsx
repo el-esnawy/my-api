@@ -10,6 +10,7 @@ const tabs = [
   { href: "/dashboard/entries", labelKey: "dashboard.tabs.entries" },
   { href: "/dashboard/endpoints", labelKey: "dashboard.tabs.endpoints" },
   { href: "/dashboard/tokens", labelKey: "dashboard.tabs.tokens" },
+  { href: "/dashboard/account", labelKey: "dashboard.tabs.account" },
 ];
 
 export function DashboardTabs() {

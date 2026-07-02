@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/lib/models/User";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
+import { createOrganizationForUser } from "@/lib/api/organization";
 import { signUpInput } from "@/lib/validation/schemas";
 import { serializeUser } from "@/lib/api/serialize";
 import { getRequestTranslator } from "@/i18n/server";
@@ -34,7 +35,14 @@ export async function POST(req: NextRequest) {
         name: parsed.data.name,
       });
 
-      await createSession({ userId: String(user._id), email: user.email });
+      const organization = await createOrganizationForUser(user);
+
+      await createSession({
+        userId: String(user._id),
+        email: user.email,
+        orgId: String(organization._id),
+        role: "owner",
+      });
       return created({ user: serializeUser(user) });
     } catch (err: any) {
       // Duplicate key on the unique email index.

@@ -34,13 +34,13 @@ function hasValue(v: unknown): boolean {
  */
 export async function findUniqueConflicts({
   schemaId,
-  userId,
+  organizationId,
   fields,
   candidates,
   extraExcludeIds = [],
 }: {
   schemaId: string;
-  userId: string;
+  organizationId: string;
   fields: SchemaFieldLike[];
   candidates: UniqueCandidate[];
   /** Record ids being deleted in the same operation — their values are freed up. */
@@ -81,7 +81,7 @@ export async function findUniqueConflicts({
   ];
 
   const existing = await RecordModel.find({
-    userId,
+    organizationId,
     schemaId,
     $or: or,
     ...(excludeIds.length > 0 ? { _id: { $nin: excludeIds } } : {}),

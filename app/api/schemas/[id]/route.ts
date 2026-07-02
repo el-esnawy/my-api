@@ -28,8 +28,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const { id } = await params;
 
     await connectDB();
-    // Scope by userId so one user can never read another's schema.
-    const schema = await DataSchema.findOne({ _id: id, userId: auth.session.userId });
+    // Scope by organizationId so one org can never read another's schema.
+    const schema = await DataSchema.findOne({ _id: id, organizationId: auth.session.orgId });
     if (!schema) return notFound(t("api.errors.schemaNotFound"));
     return ok({ schema: serializeSchema(schema) });
   });
@@ -58,7 +58,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     await connectDB();
     try {
       const schema = await DataSchema.findOneAndUpdate(
-        { _id: id, userId: auth.session.userId },
+        { _id: id, organizationId: auth.session.orgId },
         { $set: parsed.data },
         { new: true }
       );
@@ -82,7 +82,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
     // Refuse to delete a schema that endpoints still depend on.
     const inUse = await Endpoint.countDocuments({
-      userId: auth.session.userId,
+      organizationId: auth.session.orgId,
       schemaId: id,
     });
     if (inUse > 0) {
@@ -91,12 +91,12 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
     const deleted = await DataSchema.findOneAndDelete({
       _id: id,
-      userId: auth.session.userId,
+      organizationId: auth.session.orgId,
     });
     if (!deleted) return notFound(t("api.errors.schemaNotFound"));
 
     // The schema owns its entries — remove them with it.
-    await RecordModel.deleteMany({ userId: auth.session.userId, schemaId: deleted._id });
+    await RecordModel.deleteMany({ organizationId: auth.session.orgId, schemaId: deleted._id });
 
     return ok({ success: true });
   });

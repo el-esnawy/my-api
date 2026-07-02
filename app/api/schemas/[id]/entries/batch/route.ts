@@ -48,14 +48,14 @@ export async function POST(req: NextRequest, { params }: Params) {
     const { creates, updates, deletes } = parsed.data;
 
     await connectDB();
-    const owned = await loadOwnedSchema(id, auth.session.userId);
+    const owned = await loadOwnedSchema(id, auth.session.orgId);
     if (!owned) return notFound(t("api.errors.schemaNotFound"));
     const schemaId = String(owned.schema._id);
-    const userId = auth.session.userId;
+    const organizationId = auth.session.orgId;
 
     const errors: ItemError[] = [];
 
-    // --- Referenced records must exist and belong to this user + schema ---
+    // --- Referenced records must exist and belong to this organization + schema ---
     const referencedIds = [...updates.map((u) => u.id), ...deletes];
     const invalidIds = referencedIds.filter((rid) => !isValidObjectId(rid));
     for (const rid of invalidIds) {
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     const validIds = referencedIds.filter((rid) => isValidObjectId(rid));
     const found = await RecordModel.find({
       _id: { $in: validIds },
-      userId,
+      organizationId,
       schemaId,
     }).select("_id");
     const foundSet = new Set(found.map((r) => String(r._id)));
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     ];
     const conflicts = await findUniqueConflicts({
       schemaId,
-      userId,
+      organizationId,
       fields: owned.fields,
       candidates,
       extraExcludeIds: deletes.filter((d) => isValidObjectId(d)),
@@ -113,21 +113,26 @@ export async function POST(req: NextRequest, { params }: Params) {
     // --- Apply (validation passed for every item) ---
     if (validatedCreates.length > 0) {
       await RecordModel.insertMany(
-        validatedCreates.map((c) => ({ userId, schemaId, data: c.data }))
+        validatedCreates.map((c) => ({
+          organizationId,
+          createdBy: auth.session.userId,
+          schemaId,
+          data: c.data,
+        }))
       );
     }
     if (validatedUpdates.length > 0) {
       await RecordModel.bulkWrite(
         validatedUpdates.map((u) => ({
           updateOne: {
-            filter: { _id: u.id, userId, schemaId },
+            filter: { _id: u.id, organizationId, schemaId },
             update: { $set: { data: u.data } },
           },
         }))
       );
     }
     if (deletes.length > 0) {
-      await RecordModel.deleteMany({ _id: { $in: deletes }, userId, schemaId });
+      await RecordModel.deleteMany({ _id: { $in: deletes }, organizationId, schemaId });
     }
 
     return ok({

@@ -22,9 +22,10 @@ Authorization: Bearer mapi_<secret>
 | --- | --- |
 | `app/api/v1/[endpoint]/route.ts` | List records and create records. |
 | `app/api/v1/[endpoint]/[id]/route.ts` | Fetch, update, patch, and delete one record. |
-| `lib/api/publicEngine.ts` | Shared gate, rate-limit handling, schema field loading, JSON-with-headers helper. |
+| `lib/api/publicEngine.ts` | Shared gate, rate-limit + quota handling, schema field loading, JSON-with-headers helper. |
 | `lib/api/publicAuth.ts` | Bearer-token authorization and permission checks. |
-| `lib/api/rateLimit.ts` | Redis fixed-window rate limiter. |
+| `lib/api/rateLimit.ts` | Redis fixed-window rate limiter + monthly quota counter. |
+| `lib/billing/plans.ts` | Per-plan `requestsPerMinute` / `requestsPerMonth` / resource caps — the single source of truth `gate()` reads from. |
 | `lib/records/validate.ts` | Dynamic record validation, filter coercion, readable-field projection. |
 | `lib/models/Record.ts` | Stored record model. |
 
@@ -38,20 +39,31 @@ if (!g.ok) return g.response;
 const { auth, headers } = g;
 ```
 
-`gate()` does two things:
+`gate()` does three things:
 
 1. Calls `authorizePublicRequest()` to verify token, endpoint, method, and grant.
-2. Calls `rateLimit()` for the access token id.
+2. Looks up the token's organization plan and calls `rateLimit()` — a
+   per-minute budget, keyed by **organization** (`rl:org:<orgId>`), shared
+   across every token that organization has minted.
+3. Calls `checkMonthlyQuota()` — a UTC-calendar-month budget, also keyed by
+   organization.
 
-If either step fails, the route returns early.
+If any step fails, the route returns early — a 401/403/404/405 from step 1,
+or a 429 from step 2 or 3.
 
-If both succeed, the route receives:
+If all succeed, the route receives:
 
-- `auth.userId`
+- `auth.organizationId`
 - `auth.token`
 - `auth.endpoint`
 - `auth.grant`
-- rate-limit headers to attach to the response.
+- headers to attach to the response: rate-limit headers always, quota
+  headers when the plan's monthly limit isn't unmetered.
+
+Why organization-keyed instead of token-keyed: the whole point of tying
+throughput to a subscription tier is that the tier's budget belongs to the
+organization, not to however many tokens it happens to have minted — minting
+more tokens doesn't buy more throughput.
 
 ## Method Behavior
 
@@ -87,7 +99,7 @@ Flow:
 
 1. Authorize and rate-limit with `gate(req, slug, "GET_MANY")`.
 2. Load schema fields with `loadFields(auth)`.
-3. Start a MongoDB filter with `userId` and `endpointId`.
+3. Start a MongoDB filter with `organizationId` and `schemaId`.
 4. For each schema field:
    - only consider it if the field is readable,
    - read the query-string value,
@@ -132,8 +144,9 @@ Flow:
 3. Parse request JSON.
 4. Validate with `validateRecordData(fields, body, { writableFields })`.
 5. Create `RecordModel` with:
-   - `userId`,
-   - `endpointId`,
+   - `organizationId`,
+   - `createdBy: auth.token.createdBy` (the user who minted the token — best-effort audit trail; there's no signed-in user on a public API call),
+   - `schemaId`, `endpointId`,
    - cleaned `data`.
 6. Return the created record after readable-field projection.
 
@@ -153,7 +166,7 @@ Flow:
 ```ts
 {
   _id: id,
-  userId: auth.userId,
+  organizationId: auth.organizationId,
   schemaId: auth.endpoint.schemaId
 }
 ```
@@ -196,7 +209,7 @@ Flow:
 
 1. Authorize as `DELETE`.
 2. Validate `id` shape.
-3. Delete by `_id`, `userId`, and `schemaId`.
+3. Delete by `_id`, `organizationId`, and `schemaId`.
 4. Return `{ success: true, id }`.
 
 ## Field Permissions
@@ -219,38 +232,53 @@ projectReadable(record.data, auth.endpoint.readableFields ?? [])
 
 An empty readable or writable field list means all schema fields.
 
-## Rate-Limit Headers
+## Rate-Limit and Quota Headers
 
 Every successful public route response includes:
 
 ```http
-X-RateLimit-Limit: 120
-X-RateLimit-Remaining: 119
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 59
 X-RateLimit-Reset: 60
 ```
 
-The exact values depend on environment variables and current token usage.
+Plus, for metered plans (not `enterprise`, which is unmetered):
 
-When rate-limited, the engine returns:
-
-```json
-{
-  "error": "Rate limit exceeded"
-}
+```http
+X-Quota-Limit: 10000
+X-Quota-Remaining: 9998
 ```
 
-with status `429`.
+The exact values depend on the calling organization's `plan` (see
+`lib/billing/plans.ts`) and current usage — not environment variables; the
+`RATE_LIMIT_MAX` env var is no longer read on the request path (see
+local-development-and-operations.md).
+
+When per-minute rate-limited, the engine returns `429` with:
+
+```json
+{ "error": "Rate limit exceeded" }
+```
+
+When the monthly quota is exhausted, it returns `429` with a distinct message:
+
+```json
+{ "error": "Monthly request quota exceeded for your plan. Upgrade for more, or wait for next month." }
+```
 
 ## Adding a New Public API Feature
 
 When adding public API behavior, preserve these rules:
 
 1. Start with `gate()`.
-2. Keep `userId` and `endpointId` in record queries.
+2. Keep `organizationId` and `schemaId` (or `endpointId`, for provenance) in
+   record queries.
 3. Load schema fields through `loadFields(auth)` when validating or filtering
    data.
 4. Apply readable-field projection before returning record data.
-5. Attach rate-limit headers to responses.
+5. Attach rate-limit and quota headers to responses.
 6. Return consistent JSON error shapes.
 7. Think through how the change interacts with endpoint methods, grants,
    readable fields, and writable fields.
+8. If the change creates a new plan-limited resource, add its cap to
+   `lib/billing/plans.ts` and enforce it with `assertUnderLimit()`.

@@ -16,7 +16,8 @@ const grantSchema = new Schema(
 
 const accessTokenSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    organizationId: { type: Schema.Types.ObjectId, ref: "Organization", required: true, index: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     name: { type: String, required: true, trim: true },
     // sha256 of the plaintext token — used to authenticate public API requests.
     tokenHash: { type: String, required: true, unique: true },

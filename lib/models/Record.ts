@@ -6,11 +6,12 @@ import { Schema, model, models, type Model, type InferSchemaType } from "mongoos
  * schema's data pool, so two endpoints backed by the same schema read and
  * write the same records. `endpointId` is kept as provenance (which endpoint
  * created the record via the public API; null for dashboard-created entries).
- * Every record carries its owning `userId` so all queries stay per-tenant.
+ * Every record carries its owning `organizationId` so all queries stay per-tenant.
  */
 const recordSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    organizationId: { type: Schema.Types.ObjectId, ref: "Organization", required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     schemaId: { type: Schema.Types.ObjectId, ref: "DataSchema", required: true },
     endpointId: { type: Schema.Types.ObjectId, ref: "Endpoint" },
     data: { type: Schema.Types.Mixed, default: {} },
@@ -18,8 +19,8 @@ const recordSchema = new Schema(
   { timestamps: true }
 );
 
-// Primary access pattern: list/find records for one schema owned by one user.
-recordSchema.index({ schemaId: 1, userId: 1, createdAt: -1 });
+// Primary access pattern: list/find records for one schema owned by one org.
+recordSchema.index({ schemaId: 1, organizationId: 1, createdAt: -1 });
 
 export type RecordDoc = InferSchemaType<typeof recordSchema> & {
   _id: import("mongoose").Types.ObjectId;

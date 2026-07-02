@@ -24,7 +24,7 @@ export function LandingHeader({ signedIn }: { signedIn: boolean }) {
         <LanguageSwitcher />
         {signedIn ? (
           <Link
-            href="/dashboard/schemas"
+            href="/dashboard/account/profile"
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-500"
           >
             {t("common.goToAccount")}

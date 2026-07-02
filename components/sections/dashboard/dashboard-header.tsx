@@ -25,7 +25,14 @@ export function DashboardHeader() {
         <span>{t("common.brand")}</span>
       </Link>
       <div className="flex items-center gap-4">
-        {me && <span className="hidden text-sm text-slate-500 sm:inline">{me.email}</span>}
+        {me && (
+          <Link
+            href="/dashboard/account/profile"
+            className="hidden text-sm text-slate-500 transition hover:text-slate-800 sm:inline"
+          >
+            {me.email}
+          </Link>
+        )}
         <LanguageSwitcher />
         <button
           onClick={onSignOut}

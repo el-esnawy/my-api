@@ -7,11 +7,11 @@ import type { ApiTranslator } from "./respond";
 /**
  * The core security gate for the public REST engine.
  *
- * A token uniquely identifies a tenant. We resolve the endpoint *within that
- * tenant only*, so a token can never address another user's endpoints — even if
- * two users happen to use the same slug. Authorization checks, in order:
+ * A token belongs to one organization. We resolve the endpoint *within that
+ * organization only*, so a token can never address another org's endpoints —
+ * even if two orgs happen to use the same slug. Authorization checks, in order:
  *   1. valid, non-revoked token
- *   2. endpoint exists for the token's user (slug scoped to userId)
+ *   2. endpoint exists for the token's organization (slug scoped to organizationId)
  *   3. token has an explicit grant for that endpoint
  *   4. verb is allowed by the endpoint
  *   5. verb is permitted by the grant (read vs write)
@@ -19,7 +19,7 @@ import type { ApiTranslator } from "./respond";
 
 export type AuthSuccess = {
   ok: true;
-  userId: string;
+  organizationId: string;
   token: AccessTokenDoc;
   endpoint: EndpointDoc;
   grant: { read: boolean; write: boolean };
@@ -51,8 +51,8 @@ export async function authorizePublicRequest(
     return { ok: false, status: 401, message: t("api.errors.invalidBearer") };
   }
 
-  // Resolve the endpoint strictly within the token owner's namespace.
-  const endpoint = await Endpoint.findOne({ userId: token.userId, slug });
+  // Resolve the endpoint strictly within the token's organization namespace.
+  const endpoint = await Endpoint.findOne({ organizationId: token.organizationId, slug });
   if (!endpoint) {
     return { ok: false, status: 404, message: t("api.errors.endpointNotFound") };
   }
@@ -102,7 +102,7 @@ export async function authorizePublicRequest(
 
   return {
     ok: true,
-    userId: String(token.userId),
+    organizationId: String(token.organizationId),
     token,
     endpoint,
     grant: { read: !!grant.read, write: !!grant.write },

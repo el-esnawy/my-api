@@ -57,9 +57,109 @@
       "schemas": "Schemas",
       "entries": "Entries",
       "endpoints": "Endpoints",
-      "tokens": "Request Tokens"
+      "tokens": "Request Tokens",
+      "account": "Account"
     },
     "signOut": "Sign out"
+  },
+  "account": {
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "billing": "Billing",
+      "team": "Team"
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "profile": {
+      "title": "Profile",
+      "description": "Your account details.",
+      "nameLabel": "Name",
+      "namePlaceholder": "Ada Lovelace",
+      "emailLabel": "Email",
+      "currentPasswordLabel": "Current password",
+      "currentPasswordHint": "Required to change your email.",
+      "save": "Save changes",
+      "saved": "Profile updated",
+      "saveFailed": "Failed to update profile"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Change your password.",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "At least 8 characters",
+      "confirmNewPassword": "Confirm new password",
+      "confirmNewPasswordPlaceholder": "Re-enter your new password",
+      "save": "Change password",
+      "saved": "Password changed",
+      "saveFailed": "Failed to change password"
+    },
+    "billing": {
+      "title": "Billing",
+      "description": "Manage your subscription plan. This is a demo — no payment is collected.",
+      "currentPlan": "Current plan",
+      "currentBadge": "Current plan",
+      "upgrade": "Switch to this plan",
+      "switched": "Plan updated",
+      "switchFailed": "Failed to switch plan"
+    },
+    "team": {
+      "title": "Team",
+      "description": "Invite people to collaborate on this account. Members share your schemas, endpoints, tokens, and rate limits.",
+      "orgNameLabel": "Organization name",
+      "orgNameSave": "Save",
+      "orgNameSaved": "Organization renamed",
+      "orgNameSaveFailed": "Failed to rename organization",
+      "membersTitle": "Members",
+      "you": "you",
+      "roleAria": "Change role",
+      "remove": "Remove",
+      "removeConfirm": "Remove {{name}} from this organization?",
+      "removeFailed": "Failed to remove member",
+      "roleChangeFailed": "Failed to change role",
+      "lastOwner": "An organization must have at least one owner",
+      "invitesTitle": "Pending invites",
+      "noInvites": "No pending invites",
+      "invite": "+ Invite member",
+      "revoke": "Revoke",
+      "resend": "Resend",
+      "expires": "Expires {{date}}",
+      "revokeFailed": "Failed to revoke invite",
+      "resendFailed": "Failed to resend invite",
+      "resent": "Invite resent",
+      "modal": {
+        "title": "Invite a teammate",
+        "description": "They'll get an email with a link to join.",
+        "emailLabel": "Email",
+        "emailPlaceholder": "teammate@example.com",
+        "roleLabel": "Role",
+        "invite": "Send invite",
+        "created": "Invite sent",
+        "createdNoEmail": "Invite created, but the email failed to send. Share the link below manually.",
+        "acceptUrlLabel": "Accept link"
+      }
+    }
+  },
+  "invite": {
+    "loading": "Loading invite...",
+    "notFound": "This invite link isn't valid.",
+    "unknownInviter": "Someone",
+    "acceptTitle": "You're invited to join {{organization}}",
+    "acceptDescription": "{{inviter}} invited you to collaborate on my-api.",
+    "signInPrompt": "You already have an account. Sign in as {{email}} to accept.",
+    "signInCta": "Sign in to accept",
+    "createAccountDescription": "Create an account to join.",
+    "nameLabel": "Name (optional)",
+    "namePlaceholder": "Ada Lovelace",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "confirmPasswordLabel": "Confirm password",
+    "accept": "Accept invite",
+    "acceptFailed": "Failed to accept invite"
   },
   "landing": {
     "hero": {
@@ -167,12 +267,14 @@
       "title": "Create your account",
       "description": "Start building custom REST endpoints in minutes.",
       "footerPrompt": "Already have an account?",
-      "passwordPlaceholder": "At least 8 characters"
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPasswordPlaceholder": "Re-enter your password"
     },
     "fields": {
       "nameOptional": "Name (optional)",
       "email": "Email",
-      "password": "Password"
+      "password": "Password",
+      "confirmPassword": "Confirm password"
     },
     "placeholders": {
       "name": "Ada Lovelace",
@@ -351,7 +453,24 @@
       "notFound": "Not found",
       "methodNotAllowed": "Method not allowed",
       "conflict": "Conflict",
+      "gone": "No longer available",
       "rateLimitExceeded": "Rate limit exceeded",
+      "monthlyQuotaExceeded": "Monthly request quota exceeded for your plan. Upgrade for more, or wait for next month.",
+      "planLimitSchemas": "Your {{plan}} plan allows up to {{limit}} schemas. Upgrade to create more.",
+      "planLimitEndpoints": "Your {{plan}} plan allows up to {{limit}} endpoints. Upgrade to create more.",
+      "planLimitTokens": "Your {{plan}} plan allows up to {{limit}} request tokens. Upgrade to create more.",
+      "organizationNotFound": "Organization not found",
+      "currentPasswordIncorrect": "Current password is incorrect",
+      "memberNotFound": "Member not found",
+      "lastOwner": "An organization must have at least one owner",
+      "inviteAlreadyPending": "There's already a pending invite for that email",
+      "alreadyMember": "That person is already a member of this organization",
+      "inviteNotFound": "Invite not found",
+      "inviteAlreadyAccepted": "This invite has already been accepted",
+      "inviteRevoked": "This invite has been revoked",
+      "inviteExpired": "This invite has expired",
+      "mustSignInToAccept": "Sign in with that email address to accept this invite",
+      "alreadyInOrganization": "You already belong to an organization — multi-org support isn't available yet",
       "serverError": "Internal server error",
       "validationFailed": "Validation failed",
       "emailRegistered": "Email already registered",
@@ -383,6 +502,8 @@
   },
   "validation": {
     "passwordMin": "Password must be at least 8 characters",
+    "currentPasswordRequired": "Enter your current password to change your email",
+    "passwordMismatch": "Passwords don't match",
     "fieldName": "Use letters, numbers, underscores; must not start with a number",
     "invalidSlug": "Invalid slug",
     "schemaFieldsMin": "Add at least one field",

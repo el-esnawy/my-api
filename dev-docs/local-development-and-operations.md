@@ -44,6 +44,7 @@ volumes:
 MongoDB stores the application source of truth:
 
 - users,
+- organizations, memberships, invites,
 - schemas,
 - endpoints,
 - access-token metadata,
@@ -66,7 +67,8 @@ volumes:
   - ./docker-data/redis:/data
 ```
 
-Redis stores rate-limit counters for public API tokens.
+Redis stores rate-limit counters and monthly-quota counters for the public
+API, keyed per organization.
 
 Default app connection string:
 
@@ -90,12 +92,19 @@ must set real values.
 | `REDIS_URL` | `redis://localhost:6379` | Redis connection. |
 | `SESSION_SECRET` | development-only string | HMAC secret for dashboard session JWTs. |
 | `SESSION_TTL` | `7d` | JWT expiration passed to `jose`. |
-| `RATE_LIMIT_MAX` | `120` | Max public API requests per window per token. |
-| `RATE_LIMIT_WINDOW` | `60` | Rate-limit window in seconds. |
-| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Public app base URL used by UI helpers. |
+| `TOKEN_ENCRYPTION_SECRET` | development-only string | AES-256-GCM key for at-rest access-token encryption (reveal feature). |
+| `RATE_LIMIT_WINDOW` | `60` | Shared window length (seconds) for the per-minute rate limit. The *count* allowed per window is plan-derived (`lib/billing/plans.ts`), not env-configured. |
+| `RATE_LIMIT_MAX` | — | Deprecated — no longer read on the request path. Safe to delete from `.env`; kept as a documented no-op so old files don't need to change. |
+| `RESEND_API_KEY` | `""` (no safe fallback) | Sends team-invite emails. Without a real key, invite creation still succeeds — the email just doesn't send (logged as a warning), and the accept URL is echoed back in the API response outside of production so the flow is still testable. |
+| `EMAIL_FROM` | `"My API <onboarding@resend.dev>"` | Must be a verified sender in your Resend account, or use Resend's shared onboarding domain for local dev. |
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Public app base URL used by UI helpers and to build invite accept links. |
 
 Important: replace `SESSION_SECRET` outside local development. If the secret is
 weak or shared, dashboard session cookies are not trustworthy.
+
+To exercise invites locally without a Resend account: leave `RESEND_API_KEY`
+unset, create an invite from the Team page, and copy the accept URL shown
+directly in the "invite created" screen (only shown outside production).
 
 ## npm Scripts
 
@@ -180,23 +189,47 @@ on the endpoint.
 
 ### Public API returns 404 for an endpoint
 
-Endpoint lookup is scoped by token owner:
+Endpoint lookup is scoped by the token's organization:
 
 ```ts
-Endpoint.findOne({ userId: token.userId, slug })
+Endpoint.findOne({ organizationId: token.organizationId, slug })
 ```
 
 So this can mean either:
 
-- no endpoint with that slug exists for the token owner,
-- the token belongs to a different user than expected.
+- no endpoint with that slug exists in the token's organization,
+- the token belongs to a different organization than expected.
+
+## Organization Backfill Migration
+
+`scripts/backfill-organizations.mjs` is a one-off migration for local data
+that predates the Organization/Membership model (every `User` used to
+directly own their schemas/endpoints/tokens/records via `userId`; those
+fields are now `organizationId` + `createdBy`).
+
+```bash
+node scripts/backfill-organizations.mjs
+```
+
+For every `User` without a `Membership`, it creates a personal `Organization`
+(`plan: "hobby"`) and an `owner` `Membership`, then re-points that user's
+existing schemas/endpoints/tokens/records at the new `organizationId`
+(renaming their `userId` field to `createdBy`). It's idempotent — safe to
+re-run; already-migrated users and documents are skipped. Modeled on
+`scripts/backfill-entries.mjs` (raw `mongoose.connect` + `db.collection(...)`,
+not the Mongoose models, so it doesn't break if the models change shape
+later).
+
+This is local Docker Mongo data only — run it once after pulling model
+changes, before starting the app.
 
 ## Data Persistence
 
 Local Docker data is stored in `docker-data`.
 
 Deleting that folder removes local MongoDB and Redis data. Be careful: it will
-wipe local users, schemas, endpoints, tokens, records, and rate-limit counters.
+wipe local users, organizations, memberships, invites, schemas, endpoints,
+tokens, records, and rate-limit/quota counters.
 
 ## Build-Time Notes
 
@@ -219,10 +252,18 @@ npm run build
 
 For frontend behavior changes, also start the app and manually check:
 
-- sign-up,
+- sign-up (creates an Organization + owner Membership),
 - sign-in,
 - schema creation,
 - endpoint creation,
 - token creation,
-- at least one public API call with the created token.
+- at least one public API call with the created token,
+- hitting a Hobby-plan resource cap (3rd schema/endpoint or 2nd token) returns
+  a `403` with an upgrade message,
+- switching plans on the Billing page and confirming caps lift,
+- inviting a teammate on the Team page and accepting as both a brand-new user
+  and (separately) a user who already has their own account (should be
+  rejected — see the "Known v1 Limitations" note in dashboard-management-flows.md),
+- changing name, email (with current password), and password from the
+  Account pages.
 

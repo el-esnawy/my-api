@@ -48,10 +48,10 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     await connectDB();
-    const owned = await loadOwnedSchema(id, auth.session.userId);
+    const owned = await loadOwnedSchema(id, auth.session.orgId);
     if (!owned) return notFound(t("api.errors.schemaNotFound"));
     const schemaId = String(owned.schema._id);
-    const userId = auth.session.userId;
+    const organizationId = auth.session.orgId;
 
     const rejected = new Map<number, RejectedEntry>();
     function reject(index: number, entry: Record<string, unknown>, reason: string) {
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     // --- Uniqueness: first occurrence in the file wins; stored values block all ---
     const conflicts = await findUniqueConflicts({
       schemaId,
-      userId,
+      organizationId,
       fields: owned.fields,
       candidates: valid.map((v) => ({ data: v.data })),
     });
@@ -97,7 +97,12 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     if (accepted.length > 0) {
       await RecordModel.insertMany(
-        accepted.map((a) => ({ userId, schemaId, data: a.data }))
+        accepted.map((a) => ({
+          organizationId,
+          createdBy: auth.session.userId,
+          schemaId,
+          data: a.data,
+        }))
       );
     }
 

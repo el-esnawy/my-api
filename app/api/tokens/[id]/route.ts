@@ -26,7 +26,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const { id } = await params;
 
     await connectDB();
-    const token = await AccessToken.findOne({ _id: id, userId: auth.session.userId });
+    const token = await AccessToken.findOne({ _id: id, organizationId: auth.session.orgId });
     if (!token) return notFound(t("api.errors.tokenNotFound"));
     return ok({ token: serializeToken(token) });
   });
@@ -52,7 +52,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       const endpointIds = [...new Set(parsed.data.grants.map((g) => g.endpointId))];
       const owned = await Endpoint.find({
         _id: { $in: endpointIds },
-        userId: auth.session.userId,
+        organizationId: auth.session.orgId,
       }).select("_id");
       const ownedSet = new Set(owned.map((e) => String(e._id)));
       const notOwned = endpointIds.filter((eid) => !ownedSet.has(eid));
@@ -62,7 +62,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 
     const token = await AccessToken.findOneAndUpdate(
-      { _id: id, userId: auth.session.userId },
+      { _id: id, organizationId: auth.session.orgId },
       { $set: parsed.data },
       { new: true }
     );
@@ -81,7 +81,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     await connectDB();
     const deleted = await AccessToken.findOneAndDelete({
       _id: id,
-      userId: auth.session.userId,
+      organizationId: auth.session.orgId,
     });
     if (!deleted) return notFound(t("api.errors.tokenNotFound"));
     return ok({ success: true });

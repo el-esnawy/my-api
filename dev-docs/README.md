@@ -32,29 +32,41 @@ doing.
 
 `my-api` lets signed-in users define data schemas, expose those schemas as REST
 endpoints, and create bearer tokens that external callers use to read and write
-records.
+records. Each user belongs to one `Organization` (their own, created at
+sign-up, or one they were invited into) — the organization is the tenant
+boundary and the subscription-tier boundary, not the individual user.
 
 The most important invariant is:
 
 > Every dashboard and public API data operation must be scoped by the owning
-> `userId`.
+> `organizationId`.
 
-That rule is what prevents one account from seeing or changing another account's
-schemas, endpoints, tokens, or records. When you add features, look for that
-scope first.
+That rule is what prevents one organization from seeing or changing another
+organization's schemas, endpoints, tokens, or records. When you add features,
+look for that scope first.
+
+Subscription tier (`Organization.plan`: `hobby` / `pro` / `enterprise`)
+determines rate limits, monthly request quotas, and resource caps (max
+schemas/endpoints/tokens) — see [`lib/billing/plans.ts`](../lib/billing/plans.ts).
+There is no real payment processor; upgrading a plan just writes the field.
 
 ## Main Code Areas
 
 | Area | Purpose |
 | --- | --- |
 | `app/(auth)` | Sign-in and sign-up pages. |
-| `app/(dashboard)` | Authenticated dashboard UI for schemas, endpoints, and tokens. |
+| `app/(dashboard)` | Authenticated dashboard UI for schemas, endpoints, tokens, and the account section. |
+| `app/invite/[token]` | Public invite-accept page (deliberately outside `(auth)`, which redirects signed-in visitors away). |
 | `app/api/auth` | Cookie-session auth endpoints. |
 | `app/api/schemas`, `app/api/endpoints`, `app/api/tokens` | Dashboard management APIs. |
+| `app/api/account` | Profile, password, organization, billing plan, members, and invites APIs. |
+| `app/api/invites/[token]` | Public invite-accept API. |
 | `app/api/v1` | Public REST engine called by external clients with bearer tokens. |
-| `lib/models` | Mongoose models for users, schemas, endpoints, tokens, and records. |
+| `lib/models` | Mongoose models for users, organizations, memberships, invites, schemas, endpoints, tokens, and records. |
 | `lib/api` | Shared API helpers for auth gates, responses, rate limiting, and public engine plumbing. |
-| `lib/auth` | Password hashing, session JWTs, and access-token helpers. |
+| `lib/auth` | Password hashing, session JWTs, and access-/invite-token helpers. |
+| `lib/billing` | Plan limits config and the resource-cap enforcement helper. |
+| `lib/email` | Resend client and invite-email sending. |
 | `lib/records` | Runtime validation and projection for stored record data. |
 | `lib/client` | Browser-side API wrapper, React Query hooks, types, and small utilities. |
 
@@ -62,7 +74,10 @@ scope first.
 
 | Term | Meaning |
 | --- | --- |
-| User | A dashboard account. Owns schemas, endpoints, tokens, and records. |
+| User | A login identity (email/password/name). Belongs to one organization via a Membership. |
+| Organization | The tenant boundary. Owns schemas, endpoints, tokens, and records, and has a subscription `plan`. |
+| Membership | Joins a User to an Organization with a `role` (`owner` / `admin` / `member`). |
+| Invite | A pending email invitation to join an Organization, accepted at `/invite/:token`. |
 | DataSchema | A user-defined data type, such as `Note` or `Customer`. |
 | Field | One property inside a schema, with a type like `string`, `number`, `boolean`, or `date`. |
 | Endpoint | A REST resource generated from a `DataSchema`, exposed at `/api/v1/:slug`. |

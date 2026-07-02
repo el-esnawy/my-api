@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { Endpoint } from "@/lib/models/Endpoint";
 import { DataSchema } from "@/lib/models/DataSchema";
 import { requireSession } from "@/lib/api/dashboardAuth";
+import { assertUnderLimit } from "@/lib/billing/enforceLimit";
 import { createEndpointInput } from "@/lib/validation/schemas";
 import { serializeEndpoint } from "@/lib/api/serialize";
 import { getRequestTranslator } from "@/i18n/server";
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
     if ("response" in auth) return auth.response;
 
     await connectDB();
-    const endpoints = await Endpoint.find({ userId: auth.session.userId }).sort({
+    const endpoints = await Endpoint.find({ organizationId: auth.session.orgId }).sort({
       createdAt: -1,
     });
     return ok({ endpoints: endpoints.map(serializeEndpoint) });
@@ -44,11 +45,13 @@ export async function POST(req: NextRequest) {
     }
 
     await connectDB();
+    const limitErr = await assertUnderLimit(auth.session.orgId, "endpoints", t);
+    if (limitErr) return limitErr.response;
 
-    // The referenced schema must exist and belong to this user.
+    // The referenced schema must exist and belong to this organization.
     const schema = await DataSchema.findOne({
       _id: parsed.data.schemaId,
-      userId: auth.session.userId,
+      organizationId: auth.session.orgId,
     });
     if (!schema) return badRequest(t("api.errors.unknownSchema"));
 
@@ -65,7 +68,8 @@ export async function POST(req: NextRequest) {
 
     try {
       const endpoint = await Endpoint.create({
-        userId: auth.session.userId,
+        organizationId: auth.session.orgId,
+        createdBy: auth.session.userId,
         schemaId: schema._id,
         name: parsed.data.name,
         slug: parsed.data.slug,

@@ -20,7 +20,8 @@ export type HttpMethod = (typeof HTTP_METHODS)[number];
  */
 const endpointSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    organizationId: { type: Schema.Types.ObjectId, ref: "Organization", required: true, index: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     schemaId: { type: Schema.Types.ObjectId, ref: "DataSchema", required: true },
     name: { type: String, required: true, trim: true },
     slug: { type: String, required: true, trim: true, lowercase: true },
@@ -35,7 +36,7 @@ const endpointSchema = new Schema(
   { timestamps: true }
 );
 
-endpointSchema.index({ userId: 1, slug: 1 }, { unique: true });
+endpointSchema.index({ organizationId: 1, slug: 1 }, { unique: true });
 
 export type EndpointDoc = InferSchemaType<typeof endpointSchema> & {
   _id: import("mongoose").Types.ObjectId;

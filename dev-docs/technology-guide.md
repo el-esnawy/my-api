@@ -42,9 +42,15 @@ You will see `"use client";` at the top of:
 - `app/(dashboard)/dashboard/schemas/page.tsx`
 - `app/(dashboard)/dashboard/endpoints/page.tsx`
 - `app/(dashboard)/dashboard/tokens/page.tsx`
+- `app/(dashboard)/dashboard/account/layout.tsx` and its four sub-pages
 - `app/(auth)/sign-in/page.tsx`
 - `app/(auth)/sign-up/page.tsx`
 - interactive components like `Modal` and `CopyButton`
+
+`app/invite/[token]/page.tsx` (via `components/pages/invite-accept.tsx`) is
+the one auth-adjacent page that's a **server** component — it awaits the
+route's `params` and renders a client child (`InviteAcceptForm`) for the
+actual interactivity, the same split used by dynamic API route handlers.
 
 Common frontend pattern:
 
@@ -85,40 +91,51 @@ every request.
 
 Models:
 
-- `User`
-- `DataSchema`
-- `Endpoint`
-- `AccessToken`
-- `RecordModel`
+- `User` — identity only (email/password/name); no plan or org fields.
+- `Organization` — the tenant boundary; has `plan`.
+- `Membership` — joins `User` to `Organization` with a `role`.
+- `Invite` — pending email invitation to an `Organization`.
+- `DataSchema`, `Endpoint`, `AccessToken` — all `organizationId`-owned, with
+  a `createdBy` audit field.
+- `RecordModel` — `organizationId`-owned, `createdBy` audit field, `schemaId`
+  owner + `endpointId` provenance.
 
 Indexes worth knowing:
 
 - Users have unique emails.
-- Schemas have unique `{ userId, slug }`.
-- Endpoints have unique `{ userId, slug }`.
-- Access tokens have unique `tokenHash`.
-- Records are indexed by `{ endpointId, userId, createdAt: -1 }`.
+- Memberships have unique `{ organizationId, userId }` (not unique on
+  `userId` alone — v1's "one org per user" rule is enforced in application
+  code, not the schema, so it doesn't block adding multi-org later).
+- Schemas have unique `{ organizationId, slug }`.
+- Endpoints have unique `{ organizationId, slug }`.
+- Access tokens have unique `tokenHash`; invites have unique `tokenHash` too
+  (separate collection, same hash-only-storage approach).
+- Records are indexed by `{ schemaId, organizationId, createdAt: -1 }`.
 
 ## Redis and ioredis
 
-Redis is used for public API rate limiting. It is not the source of truth for
-tokens or records.
+Redis is used for public API rate limiting and monthly quota tracking. It is
+not the source of truth for tokens or records.
 
 Connection management is in `lib/db/redis.ts`.
 
 The Redis client is cached on `global._redisClient` in development. The client
-logs connection errors but does not crash the app. Rate limiting fails open, so
-if Redis is unavailable, legitimate API calls are allowed instead of blocked.
+logs connection errors but does not crash the app. Both the rate limiter and
+the quota counter fail open, so if Redis is unavailable, legitimate API calls
+are allowed instead of blocked.
 
-Rate limiting logic lives in `lib/api/rateLimit.ts`.
-
-The public API passes the token id to:
+Rate limiting and quota logic live in `lib/api/rateLimit.ts`. The public
+engine passes the calling organization's plan-derived limits:
 
 ```ts
-rateLimit(String(auth.token._id))
+rateLimit(`org:${auth.organizationId}`, limits.requestsPerMinute, env.RATE_LIMIT_WINDOW)
+checkMonthlyQuota(auth.organizationId, limits.requestsPerMonth)
 ```
 
-This means the fixed window is per access token, not per IP address.
+This means the fixed window (and the monthly quota) is per organization, not
+per token or per IP address — every token an organization mints shares one
+throughput budget. `limits` comes from `lib/billing/plans.ts`, keyed by
+`Organization.plan`.
 
 ## TanStack Query
 
@@ -142,6 +159,11 @@ keys.me
 keys.schemas
 keys.endpoints
 keys.tokens
+keys.entryCounts
+keys.entries(schemaId)
+keys.account.organization
+keys.account.members
+keys.account.invites
 ```
 
 After mutations, hooks invalidate affected queries. For example, updating a
@@ -164,6 +186,10 @@ Examples:
 - `updateEndpointInput`
 - `createTokenInput`
 - `updateTokenInput`
+- `updateProfileInput` — `superRefine`s `currentPassword` in when `email` is present
+- `changePasswordInput`
+- `updateOrganizationInput`, `updatePlanInput`
+- `updateMemberInput`, `createInviteInput`, `acceptInviteInput`
 
 Route handlers call `safeParse()` and return:
 
@@ -194,10 +220,15 @@ Session payload:
 {
   userId: string;
   email: string;
+  orgId: string;
+  role: "owner" | "admin" | "member";
 }
 ```
 
-The signed JWT is stored in the `my_api_session` cookie.
+The signed JWT is stored in the `my_api_session` cookie. `orgId`/`role` are
+resolved once at sign-up/sign-in/invite-accept time and trusted for the life
+of the session — see auth-and-security.md's "Session Cookie" section for the
+staleness trade-off this implies.
 
 ## bcryptjs
 
@@ -230,6 +261,29 @@ mapi_<base64url-random-secret>
 
 Only the hash is stored. The plaintext is returned once from
 `POST /api/tokens`.
+
+The same module's `generateInviteToken()` produces invite tokens the same
+way (random bytes + sha256 hash), but skips the AES-256-GCM
+encrypted-for-reveal copy that access tokens have — an invite link is only
+ever shown once, in the email, and never needs to be redisplayed later.
+
+## Resend
+
+`resend` sends team-invite emails. The client and template live in
+`lib/email/`.
+
+- `lib/email/client.ts` — `getResendClient()` lazily constructs the SDK
+  client, returning `null` if `RESEND_API_KEY` isn't set (the SDK throws at
+  construction time if given no key, so it's never constructed without one).
+- `lib/email/sendInviteEmail.ts` — builds a plain HTML template literal
+  (no `@react-email` dependency for one template) and sends it. Never
+  throws — a failed or skipped send returns `false` rather than failing the
+  invite-creation request; the `Invite` row is still created either way.
+
+Unlike every other env var in `lib/env.ts`, `RESEND_API_KEY` has no safe
+local-dev fallback. Without a real key, invites still work end-to-end in
+local development because the invite-create/resend API responses echo the
+plaintext accept URL directly when `!env.isProd`.
 
 ## Tailwind CSS
 

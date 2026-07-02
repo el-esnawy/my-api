@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db/mongoose";
 import { User } from "@/lib/models/User";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
+import { getMembershipForUser } from "@/lib/api/organization";
 import { signInInput } from "@/lib/validation/schemas";
 import { serializeUser } from "@/lib/api/serialize";
 import { getRequestTranslator } from "@/i18n/server";
@@ -30,7 +31,15 @@ export async function POST(req: NextRequest) {
     const valid = await verifyPassword(parsed.data.password, user.passwordHash);
     if (!valid) return genericFail;
 
-    await createSession({ userId: String(user._id), email: user.email });
+    const membership = await getMembershipForUser(String(user._id));
+    if (!membership) return genericFail;
+
+    await createSession({
+      userId: String(user._id),
+      email: user.email,
+      orgId: String(membership.organizationId),
+      role: membership.role,
+    });
     return ok({ user: serializeUser(user) });
   });
 }

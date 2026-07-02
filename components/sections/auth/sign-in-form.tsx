@@ -30,7 +30,8 @@ export function SignInForm() {
       const { user } = await signIn.mutateAsync(form);
       qc.setQueryData(keys.me, user);
       const next = search.get("next");
-      router.replace(next && next.startsWith("/dashboard") ? next : "/dashboard/schemas");
+      const nextIsSafe = next && (next.startsWith("/dashboard") || next.startsWith("/invite/"));
+      router.replace(nextIsSafe ? next : "/dashboard/schemas");
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);

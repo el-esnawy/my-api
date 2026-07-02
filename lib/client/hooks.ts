@@ -12,6 +12,11 @@ import type {
   Endpoint,
   Entry,
   ImportResult,
+  Invite,
+  Member,
+  Organization,
+  Plan,
+  OrgRole,
   TokenGrant,
   User,
 } from "./types";
@@ -23,6 +28,11 @@ export const keys = {
   tokens: ["tokens"] as const,
   entryCounts: ["entries", "counts"] as const,
   entries: (schemaId: string) => ["entries", schemaId] as const,
+  account: {
+    organization: ["account", "organization"] as const,
+    members: ["account", "members"] as const,
+    invites: ["account", "invites"] as const,
+  },
 };
 
 // --- Auth ---
@@ -43,8 +53,12 @@ export function useSignIn() {
 
 export function useSignUp() {
   return useMutation({
-    mutationFn: (input: { email: string; password: string; name?: string }) =>
-      api<{ user: User }>("/api/auth/sign-up", { method: "POST", json: input }),
+    mutationFn: (input: {
+      email: string;
+      password: string;
+      confirmPassword: string;
+      name?: string;
+    }) => api<{ user: User }>("/api/auth/sign-up", { method: "POST", json: input }),
   });
 }
 
@@ -242,5 +256,167 @@ export function useRevealToken() {
   return useMutation({
     mutationFn: (id: string) =>
       api<{ token: string }>(`/api/tokens/${id}/reveal`).then((r) => r.token),
+  });
+}
+
+// --- Account: profile ---
+/** Profile + the caller's organization + their role in it, in one round trip. */
+export function useAccountProfile() {
+  return useQuery({
+    queryKey: ["account", "profile"],
+    queryFn: () =>
+      api<{ user: User; organization: Organization; role: OrgRole }>("/api/account/profile"),
+  });
+}
+
+export function useUpdateProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { name?: string; email?: string; currentPassword?: string }) =>
+      api<{ user: User }>("/api/account/profile", { method: "PATCH", json: input }),
+    onSuccess: (data) => {
+      qc.setQueryData(keys.me, data.user);
+      qc.invalidateQueries({ queryKey: ["account", "profile"] });
+    },
+  });
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (input: {
+      currentPassword: string;
+      newPassword: string;
+      confirmNewPassword: string;
+    }) => api<{ success: boolean }>("/api/account/password", { method: "POST", json: input }),
+  });
+}
+
+// --- Account: organization & billing ---
+export function useOrganization() {
+  return useQuery({
+    queryKey: keys.account.organization,
+    queryFn: () =>
+      api<{ organization: Organization }>("/api/account/organization").then(
+        (r) => r.organization
+      ),
+  });
+}
+
+export function useUpdateOrganization() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) =>
+      api<{ organization: Organization }>("/api/account/organization", {
+        method: "PATCH",
+        json: { name },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.account.organization });
+      qc.invalidateQueries({ queryKey: ["account", "profile"] });
+    },
+  });
+}
+
+export function useUpgradePlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (plan: Plan) =>
+      api<{ organization: Organization }>("/api/account/organization/plan", {
+        method: "PATCH",
+        json: { plan },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.account.organization });
+      qc.invalidateQueries({ queryKey: ["account", "profile"] });
+    },
+  });
+}
+
+// --- Account: team members ---
+export function useMembers() {
+  return useQuery({
+    queryKey: keys.account.members,
+    queryFn: () => api<{ members: Member[] }>("/api/account/members").then((r) => r.members),
+  });
+}
+
+export function useUpdateMemberRole() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, role }: { id: string; role: OrgRole }) =>
+      api<{ member: Member }>(`/api/account/members/${id}`, { method: "PATCH", json: { role } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.account.members }),
+  });
+}
+
+export function useRemoveMember() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api(`/api/account/members/${id}`, { method: "DELETE" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.account.members }),
+  });
+}
+
+// --- Account: invites ---
+export function useInvites() {
+  return useQuery({
+    queryKey: keys.account.invites,
+    queryFn: () => api<{ invites: Invite[] }>("/api/account/invites").then((r) => r.invites),
+  });
+}
+
+export function useCreateInvite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { email: string; role: OrgRole }) =>
+      api<{ invite: Invite; emailSent: boolean; acceptUrl?: string }>("/api/account/invites", {
+        method: "POST",
+        json: input,
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.account.invites }),
+  });
+}
+
+export function useRevokeInvite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api(`/api/account/invites/${id}`, { method: "DELETE" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.account.invites }),
+  });
+}
+
+export function useResendInvite() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      api<{ invite: Invite; emailSent: boolean; acceptUrl?: string }>(
+        `/api/account/invites/${id}/resend`,
+        { method: "POST" }
+      ),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.account.invites }),
+  });
+}
+
+// --- Invite accept (public) ---
+export function useInviteDetails(token: string | null) {
+  return useQuery({
+    queryKey: ["invite", token],
+    queryFn: () =>
+      api<{
+        organizationName: string | null;
+        inviterEmail: string | null;
+        email: string;
+        role: OrgRole;
+        alreadyHasAccount: boolean;
+      }>(`/api/invites/${token}`),
+    enabled: !!token,
+    retry: false,
+  });
+}
+
+export function useAcceptInvite(token: string) {
+  return useMutation({
+    mutationFn: (input: { name?: string; password?: string; confirmPassword?: string }) =>
+      api<{ user: User }>(`/api/invites/${token}`, { method: "POST", json: input }),
   });
 }

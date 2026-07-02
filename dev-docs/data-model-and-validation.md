@@ -8,15 +8,22 @@ validation.
 
 ```mermaid
 erDiagram
-  USER ||--o{ DATA_SCHEMA : owns
-  USER ||--o{ ENDPOINT : owns
-  USER ||--o{ ACCESS_TOKEN : owns
-  USER ||--o{ RECORD : owns
+  USER ||--o{ MEMBERSHIP : has
+  ORGANIZATION ||--o{ MEMBERSHIP : has
+  ORGANIZATION ||--o{ INVITE : sends
+  ORGANIZATION ||--o{ DATA_SCHEMA : owns
+  ORGANIZATION ||--o{ ENDPOINT : owns
+  ORGANIZATION ||--o{ ACCESS_TOKEN : owns
+  ORGANIZATION ||--o{ RECORD : owns
   DATA_SCHEMA ||--o{ ENDPOINT : shapes
   ENDPOINT ||--o{ RECORD : stores
   ACCESS_TOKEN ||--o{ GRANT : contains
   GRANT }o--|| ENDPOINT : authorizes
 ```
+
+`Organization` is the tenant boundary — it owns schemas, endpoints, tokens,
+and records. `User` is a login identity that joins an organization through a
+`Membership`. v1 gives every user exactly one `Membership`.
 
 ## User
 
@@ -29,17 +36,82 @@ Fields:
 - `name`: optional, trimmed.
 - timestamps.
 
-Users are the tenant boundary. Most other models store `userId`.
+`User` intentionally has no `plan` or `organizationId` field — billing lives
+on `Organization`, membership lives in `Membership`. Look a user's org up via
+`Membership.findOne({ userId })` (v1 assumes exactly one result).
+
+## Organization
+
+File: `lib/models/Organization.ts`
+
+The tenant boundary and the subscription-tier boundary.
+
+Fields:
+
+- `name`: display name (defaults to `"<name or email>'s workspace"` at sign-up).
+- `slug`: unique, generated, not currently user-facing.
+- `plan`: `"hobby" | "pro" | "enterprise"`, default `"hobby"`. No payment
+  processor — switching plans (`PATCH /api/account/organization/plan`) just
+  writes this field. See `lib/billing/plans.ts` for what each plan unlocks.
+- `ownerId`: the founding member (convenience only — the authoritative
+  owner list is `Membership` rows with `role: "owner"`).
+- timestamps.
+
+## Membership
+
+File: `lib/models/Membership.ts`
+
+Joins a `User` to an `Organization` with a role.
+
+Fields:
+
+- `organizationId`, `userId`: both required, both indexed.
+- `role`: `"owner" | "admin" | "member"`.
+- timestamps.
+
+Index: `{ organizationId: 1, userId: 1 }` unique — a user can't be added to
+the same org twice. There is **no** unique index on `userId` alone; v1
+enforces "one org per user" in application code (sign-up and invite-accept),
+not the schema, so multi-org support can be added later without a migration.
+
+An organization must always have at least one `role: "owner"` membership —
+enforced in `app/api/account/members/[id]/route.ts`, not by the schema.
+
+## Invite
+
+File: `lib/models/Invite.ts`
+
+A pending (or resolved) invitation to join an `Organization`.
+
+Fields:
+
+- `organizationId`, `email`, `role` (`"admin" | "member"` — never `"owner"`).
+- `invitedBy`: the inviting user.
+- `tokenHash`: sha256 of the plaintext token, same approach as `AccessToken`
+  but without an encrypted-for-reveal copy (invite links are never
+  redisplayed after creation).
+- `status`: `"pending" | "accepted" | "revoked"`.
+- `expiresAt`: 7 days from creation (or from the last resend).
+- `acceptedAt`, `acceptedBy`: set on accept.
+- timestamps.
+
+Indexes: `{ tokenHash: 1 }` unique (accept lookup); `{ organizationId: 1,
+email: 1, status: 1 }` (detect an already-pending invite for that email).
+
+Expiry is checked live (`expiresAt.getTime() < Date.now()`) rather than via a
+cron job or lazy status flip — simpler, and `status` already distinguishes
+revoked/accepted from "still pending, check the date."
 
 ## DataSchema
 
 File: `lib/models/DataSchema.ts`
 
-A `DataSchema` is a user-defined data type.
+A `DataSchema` is an organization-defined data type.
 
 Fields:
 
-- `userId`: owner.
+- `organizationId`: owner.
+- `createdBy`: which user created it (audit only — not used for scoping).
 - `name`: display name.
 - `slug`: lowercase machine-friendly name.
 - `fields`: array of field definitions.
@@ -60,15 +132,19 @@ Field definition:
 Index:
 
 ```ts
-{ userId: 1, slug: 1 }, { unique: true }
+{ organizationId: 1, slug: 1 }, { unique: true }
 ```
 
-That means two different users may both have a schema slug like `note`, but one
-user cannot create two schemas with the same slug.
+That means two different organizations may both have a schema slug like
+`note`, but one organization cannot create two schemas with the same slug —
+so all members of an org share that slug namespace.
 
 Important note: `unique` is currently stored and displayed on fields, but the
 record engine does not currently enforce uniqueness of `data.<field>` values.
-If you build that feature, it should be enforced per `{ userId, endpointId }`.
+If you build that feature, it should be enforced per `{ organizationId, endpointId }`.
+
+Creating a schema is capped by the org's plan — see `assertUnderLimit()` in
+[public-api-engine.md](./public-api-engine.md).
 
 ## Endpoint
 
@@ -78,7 +154,8 @@ An `Endpoint` exposes one `DataSchema` as a REST resource.
 
 Fields:
 
-- `userId`: owner.
+- `organizationId`: owner.
+- `createdBy`: which user created it (audit only).
 - `schemaId`: referenced `DataSchema`.
 - `name`: display name.
 - `slug`: URL segment used by `/api/v1/:slug`.
@@ -96,7 +173,7 @@ Supported methods:
 Index:
 
 ```ts
-{ userId: 1, slug: 1 }, { unique: true }
+{ organizationId: 1, slug: 1 }, { unique: true }
 ```
 
 ### Empty Field Lists Mean "All"
@@ -121,7 +198,10 @@ An `AccessToken` is metadata for an external bearer token.
 
 Fields:
 
-- `userId`: owner.
+- `organizationId`: owner. Every token an org mints shares that org's
+  plan-derived rate limit and monthly quota (see
+  [public-api-engine.md](./public-api-engine.md)) — throughput isn't per-token.
+- `createdBy`: which user minted it (audit only).
 - `name`: dashboard label.
 - `tokenHash`: SHA-256 hash of the plaintext token.
 - `tokenPrefix`: short safe prefix for display.
@@ -129,6 +209,8 @@ Fields:
 - `lastUsedAt`: best-effort timestamp.
 - `revoked`: boolean.
 - timestamps.
+
+Creating a token is capped by the org's plan — see `assertUnderLimit()`.
 
 Grant shape:
 
@@ -146,23 +228,31 @@ Only `tokenHash` is stored. The plaintext token is shown once during creation.
 
 File: `lib/models/Record.ts`
 
-A `Record` is one stored item for one endpoint.
+A `Record` is one stored item, owned by a `DataSchema` (endpoints are
+projections over the schema's data pool — `endpointId` is provenance, not
+ownership).
 
 Fields:
 
-- `userId`: owner.
-- `endpointId`: endpoint that stores the record.
-- `data`: flexible object validated against the endpoint schema at write time.
+- `organizationId`: owner.
+- `createdBy`: which user created it. For dashboard-created entries this is
+  the signed-in user; for records created through the public API (no signed-in
+  user, only a bearer token) it's the token's `createdBy` — the user who
+  minted that token, as a best-effort audit trail.
+- `schemaId`: the schema this record belongs to.
+- `endpointId`: which endpoint the record was created through (nullable for
+  dashboard-created entries).
+- `data`: flexible object validated against the schema at write time.
 - timestamps.
 
 Index:
 
 ```ts
-{ endpointId: 1, userId: 1, createdAt: -1 }
+{ schemaId: 1, organizationId: 1, createdAt: -1 }
 ```
 
-The index matches the main public API access pattern: list records for one
-endpoint owned by one user, sorted newest first.
+The index matches the main access pattern: list records for one schema owned
+by one organization, sorted newest first.
 
 ## Validation Layers
 
@@ -194,9 +284,11 @@ Zod checks basic shape, types, string lengths, and slug/field-name formats.
 Some rules are still handled in route handlers because they need context:
 
 - field names must be unique within a schema.
-- a referenced schema must exist and belong to the current user.
+- a referenced schema must exist and belong to the current organization.
 - readable and writable fields must belong to the selected schema.
-- granted endpoints must exist and belong to the current user.
+- granted endpoints must exist and belong to the current organization.
+- the organization must be under its plan's resource cap (schemas/endpoints/
+  tokens) — see `assertUnderLimit()` in `lib/billing/enforceLimit.ts`.
 
 ### Record Data Validation
 
@@ -285,7 +377,7 @@ Endpoint delete:
 
 - Deletes the endpoint.
 - Deletes records for that endpoint.
-- Pulls matching grants out of the user's access tokens.
+- Pulls matching grants out of the organization's access tokens.
 
 Token delete:
 
@@ -298,3 +390,12 @@ Token revoke:
 - Leaves the token metadata in place.
 - Sets `revoked: true`.
 - Public authorization rejects it immediately.
+
+Member remove / invite revoke:
+
+- Removing a `Membership` is a hard delete, but is refused if it would leave
+  the organization with zero `role: "owner"` members
+  (`api.errors.lastOwner`).
+- Revoking an `Invite` is a soft delete (`status: "revoked"`) — the row stays
+  for audit purposes; the accept route rejects revoked invites explicitly
+  rather than treating them as "not found."

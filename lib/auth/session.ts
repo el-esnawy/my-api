@@ -5,6 +5,7 @@ import {
   signSession,
   verifySession,
   type SessionPayload,
+  type OrgRole,
 } from "./jwt";
 
 /**
@@ -39,4 +40,4 @@ export async function destroySession(): Promise<void> {
   store.delete(SESSION_COOKIE);
 }
 
-export type { SessionPayload };
+export type { SessionPayload, OrgRole };

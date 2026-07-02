@@ -1,13 +1,17 @@
 # Dashboard Management Flows
 
-The dashboard lets signed-in users manage three things:
+The dashboard lets signed-in users manage:
 
 1. Schemas
 2. Endpoints
 3. Access tokens
+4. Their account: profile, password, organization billing plan, and team
+   members/invites (see "Account, Billing, and Team Flows" below)
 
 The browser talks to cookie-authenticated API routes. Those routes use the
-current session to scope every database operation by `userId`.
+current session to scope every database operation by `organizationId`
+(schemas/endpoints/tokens/records) or `userId` (the account holder's own
+profile/password).
 
 ## Shared Route Handler Pattern
 
@@ -25,16 +29,24 @@ return withErrorHandling(async () => {
   }
 
   await connectDB();
-  // Query or write with userId: auth.session.userId
+  // Query or write with organizationId: auth.session.orgId
 });
+```
+
+Routes restricted to owners/admins (plan changes, invites, member management)
+add one more line after `requireSession()`:
+
+```ts
+const roleCheck = requireOrgRole(auth.session, ["owner", "admin"], t);
+if ("response" in roleCheck) return roleCheck.response;
 ```
 
 This gives every route:
 
-- consistent 401 behavior,
+- consistent 401/403 behavior,
 - consistent validation errors,
 - safe 500 handling,
-- per-user data isolation.
+- per-organization data isolation.
 
 ## Schema Flows
 
@@ -58,7 +70,7 @@ sequenceDiagram
   Page->>Hook: query schemas
   Hook->>API: fetch with session cookie
   API->>API: requireSession()
-  API->>DB: DataSchema.find({ userId }).sort({ createdAt: -1 })
+  API->>DB: DataSchema.find({ organizationId }).sort({ createdAt: -1 })
   DB-->>API: schema documents
   API-->>Hook: { schemas }
   Hook-->>Page: render cards
@@ -76,7 +88,9 @@ The route validates:
 
 1. the request body with `createSchemaInput`,
 2. unique field names inside the schema,
-3. unique `{ userId, slug }` through the MongoDB index.
+3. the organization is under its plan's schema cap (`assertUnderLimit()`) —
+   returns `403` if not,
+4. unique `{ organizationId, slug }` through the MongoDB index.
 
 Duplicate slug returns `409`.
 
@@ -86,14 +100,14 @@ Duplicate slug returns `409`.
 
 ```ts
 DataSchema.findOneAndUpdate(
-  { _id: id, userId: auth.session.userId },
+  { _id: id, organizationId: auth.session.orgId },
   { $set: parsed.data },
   { new: true }
 )
 ```
 
-The `{ _id, userId }` filter is important. Without `userId`, a user could update
-another user's schema if they knew the id.
+The `{ _id, organizationId }` filter is important. Without `organizationId`,
+a member of one org could update another org's schema if they knew the id.
 
 After a schema update, the frontend invalidates:
 
@@ -108,7 +122,7 @@ Before deleting, the route checks whether endpoints still depend on the schema:
 
 ```ts
 Endpoint.countDocuments({
-  userId: auth.session.userId,
+  organizationId: auth.session.orgId,
   schemaId: id
 })
 ```
@@ -141,13 +155,14 @@ The endpoint modal collects:
 The route validates:
 
 1. request shape with `createEndpointInput`,
-2. the referenced schema exists and belongs to the user,
-3. readable fields are fields on that schema,
-4. writable fields are fields on that schema,
-5. endpoint slug is unique for the user.
+2. the organization is under its plan's endpoint cap (`assertUnderLimit()`),
+3. the referenced schema exists and belongs to the organization,
+4. readable fields are fields on that schema,
+5. writable fields are fields on that schema,
+6. endpoint slug is unique for the organization.
 
-The schema ownership check prevents a user from creating an endpoint from
-another user's schema.
+The schema ownership check prevents a member of one org from creating an
+endpoint from another org's schema.
 
 ### Readable and Writable Fields
 
@@ -164,7 +179,7 @@ write methods are enabled, the user must select at least one writable field.
 
 ### Update Endpoint
 
-The route first loads the existing endpoint by `{ _id, userId }`.
+The route first loads the existing endpoint by `{ _id, organizationId }`.
 
 Then it calculates the effective schema:
 
@@ -186,9 +201,9 @@ Deleting an endpoint has cascading cleanup:
 
 ```ts
 await Promise.all([
-  RecordModel.deleteMany({ userId, endpointId: endpoint._id }),
+  RecordModel.deleteMany({ organizationId, endpointId: endpoint._id }),
   AccessToken.updateMany(
-    { userId },
+    { organizationId },
     { $pull: { grants: { endpointId: endpoint._id } } }
   ),
 ]);
@@ -230,12 +245,13 @@ The modal collects:
 - one or more endpoint grants,
 - read/write booleans for each grant.
 
-The route validates every granted endpoint:
+The route first checks the organization is under its plan's token cap
+(`assertUnderLimit()`), then validates every granted endpoint:
 
 ```ts
 Endpoint.find({
   _id: { $in: endpointIds },
-  userId: auth.session.userId
+  organizationId: auth.session.orgId
 })
 ```
 
@@ -269,6 +285,68 @@ saving.
 Deleting a token removes its metadata. The public API will reject future calls
 because it can no longer find a non-revoked `AccessToken` with the submitted
 hash.
+
+## Account, Billing, and Team Flows
+
+Files:
+
+- UI: `app/(dashboard)/dashboard/account/{profile,security,billing,team}/page.tsx`
+  → thin re-exports of `components/pages/dashboard/account/*`
+- API: `app/api/account/**`, plus the public `app/api/invites/[token]/route.ts`
+- Models: `Organization`, `Membership`, `Invite`
+- Hooks: `useAccountProfile`, `useUpdateProfile`, `useChangePassword`,
+  `useOrganization`, `useUpgradePlan`, `useMembers`, `useUpdateMemberRole`,
+  `useRemoveMember`, `useInvites`, `useCreateInvite`, `useRevokeInvite`,
+  `useResendInvite`, `useInviteDetails`, `useAcceptInvite`
+
+### Profile and Security
+
+`PATCH /api/account/profile` updates `name` and/or `email`. Changing `email`
+requires `currentPassword` in the same request (enforced by
+`updateProfileInput`'s Zod `superRefine`) — a re-auth step for a sensitive
+change, mirroring how password change already requires the current password.
+`POST /api/account/password` is a separate endpoint requiring
+`{currentPassword, newPassword}`. Neither invalidates other active sessions
+— there's no session-revocation store (see auth-and-security.md).
+
+### Billing
+
+`PATCH /api/account/organization/plan` (owner/admin only) instantly sets
+`Organization.plan` to `hobby | pro | enterprise`. No payment is collected —
+this is a mock. The billing page reuses the landing page's
+`landing.pricing.tiers.*` i18n copy so the marketed tiers and the in-app
+switcher never drift apart.
+
+### Team
+
+```mermaid
+sequenceDiagram
+  participant Owner as Owner/Admin
+  participant API as POST /api/account/invites
+  participant Mongo as MongoDB
+  participant Email as Resend
+  participant Invitee
+
+  Owner->>API: email, role
+  API->>Mongo: create Invite (tokenHash, 7d expiry)
+  API->>Email: sendInviteEmail(acceptUrl)
+  Email-->>Invitee: invite email (or: acceptUrl echoed in the API response outside prod, if send failed/no key)
+  Invitee->>Invitee: open /invite/:token
+  Invitee->>API: POST /api/invites/:token (sign in, or name+password)
+  API->>Mongo: create Membership, mark Invite accepted
+  API-->>Invitee: session cookie set, signed in
+```
+
+A failed email send does **not** fail invite creation — the route returns
+`{ invite, emailSent: false }` so the UI can offer "resend" instead of
+erroring. See auth-and-security.md's "Organizations, Roles, and Invites"
+section for the accept-flow branching (existing vs. new user) and the v1
+single-org-per-user limitation.
+
+`/invite/[token]` is deliberately **not** under `app/(auth)` — that route
+group's layout redirects any signed-in visitor to the dashboard, which would
+break the "sign in as the invited email, then accept" path for invitees who
+already have an account.
 
 ## Client-Side Error Handling
 

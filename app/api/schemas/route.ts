@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { connectDB } from "@/lib/db/mongoose";
 import { DataSchema } from "@/lib/models/DataSchema";
 import { requireSession } from "@/lib/api/dashboardAuth";
+import { assertUnderLimit } from "@/lib/billing/enforceLimit";
 import { createSchemaInput } from "@/lib/validation/schemas";
 import { serializeSchema } from "@/lib/api/serialize";
 import { getRequestTranslator } from "@/i18n/server";
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
     if ("response" in auth) return auth.response;
 
     await connectDB();
-    const schemas = await DataSchema.find({ userId: auth.session.userId }).sort({
+    const schemas = await DataSchema.find({ organizationId: auth.session.orgId }).sort({
       createdAt: -1,
     });
     return ok({ schemas: schemas.map(serializeSchema) });
@@ -49,9 +50,13 @@ export async function POST(req: NextRequest) {
     }
 
     await connectDB();
+    const limitErr = await assertUnderLimit(auth.session.orgId, "schemas", t);
+    if (limitErr) return limitErr.response;
+
     try {
       const schema = await DataSchema.create({
-        userId: auth.session.userId,
+        organizationId: auth.session.orgId,
+        createdBy: auth.session.userId,
         name: parsed.data.name,
         slug: parsed.data.slug,
         fields: parsed.data.fields,

@@ -8,10 +8,10 @@ import type { SchemaFieldLike } from "@/lib/records/validate";
  */
 export async function loadOwnedSchema(
   schemaId: string,
-  userId: string
+  organizationId: string
 ): Promise<{ schema: DataSchemaDoc; fields: SchemaFieldLike[] } | null> {
   if (!isValidObjectId(schemaId)) return null;
-  const schema = await DataSchema.findOne({ _id: schemaId, userId });
+  const schema = await DataSchema.findOne({ _id: schemaId, organizationId });
   if (!schema) return null;
   return {
     schema,

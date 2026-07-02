@@ -17,7 +17,7 @@ export function SignUpForm() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const signUp = useSignUp();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
@@ -30,6 +30,7 @@ export function SignUpForm() {
         name: form.name || undefined,
         email: form.email,
         password: form.password,
+        confirmPassword: form.confirmPassword,
       });
       qc.setQueryData(keys.me, user);
       router.replace("/dashboard/schemas");
@@ -77,6 +78,18 @@ export function SignUpForm() {
           placeholder={t("auth.signUp.passwordPlaceholder")}
         />
         <ErrorText>{fieldErrors.password}</ErrorText>
+      </div>
+      <div>
+        <Label htmlFor="confirmPassword">{t("auth.fields.confirmPassword")}</Label>
+        <Input
+          id="confirmPassword"
+          type="password"
+          required
+          value={form.confirmPassword}
+          onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+          placeholder={t("auth.signUp.confirmPasswordPlaceholder")}
+        />
+        <ErrorText>{fieldErrors.confirmPassword}</ErrorText>
       </div>
 
       {error && (

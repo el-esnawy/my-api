@@ -72,3 +72,36 @@ export function serializeRecord(doc: any) {
     updatedAt: doc.updatedAt ?? null,
   };
 }
+
+export function serializeOrganization(doc: any) {
+  return {
+    id: String(doc._id),
+    name: doc.name,
+    plan: doc.plan,
+    createdAt: doc.createdAt ?? null,
+  };
+}
+
+/** `doc` must be a Membership populated with `userId` (email/name). */
+export function serializeMember(doc: any) {
+  const user = doc.userId && typeof doc.userId === "object" ? doc.userId : null;
+  return {
+    id: String(doc._id),
+    userId: user ? String(user._id) : String(doc.userId),
+    email: user?.email ?? null,
+    name: user?.name ?? null,
+    role: doc.role,
+    createdAt: doc.createdAt ?? null,
+  };
+}
+
+export function serializeInvite(doc: any) {
+  return {
+    id: String(doc._id),
+    email: doc.email,
+    role: doc.role,
+    status: doc.status,
+    expiresAt: doc.expiresAt ?? null,
+    createdAt: doc.createdAt ?? null,
+  };
+}

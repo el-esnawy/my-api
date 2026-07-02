@@ -28,7 +28,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const { id } = await params;
 
     await connectDB();
-    const endpoint = await Endpoint.findOne({ _id: id, userId: auth.session.userId });
+    const endpoint = await Endpoint.findOne({ _id: id, organizationId: auth.session.orgId });
     if (!endpoint) return notFound(t("api.errors.endpointNotFound"));
     return ok({ endpoint: serializeEndpoint(endpoint) });
   });
@@ -48,14 +48,14 @@ export async function PUT(req: NextRequest, { params }: Params) {
     }
 
     await connectDB();
-    const endpoint = await Endpoint.findOne({ _id: id, userId: auth.session.userId });
+    const endpoint = await Endpoint.findOne({ _id: id, organizationId: auth.session.orgId });
     if (!endpoint) return notFound(t("api.errors.endpointNotFound"));
 
     // Determine the effective schema (possibly changed) and validate field subsets.
     const effectiveSchemaId = parsed.data.schemaId ?? String(endpoint.schemaId);
     const schema = await DataSchema.findOne({
       _id: effectiveSchemaId,
-      userId: auth.session.userId,
+      organizationId: auth.session.orgId,
     });
     if (!schema) return badRequest(t("api.errors.unknownSchema"));
 
@@ -100,14 +100,14 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     await connectDB();
     const endpoint = await Endpoint.findOneAndDelete({
       _id: id,
-      userId: auth.session.userId,
+      organizationId: auth.session.orgId,
     });
     if (!endpoint) return notFound(t("api.errors.endpointNotFound"));
 
     // Records are owned by the schema, so they survive endpoint deletion —
     // only the token grants pointing at this endpoint need cleaning up.
     await AccessToken.updateMany(
-      { userId: auth.session.userId },
+      { organizationId: auth.session.orgId },
       { $pull: { grants: { endpointId: endpoint._id } } }
     );
 

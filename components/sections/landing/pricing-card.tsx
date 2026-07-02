@@ -20,8 +20,8 @@ export function PricingCard({
   signedIn: boolean;
 }) {
   const { t } = useTranslation();
-  // When signed in, every CTA becomes "Go to my account" → the dashboard.
-  const ctaHref = signedIn ? "/dashboard/schemas" : tier.cta.href;
+  // When signed in, every CTA becomes "Go to my account" → the billing page.
+  const ctaHref = signedIn ? "/dashboard/account/billing" : tier.cta.href;
   const ctaLabel = signedIn ? t("landing.pricing.signedInCta") : tier.cta.label;
 
   return (

@@ -20,7 +20,8 @@ const fieldSchema = new Schema(
  */
 const dataSchemaSchema = new Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    organizationId: { type: Schema.Types.ObjectId, ref: "Organization", required: true, index: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     name: { type: String, required: true, trim: true },
     slug: { type: String, required: true, trim: true, lowercase: true },
     fields: { type: [fieldSchema], default: [] },
@@ -28,8 +29,8 @@ const dataSchemaSchema = new Schema(
   { timestamps: true }
 );
 
-// Slugs are unique per user (not globally) — the tenant owns its namespace.
-dataSchemaSchema.index({ userId: 1, slug: 1 }, { unique: true });
+// Slugs are unique per organization (not globally) — the tenant owns its namespace.
+dataSchemaSchema.index({ organizationId: 1, slug: 1 }, { unique: true });
 
 export type FieldDoc = InferSchemaType<typeof fieldSchema>;
 export type DataSchemaDoc = InferSchemaType<typeof dataSchemaSchema> & {

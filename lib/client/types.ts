@@ -85,3 +85,31 @@ export interface User {
   name: string | null;
   createdAt: string | null;
 }
+
+export type Plan = "hobby" | "pro" | "enterprise";
+export type OrgRole = "owner" | "admin" | "member";
+
+export interface Organization {
+  id: string;
+  name: string;
+  plan: Plan;
+  createdAt: string | null;
+}
+
+export interface Member {
+  id: string;
+  userId: string;
+  email: string | null;
+  name: string | null;
+  role: OrgRole;
+  createdAt: string | null;
+}
+
+export interface Invite {
+  id: string;
+  email: string;
+  role: OrgRole;
+  status: "pending" | "accepted" | "revoked";
+  expiresAt: string;
+  createdAt: string | null;
+}

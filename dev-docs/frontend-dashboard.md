@@ -16,6 +16,12 @@ around small reusable components, TanStack Query hooks, and modal forms.
 | `app/(dashboard)/dashboard/schemas/page.tsx` | Schema list, create/edit/delete modal. |
 | `app/(dashboard)/dashboard/endpoints/page.tsx` | Endpoint list, create/edit/delete modal, endpoint URL copy. |
 | `app/(dashboard)/dashboard/tokens/page.tsx` | Token list, create/edit/revoke/delete modal, one-time secret reveal. |
+| `app/(dashboard)/dashboard/account/layout.tsx` | Account section heading + `AccountNav` sub-tabs (profile/security/billing/team). |
+| `app/(dashboard)/dashboard/account/profile/page.tsx` | Name/email edit form (email change requires current password). |
+| `app/(dashboard)/dashboard/account/security/page.tsx` | Change-password form. |
+| `app/(dashboard)/dashboard/account/billing/page.tsx` | Plan cards (hobby/pro/enterprise), mock upgrade/downgrade. |
+| `app/(dashboard)/dashboard/account/team/page.tsx` | Member list + role management, pending invites, invite modal. |
+| `app/invite/[token]/page.tsx` | Public invite-accept page — outside `(auth)` on purpose (see dashboard-management-flows.md). |
 
 ## Provider Setup
 
@@ -78,15 +84,29 @@ export const keys = {
   schemas: ["schemas"] as const,
   endpoints: ["endpoints"] as const,
   tokens: ["tokens"] as const,
+  entryCounts: ["entries", "counts"] as const,
+  entries: (schemaId: string) => ["entries", schemaId] as const,
+  account: {
+    organization: ["account", "organization"] as const,
+    members: ["account", "members"] as const,
+    invites: ["account", "invites"] as const,
+  },
 };
 ```
 
+(The account profile query uses the ad-hoc key `["account", "profile"]`
+directly rather than living in the `keys` object — it's only read by
+`useAccountProfile()`.)
+
 Read hooks:
 
-- `useMe()`
-- `useSchemas()`
-- `useEndpoints()`
-- `useTokens()`
+- `useMe()` — from `/api/auth/me`, just `{id, email, name, createdAt}`.
+- `useAccountProfile()` — from `/api/account/profile`, adds `organization`
+  and the caller's `role`; used wherever the UI needs to gate on role
+  (e.g. hiding the invite button from plain members).
+- `useSchemas()`, `useEndpoints()`, `useTokens()`
+- `useOrganization()`, `useMembers()`, `useInvites()`
+- `useInviteDetails(token)` — public, used by the invite-accept page.
 
 Mutation hooks:
 
@@ -94,6 +114,9 @@ Mutation hooks:
 - schemas: `useCreateSchema()`, `useUpdateSchema()`, `useDeleteSchema()`
 - endpoints: `useCreateEndpoint()`, `useUpdateEndpoint()`, `useDeleteEndpoint()`
 - tokens: `useCreateToken()`, `useUpdateToken()`, `useDeleteToken()`
+- account: `useUpdateProfile()`, `useChangePassword()`, `useUpgradePlan()`
+- team: `useUpdateMemberRole()`, `useRemoveMember()`, `useCreateInvite()`,
+  `useRevokeInvite()`, `useResendInvite()`, `useAcceptInvite(token)`
 
 When adding a new dashboard API, add the hook here so pages stay thin.
 
@@ -216,6 +239,39 @@ Token creation has a special two-step modal:
 
 Once the modal closes, the plaintext token is gone. The list only shows
 `tokenPrefix`.
+
+## Account Section Details
+
+The account section follows a different top-level shape than schemas/
+endpoints/tokens: instead of one page per resource list, it's four sub-pages
+under a shared `AccountNav` (`components/sections/dashboard/account/account-nav.tsx`,
+same active-state pattern as the top-level `DashboardTabs`).
+
+Profile and security are **full-page forms**, not modals — the existing
+modal pattern in this codebase is for CRUD over a list (schemas/endpoints/
+tokens); editing your own singular profile record doesn't fit that shape, so
+it follows the sign-in/sign-up page pattern instead (`Label`/`Input`/
+`ErrorText`/`Button`, `ApiError` handling).
+
+The profile form only shows the "current password" field once the email
+input differs from the loaded value, and only sends `currentPassword` in that
+case — matching the API's conditional requirement.
+
+Team page reuses the established sub-components:
+
+- `MemberRow` — role `Select` (if the viewer can manage members) or a role
+  `Badge` (if not), plus a `ConfirmModal`-gated remove button.
+- `InviteRow` — pending invite with resend/revoke actions.
+- `InviteModal` — two-step like `TokenFormModal`: the form, then (if the
+  invite was created in dev mode or the email failed to send) a reveal
+  screen with the copyable accept URL.
+
+Billing page renders `PlanCard` (`components/sections/dashboard/account/plan-card.tsx`)
+for each tier, sourcing copy from `landing.pricing.tiers.*` — the same i18n
+keys the landing page's `PricingCard` uses — so the two never show different
+numbers for the same plan. `PlanCard` is a deliberately separate component
+from `PricingCard`, not a shared one with a mode flag: it needs a "current
+plan" state and a disabled/active button that the marketing card doesn't.
 
 ## Sign-in and Sign-up Details
 

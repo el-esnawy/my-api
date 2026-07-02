@@ -35,6 +35,7 @@ export const forbidden = (message = fallbackErrors.forbidden) => fail(403, messa
 export const notFound = (message = fallbackErrors.notFound) => fail(404, message);
 export const methodNotAllowed = (message = fallbackErrors.methodNotAllowed) => fail(405, message);
 export const conflict = (message = fallbackErrors.conflict) => fail(409, message);
+export const gone = (message = fallbackErrors.gone) => fail(410, message);
 export const tooManyRequests = (message = fallbackErrors.rateLimitExceeded) => fail(429, message);
 export const serverError = (message = fallbackErrors.serverError) => fail(500, message);
 

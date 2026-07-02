@@ -22,12 +22,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const { id } = await params;
 
     await connectDB();
-    const owned = await loadOwnedSchema(id, auth.session.userId);
+    const owned = await loadOwnedSchema(id, auth.session.orgId);
     if (!owned) return notFound(t("api.errors.schemaNotFound"));
 
     // Oldest-first so the editor reads like an append-only sheet.
     const entries = await RecordModel.find({
-      userId: auth.session.userId,
+      organizationId: auth.session.orgId,
       schemaId: owned.schema._id,
     })
       .sort({ createdAt: 1 })
