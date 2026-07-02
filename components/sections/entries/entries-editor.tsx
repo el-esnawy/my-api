@@ -23,6 +23,7 @@ import { UploadIcon } from "@/components/atoms/icons/upload-icon";
 import { PencilIcon } from "@/components/atoms/icons/pencil-icon";
 import { TrashIcon } from "@/components/atoms/icons/trash-icon";
 import { EmptyState } from "@/components/molecules/empty-state";
+import { ConfirmModal } from "@/components/molecules/confirm-modal";
 import { EntryFormModal } from "./entry-form-modal";
 import { ImportResultModal } from "./import-result-modal";
 import { UnsavedChangesModal } from "./unsaved-changes-modal";
@@ -143,11 +144,13 @@ export function EntriesEditor({
     return () => document.removeEventListener("click", onClick, true);
   }, [dirty, router]);
 
-  // Warn on hard navigation (refresh, close tab) while dirty.
+  // Keep the browser-native alert for refresh/close; custom modals cannot block
+  // those hard navigations.
   useEffect(() => {
     if (!dirty) return;
     function onBeforeUnload(e: BeforeUnloadEvent) {
       e.preventDefault();
+      e.returnValue = "";
     }
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
@@ -155,6 +158,7 @@ export function EntriesEditor({
 
   // --- Staged CRUD ----------------------------------------------------------
   const [formModal, setFormModal] = useState<{ row?: DraftRow } | null>(null);
+  const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false);
 
   function addEntry(data: Record<string, unknown>) {
     tempCounter.current += 1;
@@ -203,8 +207,8 @@ export function EntriesEditor({
   }
 
   function discardChanges() {
-    if (!confirm(t("entries.editor.discardConfirm"))) return;
     setRows(buildRows(entries));
+    setDiscardConfirmOpen(false);
   }
 
   // --- Save -----------------------------------------------------------------
@@ -342,7 +346,7 @@ export function EntriesEditor({
             {t("entries.editor.unsaved", { count: dirtyCount })}
           </span>
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="ghost" onClick={discardChanges}>
+            <Button size="sm" variant="ghost" onClick={() => setDiscardConfirmOpen(true)}>
               {t("entries.editor.discard")}
             </Button>
             <Button size="sm" onClick={onSave} disabled={save.isPending}>
@@ -419,6 +423,15 @@ export function EntriesEditor({
       {importResult && (
         <ImportResultModal result={importResult} onClose={() => setImportResult(null)} />
       )}
+
+      <ConfirmModal
+        open={discardConfirmOpen}
+        title={t("entries.editor.discard")}
+        description={t("entries.editor.discardConfirm")}
+        confirmLabel={t("entries.editor.discard")}
+        onCancel={() => setDiscardConfirmOpen(false)}
+        onConfirm={discardChanges}
+      />
 
       <UnsavedChangesModal
         open={guard.open}
